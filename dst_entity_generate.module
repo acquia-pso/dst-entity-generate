@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Contains the implementations for the DST Entity Generate module.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function dst_entity_generate_help($route_name) {
+  switch ($route_name) {
+    case 'help.page.dst_entity_generate':
+      return t("DST Entity Generate module gives an ability to extend the Drupal Spec tool to build Drupal entities using the architecture defined in the Spec tool sheet.");
+  }
+}

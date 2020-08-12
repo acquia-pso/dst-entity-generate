@@ -1,0 +1,6 @@
+name: Drupal Spec Tool (DST) Entity Generate
+type: module
+description: 'Extends the Drupal Spec tool to build Drupal entities using the architecture defined in the Spec tool sheet.'
+version: 8.x-1.0.0
+package: Drupal Spec Tool Generate
+core_version_requirement: ^8.8.0 || ^9

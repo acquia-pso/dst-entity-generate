@@ -1,0 +1,6 @@
+services:
+  dst.commands:
+    class: \Drupal\dst_entity_generate\Commands\DstCommands
+    arguments: ['@string_translation']
+    tags:
+      - { name: drush.command }

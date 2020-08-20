@@ -1,0 +1,4 @@
+services:
+  dst_entity_generate.google_sheet:
+    class: Drupal\dst_entity_generate\Services\GoogleSheetAccess
+    arguments: ['@logger.factory', '@config.factory']

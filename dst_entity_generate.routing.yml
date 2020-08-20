@@ -1,0 +1,8 @@
+dst_entity_generate.settings.dst_google_sheet_settings:
+  path: '/admin/config/dst_entity_generate/settings/dst_google_sheet_setting'
+  defaults:
+    _form: '\Drupal\dst_entity_generate\Form\DstGoogleSheetSetting'
+    _title: 'DST Google Sheet Configurations'
+  requirements:
+    _permission: 'administer dst_entity_generate setting'
+

@@ -1,0 +1,19 @@
+dst_google_sheet.setting:
+  type: config_object
+  label: 'Google Sheet configuration.'
+  mapping:
+    name:
+      type: string
+      label: 'Application Name'
+    credentials:
+      type: string
+      label: 'Credentials'
+    access_token:
+      type: string
+      label: 'Access Token'
+    spreadsheet:
+      type: string
+      label: 'Spreadsheet'
+    import_entities:
+      type: sequence
+      label: 'Import entities'

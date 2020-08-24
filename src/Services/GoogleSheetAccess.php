@@ -7,7 +7,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 /**
  * Class GoogleSpreadsheetAccess.
  */
-class GoogleSpreadsheetAccess {
+class GoogleSheetAccess {
   /**
    * Google client object.
    *
@@ -50,17 +50,18 @@ class GoogleSpreadsheetAccess {
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $config;
+
   /**
    * Constructs a new GoogleSpreadsheetAccess object.
    */
   public function __construct(LoggerChannelFactoryInterface $logger_factory, ConfigFactoryInterface $config_factory) {
 
-    $this->logger = $logger_factory;
+    $this->logger = $logger_factory->get('dst_entity_generate');
     $this->config = $config_factory;
-    $this->name = $this->config->get('google_spreadsheet.settings')->get('name');
-    $this->credentials = $this->config->get('google_spreadsheet.settings')->get('credentials');
-    $this->accessToken = $this->config->get('google_spreadsheet.settings')->get('access_token');
-    $this->spreadsheet = $this->config->get('google_spreadsheet.settings')->get('spreadsheet');
+    $this->name = $this->config->get('dst_google_sheet.setting')->get('name');
+    $this->credentials = $this->config->get('dst_google_sheet.setting')->get('credentials');
+    $this->accessToken = $this->config->get('dst_google_sheet.setting')->get('access_token');
+    $this->spreadsheet = $this->config->get('dst_google_sheet.setting')->get('spreadsheet');
 
     if (empty($this->name) || empty($this->credentials) || empty($this->accessToken) || empty($this->spreadsheet)) {
       // Log the missing configuration of google spreadsheet.
@@ -88,15 +89,18 @@ class GoogleSpreadsheetAccess {
        // Refresh the token if it's expired.
        if ($client->isAccessTokenExpired()) {
          $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-         $settings = $this->config->getEditable('google_spreadsheet.settings');
+         $settings = $this->config->getEditable('dst_google_sheet.setting');
          if (!empty($settings)) {
            $settings->set('access_token', json_encode($client->getAccessToken()));
          }
        }
+       $this->logger->info('Google Client created successfully.');
        return $client;
      } catch (\Exception $e) {
        // Log the access error of google spreadsheet.
-       $this->logger->get('dst_entity_generate')->error($e->getMessage());
+       $this->logger->error('Error creating Google Client @error',[
+         '@error' => $e->getMessage()
+       ]);
      }
 
   }
@@ -113,8 +117,8 @@ class GoogleSpreadsheetAccess {
   public function getData($range) {
     $service = new \Google_Service_Sheets($this->client);
     $response = $service->spreadsheets_values->get($this->spreadsheet, $range);
-    $values = $response->getValues();
-    return $values;
+    $this->logger->info('Data fetched successfully.');
+    return $response->getValues();
   }
 
 }

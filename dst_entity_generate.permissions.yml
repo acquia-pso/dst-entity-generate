@@ -1,3 +1,4 @@
-'dst google spreadsheet form settings':
-  title: 'DST Google Spreadsheet Form Settings'
-  description: 'Give permission to users.'
+administer dst_entity_generate settings:
+  title: 'Administer DST Entity Generate configuration'
+  description: 'Grant access to administer DST Entity Generate settings and DST google spreadsheet settings.'
+  restrict access: true

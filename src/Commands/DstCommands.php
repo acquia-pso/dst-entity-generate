@@ -5,6 +5,7 @@ namespace Drupal\dst_entity_generate\Commands;
 use Drush\Commands\DrushCommands;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class DstCommands.

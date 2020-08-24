@@ -1,0 +1,4 @@
+administer dst_entity_generate settings:
+  title: 'Administer DST Entity Generate configuration'
+  description: 'Grant access to administer DST Entity Generate settings and DST google spreadsheet settings.'
+  restrict access: true

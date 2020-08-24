@@ -4,3 +4,4 @@ description: 'Extends the Drupal Spec tool to build Drupal entities using the ar
 version: 8.x-1.0.0
 package: Drupal Spec Tool Generate
 core_version_requirement: ^8.8.0 || ^9
+configure: dst_entity_generate.settings.dst_google_sheet_settings

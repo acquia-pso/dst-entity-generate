@@ -2,25 +2,18 @@
 
 namespace Drupal\dst_entity_generate\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 
 /**
- * Class GoogleSpreadSheetSettings.
+ * Class DstGoogleSheetSetting.
  *
  * @package Drupal\dst_entity_generate\Form
  */
 class DstGoogleSheetSetting extends ConfigFormBase {
-
-  /**
-   * Config settings.
-   *
-   * @var string
-   */
-  const SETTINGS = 'dst_google_sheet.setting';
 
   /**
    * Entity type manager object.
@@ -30,19 +23,23 @@ class DstGoogleSheetSetting extends ConfigFormBase {
   protected $entityTypeManager;
 
   /**
-   * Constructs a WsfAnalyticsDataLayerSettingsForm object.
+   * The key value store.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Core\Locale\CountryManager $country_manager
-   *   The path alias manager.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer.
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
-  public function __construct(ConfigFactoryInterface $config_factory,
-                              EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($config_factory);
+  protected $keyValue;
+
+  /**
+   * Constructs a DstGoogleSheetSetting object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity_type_manager.
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $keyValueFactory
+   *   The key value store.
+   */
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, KeyValueFactoryInterface $keyValueFactory) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->keyValue = $keyValueFactory;
   }
 
   /**
@@ -50,18 +47,9 @@ class DstGoogleSheetSetting extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('config.factory'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('keyvalue')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames() {
-    return [
-      static::SETTINGS,
-    ];
   }
 
   /**
@@ -75,21 +63,21 @@ class DstGoogleSheetSetting extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config(static::SETTINGS);
+    $store = $this->keyValue->get("dst_google_sheet_storage");
 
     $form['import_entities'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Import entities'),
       '#options' => $this->getEntityOptions(),
-      '#default_value' => $config->get('import_entities'),
+      '#default_value' => $store->get('import_entities'),
       '#description' => $this->t('Choose which entities to import.'),
     ];
 
     $form['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Application Name'),
-      '#description' => $this->t('Give Application Name.'),
-      '#default_value' => $config->get('name'),
+      '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
+      '#default_value' => $store->get('name'),
     ];
 
     $form['spreadsheet'] = [
@@ -98,11 +86,21 @@ class DstGoogleSheetSetting extends ConfigFormBase {
       '#description' => $this->t('Add unique id of spreadsheet. Example - %example', [
         '%example' => '1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30',
       ]),
-      '#default_value' => $config->get('spreadsheet'),
+      '#default_value' => $store->get('spreadsheet'),
     ];
 
-    $form['credentials_info'] = [
-      '#markup' => $this->t('If you are using ACE/ACSF, please add Google credentials and access_token in the secret.settings.php.'),
+    $form['credentials'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Credentials'),
+      '#description' => $this->t('Add json of google access credentials.'),
+      '#default_value' => $store->get('credentials'),
+    ];
+
+    $form['access_token'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Access Token'),
+      '#description' => $this->t('Add json of access token.'),
+      '#default_value' => $store->get('access_token'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -113,15 +111,13 @@ class DstGoogleSheetSetting extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+    $store = $this->keyValue->get("dst_google_sheet_storage");
 
-    $this->configFactory->getEditable(static::SETTINGS)
-      ->set('name', $form_state->getValue('name'))
-      ->set('credentials', $form_state->getValue('credentials'))
-      ->set('access_token', $form_state->getValue('access_token'))
-      ->set('spreadsheet', $form_state->getValue('spreadsheet'))
-      ->set('import_entities', $form_state->getValue('import_entities'))
-      ->save();
-
+    $store->set('name', $form_state->getValue('name'));
+    $store->set('credentials', $form_state->getValue('credentials'));
+    $store->set('access_token', $form_state->getValue('access_token'));
+    $store->set('spreadsheet', $form_state->getValue('spreadsheet'));
+    $store->set('import_entities', $form_state->getValue('import_entities'));
   }
 
   /**
@@ -146,4 +142,11 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     return $entity_list;
   }
 
+  /**
+   * @inheritDoc
+   */
+  protected function getEditableConfigNames()
+  {
+    // TODO: Implement getEditableConfigNames() method.
+  }
 }

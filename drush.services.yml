@@ -1,6 +1,10 @@
 services:
   dst.commands:
     class: \Drupal\dst_entity_generate\Commands\DstCommands
-    arguments: ['@string_translation']
+    arguments:
+      - '@string_translation'
+      - '@dst_entity_generate.google_sheet'
+      - '@entity_type.manager'
+      - '@logger.factory'
     tags:
       - { name: drush.command }

@@ -1,4 +1,8 @@
 services:
+  logger.channel.dst_entity_generate:
+    parent: logger.channel_base
+    arguments: ['dst_entity_generate']
+
   dst_entity_generate.google_sheet:
-    class: Drupal\dst_entity_generate\Services\GoogleSheetAccess
-    arguments: ['@logger.factory', '@config.factory']
+    class: Drupal\dst_entity_generate\Services\GoogleSheetApi
+    arguments: ['@logger.factory', '@keyvalue']

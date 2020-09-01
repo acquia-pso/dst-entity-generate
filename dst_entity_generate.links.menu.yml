@@ -1,0 +1,5 @@
+dst_entity_generate.dst_google_sheet_menu:
+  title: 'Drupal Entity Generate Spec Tool'
+  route_name: dst_entity_generate.settings.dst_google_sheet_settings
+  description: 'Settings related to Drupal Entity Generate Spec Tool.'
+  parent: system.admin_config_system

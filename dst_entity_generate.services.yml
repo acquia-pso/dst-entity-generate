@@ -5,4 +5,7 @@ services:
 
   dst_entity_generate.google_sheet:
     class: Drupal\dst_entity_generate\Services\GoogleSheetApi
-    arguments: ['@logger.factory', '@keyvalue']
+    arguments:
+      - '@logger.factory'
+      - '@keyvalue'
+      - '@messenger'

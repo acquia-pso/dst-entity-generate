@@ -1,5 +1,11 @@
 dst_entity_generate.dst_google_sheet_menu:
-  title: 'Drupal Entity Generate Spec Tool'
+  title: 'DST Google Sheet'
   route_name: dst_entity_generate.settings.dst_google_sheet_settings
-  description: 'Settings related to Drupal Entity Generate Spec Tool.'
+  description: 'Settings related to DST Google Sheet.'
+  parent: system.admin_config_system
+
+dst_entity_generate.dst_entity_generate_menu:
+  title: 'DST Entity Generate'
+  route_name: dst_entity_generate.settings.dst_entity_generate_settings
+  description: 'Settings related to DST Entity Generate.'
   parent: system.admin_config_system

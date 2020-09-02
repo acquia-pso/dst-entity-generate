@@ -6,3 +6,11 @@ services:
   dst_entity_generate.google_sheet:
     class: Drupal\dst_entity_generate\Services\GoogleSheetApi
     arguments: ['@logger.factory', '@keyvalue']
+
+  dst_entity_generate.entity_generate:
+    class: Drupal\dst_entity_generate\Services\DstEntityGenerate
+    arguments:
+      - '@string_translation'
+      - '@dst_entity_generate.google_sheet'
+      - '@entity_type.manager'
+      - '@logger.factory'

@@ -1,4 +1,10 @@
 dst_entity_generate.dst_google_sheet_menu:
   route_name: dst_entity_generate.dst_google_sheet_menu
-  title: DEGST Settings
+  title: DST Google Sheet Settings
   base_route: dst_entity_generate.dst_google_sheet_menu
+
+dst_entity_generate.dst_entity_generate_menu:
+  route_name: dst_entity_generate.dst_entity_generate_menu
+  title: DST Entity Generate Settings
+  base_route: dst_entity_generate.dst_entity_generate_menu
+

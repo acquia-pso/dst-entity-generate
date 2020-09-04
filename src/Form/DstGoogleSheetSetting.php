@@ -72,13 +72,11 @@ class DstGoogleSheetSetting extends ConfigFormBase {
       '#default_value' => $store->get('name'),
     ];
 
-    $form['spreadsheet'] = [
+    $form['spreadsheet_id'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Spreadsheet'),
-      '#description' => $this->t('Add unique id of spreadsheet. Example - %example', [
-        '%example' => '1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30',
-      ]),
-      '#default_value' => $store->get('spreadsheet'),
+      '#title' => $this->t('Google Sheet Id'),
+      '#description' => $this->t('You should just copy the spreadsheet unique id from google sheet url and paste in this field.'),
+      '#default_value' => $store->get('spreadsheet_id'),
     ];
 
     $form['credentials'] = [
@@ -108,7 +106,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $store->set('name', $form_state->getValue('name'));
     $store->set('credentials', $form_state->getValue('credentials'));
     $store->set('access_token', $form_state->getValue('access_token'));
-    $store->set('spreadsheet', $form_state->getValue('spreadsheet'));
+    $store->set('spreadsheet_id', $form_state->getValue('spreadsheet_id'));
   }
 
   /**

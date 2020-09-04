@@ -69,7 +69,7 @@ class GoogleSheetApi {
     if (empty($this->googleSheetStorage->get('name'))
       || empty($this->googleSheetStorage->get('credentials'))
       || empty($this->googleSheetStorage->get('access_token'))
-      || empty($this->googleSheetStorage->get('spreadsheet'))) {
+      || empty($this->googleSheetStorage->get('spreadsheet_id'))) {
       // Log the missing configuration of google spreadsheet.
       $this->logger->error("Data missing in configuration of google spreadsheet.");
       if ($this->debugMode) {
@@ -142,8 +142,8 @@ class GoogleSheetApi {
       if (empty($this->client)) {
         return $sheet_values;
       }
-      $google_sheets_service = new \Google_Service_Sheets($this->client);
-      $response = $google_sheets_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet'), $range);
+      $google_sheet_service = new \Google_Service_Sheets($this->client);
+      $response = $google_sheet_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet_id'), $range);
       if (!empty($response)) {
         $this->logger->info('Data fetched successfully.');
         if ($this->debugMode) {

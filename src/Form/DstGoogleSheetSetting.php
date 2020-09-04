@@ -68,6 +68,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Application Name'),
+      '#required' => TRUE,
       '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
       '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
     ];
@@ -75,6 +76,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['spreadsheet_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Google Sheet Id'),
+      '#required' => TRUE,
       '#description' => $this->t('You should just copy the spreadsheet unique id from google sheet url and paste in this field.'),
       '#default_value' => (isset($store) && !empty($store->get('spreadsheet_id'))) ? $store->get('spreadsheet_id') : '',
     ];
@@ -82,6 +84,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['credentials'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Credentials'),
+      '#requred' => TRUE,
       '#description' => $this->t('Add json of google access credentials.'),
       '#default_value' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
     ];
@@ -89,6 +92,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['access_token'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Access Token'),
+      '#required' => TRUE,
       '#description' => $this->t('Add json of access token.'),
       '#default_value' => (isset($store) && !empty($store->get('access_token'))) ? $store->get('access_token') : '',
     ];

@@ -68,31 +68,33 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Application Name'),
+      '#required' => TRUE,
       '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
-      '#default_value' => $store->get('name'),
+      '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
     ];
 
-    $form['spreadsheet'] = [
+    $form['spreadsheet_id'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Spreadsheet'),
-      '#description' => $this->t('Add unique id of spreadsheet. Example - %example', [
-        '%example' => '1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30',
-      ]),
-      '#default_value' => $store->get('spreadsheet'),
+      '#title' => $this->t('Google Sheet Id'),
+      '#required' => TRUE,
+      '#description' => $this->t('You should just copy the spreadsheet unique id from google sheet url and paste in this field.'),
+      '#default_value' => (isset($store) && !empty($store->get('spreadsheet_id'))) ? $store->get('spreadsheet_id') : '',
     ];
 
     $form['credentials'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Credentials'),
+      '#requred' => TRUE,
       '#description' => $this->t('Add json of google access credentials.'),
-      '#default_value' => $store->get('credentials'),
+      '#default_value' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
     ];
 
     $form['access_token'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Access Token'),
+      '#required' => TRUE,
       '#description' => $this->t('Add json of access token.'),
-      '#default_value' => $store->get('access_token'),
+      '#default_value' => (isset($store) && !empty($store->get('access_token'))) ? $store->get('access_token') : '',
     ];
 
     return parent::buildForm($form, $form_state);
@@ -108,7 +110,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $store->set('name', $form_state->getValue('name'));
     $store->set('credentials', $form_state->getValue('credentials'));
     $store->set('access_token', $form_state->getValue('access_token'));
-    $store->set('spreadsheet', $form_state->getValue('spreadsheet'));
+    $store->set('spreadsheet_id', $form_state->getValue('spreadsheet_id'));
   }
 
   /**

@@ -69,28 +69,28 @@ class DstGoogleSheetSetting extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Application Name'),
       '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
-      '#default_value' => $store->get('name'),
+      '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
     ];
 
     $form['spreadsheet_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Google Sheet Id'),
       '#description' => $this->t('You should just copy the spreadsheet unique id from google sheet url and paste in this field.'),
-      '#default_value' => $store->get('spreadsheet_id'),
+      '#default_value' => (isset($store) && !empty($store->get('spreadsheet_id'))) ? $store->get('spreadsheet_id') : '',
     ];
 
     $form['credentials'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Credentials'),
       '#description' => $this->t('Add json of google access credentials.'),
-      '#default_value' => $store->get('credentials'),
+      '#default_value' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
     ];
 
     $form['access_token'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Access Token'),
       '#description' => $this->t('Add json of access token.'),
-      '#default_value' => $store->get('access_token'),
+      '#default_value' => (isset($store) && !empty($store->get('access_token'))) ? $store->get('access_token') : '',
     ];
 
     return parent::buildForm($form, $form_state);

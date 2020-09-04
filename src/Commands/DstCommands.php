@@ -2,10 +2,12 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Drush\Commands\DrushCommands;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drush\Commands\DrushCommands;
 
 /**
  * Class DstCommands.
@@ -13,7 +15,14 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * @package Drupal\dst_entity_generate\Commands
  */
 class DstCommands extends DrushCommands {
+
   use StringTranslationTrait;
+
+  /** @var \Drupal\Core\Entity\EntityTypeManagerInterface  */
+  protected $entityTypeManager;
+
+  /** @var \Drupal\dst_entity_generate\Services\GoogleSheetApi  */
+  protected $sheet;
 
   /**
    * DstCommands constructor.
@@ -21,9 +30,11 @@ class DstCommands extends DrushCommands {
    * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
    *   String Translation service variable.
    */
-  public function __construct(TranslationInterface $stringTranslation) {
+  public function __construct(TranslationInterface $stringTranslation, GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct();
     $this->stringTranslation = $stringTranslation;
+    $this->sheet = $sheet;
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**

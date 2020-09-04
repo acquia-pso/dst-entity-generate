@@ -1,6 +1,13 @@
 services:
   dst.commands:
-    class: \Drupal\dst_entity_generate\Commands\DstCommands
-    arguments: ['@string_translation']
+    class: Drupal\dst_entity_generate\Commands\DstCommands
+    arguments: ['@string_translation', '@dst_entity_generate.google_sheet', '@entity_type.manager']
     tags:
       - { name: drush.command }
+  dst.commands.bundle:
+    class: Drupal\dst_entity_generate\Commands\DstegBundle
+    tags:
+      - { name: drush.command }
+    arguments:
+      - '@dst_entity_generate.google_sheet'
+      - '@entity_type.manager'

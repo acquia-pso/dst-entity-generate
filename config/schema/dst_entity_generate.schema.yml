@@ -2,6 +2,6 @@ dst_entity_generate.settings:
   type: config_object
   label: 'DST Entity Generate Settings'
   mapping:
-    import_entities:
+    sync_entities:
       type: sequence
       label: 'Select Entities'

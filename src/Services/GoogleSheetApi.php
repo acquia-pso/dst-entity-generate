@@ -72,9 +72,6 @@ class GoogleSheetApi {
       || empty($this->googleSheetStorage->get('spreadsheet_id'))) {
       // Log the missing configuration of google spreadsheet.
       $this->logger->error("Data missing in configuration of google spreadsheet.");
-      if ($this->debugMode) {
-        $this->messenger->addError("Data missing in configuration of google spreadsheet.");
-      }
     } else {
       $client = $this->getClient();
       $this->client = !empty($client)

@@ -9,11 +9,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 
 /**
- * Class DstGoogleSheetSetting.
+ * Class GoogleSheetApiSetting.
  *
  * @package Drupal\dst_entity_generate\Form
  */
-class DstGoogleSheetSetting extends ConfigFormBase {
+class GoogleSheetApiSetting extends ConfigFormBase {
 
   /**
    * Entity type manager object.

@@ -9,11 +9,11 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class DstEntityGenerateSettings.
+ * Class EntityGenerateSettings.
  *
  * @package Drupal\dst_entity_generate\Form
  */
-class DstEntityGenerateSettings extends ConfigFormBase {
+final class EntityGenerateSettings extends ConfigFormBase {
 
   /**
    * Config settings name.
@@ -70,13 +70,13 @@ class DstEntityGenerateSettings extends ConfigFormBase {
     $config = $this
       ->config(self::SETTINGS);
 
-    $import_entities = $config->get('import_entities');
-    $form['import_entities'] = [
+    $sync_entities = $config->get('sync_entities');
+    $form['sync_entities'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Select entities'),
       '#options' => $this->getEntityOptions(),
-      '#default_value' => isset($import_entities) ? $import_entities : '',
-      '#description' => $this->t('Select entities to import from the Drupal spec tool sheet.'),
+      '#default_value' => isset($sync_entities) ? $sync_entities : '',
+      '#description' => $this->t('Select entities to sync from the Drupal spec tool sheet.'),
     ];
 
     $store = $this->keyValue->get('dst_entity_generate_storage');
@@ -97,10 +97,9 @@ class DstEntityGenerateSettings extends ConfigFormBase {
     parent::submitForm($form, $form_state);
     $form_values = $form_state->getValues();
     $this->config(self::SETTINGS)
-      ->set('import_entities', $form_values['import_entities'])
+      ->set('sync_entities', $form_values['sync_entities'])
       ->save();
 
-    // Store debug mode in store as it is not needed to be exported.
     $store = $this->keyValue->get("dst_entity_generate_storage");
     $store->set('debug_mode', $form_state->getValue('debug_mode'));
   }
@@ -109,7 +108,7 @@ class DstEntityGenerateSettings extends ConfigFormBase {
    * Helper function to get entity options.
    */
   private function getEntityOptions() {
-    $import_entities_list = [
+    $sync_entities_list = [
       'image_style',
       'menu_link_content',
       'node_type',
@@ -120,7 +119,7 @@ class DstEntityGenerateSettings extends ConfigFormBase {
     $entity_list = [];
     $entity_definitions = $this->entityTypeManager->getDefinitions();
     foreach ($entity_definitions as $entity_id => $entity_definition) {
-      if (in_array($entity_id, $import_entities_list)) {
+      if (in_array($entity_id, $sync_entities_list)) {
         $entity_list[$entity_id] = $entity_definition->getLabel();
       }
     }

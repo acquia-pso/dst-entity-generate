@@ -1,11 +1,11 @@
-dst_entity_generate.dst_google_sheet_menu:
-  title: 'DST Google Sheet'
-  route_name: dst_entity_generate.settings.dst_google_sheet_settings
-  description: 'Settings related to DST Google Sheet.'
+dst_entity_generate.google_sheet_api_settings:
+  title: 'Google Sheet API'
+  route_name: dst_entity_generate.google_sheet_api_settings
+  description: 'Drupal spec tool Google sheet API settings.'
   parent: system.admin_config_system
 
-dst_entity_generate.dst_entity_generate_menu:
-  title: 'DST Entity Generate'
-  route_name: dst_entity_generate.settings.dst_entity_generate_settings
-  description: 'Settings related to DST Entity Generate.'
+dst_entity_generate.settings:
+  title: 'General'
+  route_name: dst_entity_generate.settings
+  description: 'Drupal spec tool general settings to generate entity.'
   parent: system.admin_config_system

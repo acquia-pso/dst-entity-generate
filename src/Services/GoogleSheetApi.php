@@ -19,13 +19,6 @@ class GoogleSheetApi {
   private $debugMode;
 
   /**
-   * Google client object.
-   *
-   * @var \Google_Client
-   */
-  protected $client;
-
-  /**
    * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
    *
    * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
@@ -47,11 +40,18 @@ class GoogleSheetApi {
   protected $entityGenerateStorage;
 
   /**
-   * Meesenger service definition.
+   * Messenger service definition.
    *
    * @var MessengerInterface
    */
   protected $messenger;
+
+  /**
+   * Google Service Sheets definition.
+   *
+   * @var \Google_Service_Sheets
+   */
+  protected $googleSheetService;
 
   /**
    * Constructs a new GoogleSpreadsheetAccess object.
@@ -74,14 +74,17 @@ class GoogleSheetApi {
       $this->logger->error("Data missing in configuration of google spreadsheet.");
     } else {
       $client = $this->getClient();
-      $this->client = !empty($client)
-        ? $client
-        : '';
+      if (!empty($client)) {
+        $this->googleSheetService = new \Google_Service_Sheets($client);
+      }
     }
   }
 
   /**
-   * Returns an authorized API client.
+   * Create google client to get data from google sheets.
+   *
+   * @return array|\Google_Client
+   *   Google Client if successfully created.
    */
   public function getClient() {
     $google_client = [];
@@ -104,11 +107,10 @@ class GoogleSheetApi {
           $settings->set('access_token', json_encode($google_client->getAccessToken()));
         }
       }
-      $this->logger->info('Google Client ceated successfully.');
+      $this->logger->info('Google Client created successfully.');
       if ($this->debugMode) {
-        $this->messenger->addStatus('Google Client ceated successfully.');
+        $this->messenger->addStatus('Google Client created successfully.');
       }
-      return $google_client;
     } catch (\Exception $e) {
       // Log the access error of google spreadsheet.
       $this->logger->error('Error creating Google Client @error',[
@@ -121,7 +123,6 @@ class GoogleSheetApi {
       }
     }
     return $google_client;
-
   }
 
   /**
@@ -136,37 +137,36 @@ class GoogleSheetApi {
   public function getData($range) {
     $sheet_values = [];
     try {
-      if (empty($this->client)) {
-        return $sheet_values;
-      }
-      $google_sheet_service = new \Google_Service_Sheets($this->client);
-      $response = $google_sheet_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet_id'), $range);
-      if (!empty($response)) {
-        $this->logger->info('Data fetched successfully.');
-        if ($this->debugMode) {
-          $this->messenger->addStatus('Data fetched successfully.');
-        }
-        $sheet_values = $response->getValues();
-        $headers = $sheet_values[0];
-
-        // Get header rows. Assuming first row is header row.
-        array_splice($sheet_values, 0, 1);
-
-        // Replacing indexes with header values as keys.
-        foreach ($sheet_values as $key => $value) {
-          $new_sheet_value = [];
-          foreach ($headers as $header_key => $header_value) {
-            $new_sheet_value[
-            preg_replace('/\s+/', '_', strtolower($header_value))
-            ] = $value[$header_key];
+      if (!empty($this->googleSheetService)) {
+        $google_sheet_service = $this->googleSheetService;
+        $response = $google_sheet_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet_id'), $range);
+        if (!empty($response)) {
+          $this->logger->info('Data fetched successfully.');
+          if ($this->debugMode) {
+            $this->messenger->addStatus('Data fetched successfully.');
           }
-          $sheet_values[$key] = $new_sheet_value;
-        }
-      }
-      else {
-        $this->logger->notice('Response is empty.');
-        if ($this->debugMode) {
-          $this->messenger->addError('Response is empty.');
+          $sheet_values = $response->getValues();
+          $headers = $sheet_values[0];
+
+          // Get header rows. Assuming first row is header row.
+          array_splice($sheet_values, 0, 1);
+
+          // Replacing indexes with header values as keys.
+          foreach ($sheet_values as $key => $value) {
+            $new_sheet_value = [];
+            foreach ($headers as $header_key => $header_value) {
+              $lower_header_value = preg_replace('/\s+/', '_', strtolower($header_value));
+              if (isset($lower_header_value) && isset($value[$header_key])) {
+                $new_sheet_value[$lower_header_value] = $value[$header_key];
+              }
+            }
+            $sheet_values[$key] = $new_sheet_value;
+          }
+        } else {
+          $this->logger->notice('Response is empty.');
+          if ($this->debugMode) {
+            $this->messenger->addError('Response is empty.');
+          }
         }
       }
     }

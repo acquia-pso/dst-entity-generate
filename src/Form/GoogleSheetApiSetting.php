@@ -77,7 +77,9 @@ class GoogleSheetApiSetting extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Google Sheet Id'),
       '#required' => TRUE,
-      '#description' => $this->t('You should just copy the spreadsheet unique id from google sheet url and paste in this field.'),
+      '#description' => $this->t(
+        'Copy the spreadsheet unique id from google sheet url and paste in this field. It looks like 1xJOEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30.'
+      ),
       '#default_value' => (isset($store) && !empty($store->get('spreadsheet_id'))) ? $store->get('spreadsheet_id') : '',
     ];
 

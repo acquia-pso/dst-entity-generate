@@ -70,7 +70,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
       '#title' => $this->t('Application Name'),
       '#required' => TRUE,
       '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
-      '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
+      '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '', '#required' => TRUE,
     ];
 
     $form['spreadsheet_id'] = [
@@ -84,7 +84,7 @@ class DstGoogleSheetSetting extends ConfigFormBase {
     $form['credentials'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Credentials'),
-      '#requred' => TRUE,
+      '#required' => TRUE,
       '#description' => $this->t('Add json of google access credentials.'),
       '#default_value' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
     ];

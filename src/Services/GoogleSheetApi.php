@@ -107,9 +107,9 @@ class GoogleSheetApi {
           $settings->set('access_token', json_encode($google_client->getAccessToken()));
         }
       }
-      $this->logger->info('Google Client ceated successfully.');
+      $this->logger->info('Google Client created successfully.');
       if ($this->debugMode) {
-        $this->messenger->addStatus('Google Client ceated successfully.');
+        $this->messenger->addStatus('Google Client created successfully.');
       }
       return $google_client;
     } catch (\Exception $e) {
@@ -144,6 +144,7 @@ class GoogleSheetApi {
       }
       $google_sheet_service = new \Google_Service_Sheets($this->client);
       $response = $google_sheet_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet_id'), $range);
+
       if (!empty($response)) {
         $this->logger->info('Data fetched successfully.');
         if ($this->debugMode) {
@@ -175,7 +176,7 @@ class GoogleSheetApi {
     }
     catch (\Exception $exception) {
       $this->logger->notice('Error in fetching data from Spec Tool Sheet @exception', [
-        '@exception' => $exception
+        '@exception' => $exception->getMessage()
       ]);
       if ($this->debugMode) {
         $this->messenger->addError('Error in fetching data from Spec Tool Sheet @exception',[

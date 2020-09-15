@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Contains the implementations for the DST Entity Generate install.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function dst_entity_generate_uninstall() {
+  // Delete key value stores on uninstall.
+  \Drupal::keyValue('dst_google_sheet_storage')->deleteAll();
+  \Drupal::keyValue('dst_entity_generate_storage')->deleteAll();
+}

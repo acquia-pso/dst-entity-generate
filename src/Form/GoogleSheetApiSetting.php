@@ -69,7 +69,7 @@ class GoogleSheetApiSetting extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Application Name'),
       '#required' => TRUE,
-      '#description' => $this->t('Give Application Name like \'Google Sheets API Application\'.'),
+      '#description' => $this->t('Give Application Name like "Google Sheets API Application".'),
       '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
     ];
 
@@ -86,7 +86,7 @@ class GoogleSheetApiSetting extends ConfigFormBase {
     $form['credentials'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Credentials'),
-      '#requred' => TRUE,
+      '#required' => TRUE,
       '#description' => $this->t('Add json of google access credentials.'),
       '#default_value' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
     ];
@@ -116,10 +116,10 @@ class GoogleSheetApiSetting extends ConfigFormBase {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
-  protected function getEditableConfigNames()
-  {
-    // TODO: Implement getEditableConfigNames() method.
+  protected function getEditableConfigNames() {
+    // @TODO: Implement getEditableConfigNames() method.
   }
+
 }

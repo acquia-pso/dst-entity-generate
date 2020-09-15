@@ -31,14 +31,14 @@ final class EntityGenerateSettings extends ConfigFormBase {
   /**
    * KeyValue store interface.
    *
-   * @var KeyValueFactoryInterface
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
   protected $keyValue;
 
   /**
    * GoogleSheetApi definition.
    *
-   * @var GoogleSheetApi
+   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
    */
   protected $googleSheetApi;
 
@@ -47,9 +47,9 @@ final class EntityGenerateSettings extends ConfigFormBase {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity_type_manager.
-   * @param KeyValueFactoryInterface $key_value_factory
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value_factory
    *   The Key Value Factory definition.
-   * @param GoogleSheetApi $google_sheet_api
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $google_sheet_api
    *   The GoogleSheetApi definition.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager,
@@ -115,7 +115,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
     $form['debug_mode'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable debug mode'),
-      '#default_value' => isset($store) ? $store->get('debug_mode') : false,
+      '#default_value' => isset($store) ? $store->get('debug_mode') : FALSE,
       '#description' => $this->t('Check this box to see connection messages. Keep it disabled in live environments.'),
     ];
 
@@ -182,12 +182,12 @@ final class EntityGenerateSettings extends ConfigFormBase {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
-  protected function getEditableConfigNames()
-  {
+  protected function getEditableConfigNames() {
     return [
       static::SETTINGS,
     ];
   }
+
 }

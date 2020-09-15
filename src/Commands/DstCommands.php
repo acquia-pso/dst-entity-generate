@@ -19,6 +19,7 @@ class DstCommands extends DrushCommands {
    * DstCommands constructor.
    *
    * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
+   *   String Translation service variable.
    */
   public function __construct(TranslationInterface $stringTranslation) {
     parent::__construct();

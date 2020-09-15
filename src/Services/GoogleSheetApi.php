@@ -42,7 +42,7 @@ class GoogleSheetApi {
   /**
    * Messenger service definition.
    *
-   * @var MessengerInterface
+   * @var \Drupal\Core\Messenger\MessengerInterface
    */
   protected $messenger;
 
@@ -72,7 +72,8 @@ class GoogleSheetApi {
       || empty($this->googleSheetStorage->get('spreadsheet_id'))) {
       // Log the missing configuration of google spreadsheet.
       $this->logger->error("Data missing in configuration of google spreadsheet.");
-    } else {
+    }
+    else {
       $client = $this->getClient();
       if (!empty($client)) {
         $this->googleSheetService = new \Google_Service_Sheets($client);
@@ -111,14 +112,15 @@ class GoogleSheetApi {
       if ($this->debugMode) {
         $this->messenger->addStatus('Google Client created successfully.');
       }
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       // Log the access error of google spreadsheet.
-      $this->logger->error('Error creating Google Client @error',[
-        '@error' => $e->getMessage()
+      $this->logger->error('Error creating Google Client @error', [
+        '@error' => $e->getMessage(),
       ]);
       if ($this->debugMode) {
-        $this->messenger->addError('Error creating Google Client @error',[
-          '@error' => $e->getMessage()
+        $this->messenger->addError('Error creating Google Client @error', [
+          '@error' => $e->getMessage(),
         ]);
       }
     }
@@ -126,9 +128,12 @@ class GoogleSheetApi {
   }
 
   /**
+   * General method to fetch the Google Sheet data.
+   *
    * @param string $range
-   *   The location to get data from [Sheet Name]![TopLeftCell]:[BottomRightCell]
-
+   *   The location to get data from [Sheet Name]![TopLeftCell]
+   *   [BottomRightCell].
+   *
    * @return array
    *   An multi-level array of retrieved values keyed by row and then column.
    *   0 indexed and the rows/columns start at 0 based on the *range* not the
@@ -162,7 +167,8 @@ class GoogleSheetApi {
             }
             $sheet_values[$key] = $new_sheet_value;
           }
-        } else {
+        }
+        else {
           $this->logger->notice('Response is empty.');
           if ($this->debugMode) {
             $this->messenger->addError('Response is empty.');
@@ -172,11 +178,11 @@ class GoogleSheetApi {
     }
     catch (\Exception $exception) {
       $this->logger->notice('Error in fetching data from Spec Tool Sheet @exception', [
-        '@exception' => $exception
+        '@exception' => $exception,
       ]);
       if ($this->debugMode) {
-        $this->messenger->addError('Error in fetching data from Spec Tool Sheet @exception',[
-          '@exception' => $exception->getMessage()
+        $this->messenger->addError('Error in fetching data from Spec Tool Sheet @exception', [
+          '@exception' => $exception->getMessage(),
         ]);
       }
     }

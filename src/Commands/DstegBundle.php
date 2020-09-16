@@ -5,7 +5,6 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
@@ -18,19 +17,29 @@ class DstegBundle extends DrushCommands {
 
   use StringTranslationTrait;
 
-  /** @var \Drupal\Core\Entity\EntityTypeManagerInterface */
+  /**
+   * Entity Type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
-  /** @var \Drupal\dst_entity_generate\Services\GoogleSheetApi */
+  /**
+   * Google sheet service.
+   *
+   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
+   */
   protected $sheet;
 
   /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   Google sheet.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity Type manager.
    */
-  public function __construct( GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;

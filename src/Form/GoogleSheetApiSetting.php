@@ -5,11 +5,11 @@ namespace Drupal\dst_entity_generate\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class GoogleSheetApiSetting.
+ * Google Api Settings Config Form.
  *
  * @package Drupal\dst_entity_generate\Form
  */

@@ -6,11 +6,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\dst_entity_generate\DstConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EntityGenerateSettings.
+ * Entity Generate Config Form.
  *
  * @package Drupal\dst_entity_generate\Form
  */
@@ -158,7 +159,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
   private function getEntityList() {
     $dst_entity_group = '';
     $entity_list = [];
-    $overview_records = $this->googleSheetApi->getData('Overview');
+    $overview_records = $this->googleSheetApi->getData(DstConstants::OVERVIEW);
     if (isset($overview_records) && !empty($overview_records)) {
       foreach ($overview_records as $overview) {
         $clean_spec = trim($overview['specification']);

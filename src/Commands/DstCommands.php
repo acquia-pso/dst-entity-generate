@@ -2,13 +2,13 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Drush\Commands\DrushCommands;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Drush\Commands\DrushCommands;
 
 /**
- * Class DstCommands.
+ * Drush Commands to generate entities from sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */

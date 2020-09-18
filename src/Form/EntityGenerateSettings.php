@@ -68,7 +68,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('keyvalue'),
-      $container->get('dst_entity_generate.google_sheet')
+      $container->get('dst_entity_generate.google_sheet_api')
     );
   }
 

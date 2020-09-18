@@ -3,7 +3,7 @@ services:
     parent: logger.channel_base
     arguments: ['dst_entity_generate']
 
-  dst_entity_generate.google_sheet:
+  dst_entity_generate.google_sheet_api:
     class: Drupal\dst_entity_generate\Services\GoogleSheetApi
     arguments:
       - '@logger.factory'

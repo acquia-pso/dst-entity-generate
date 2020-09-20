@@ -11,3 +11,12 @@ services:
     arguments:
       - '@dst_entity_generate.google_sheet'
       - '@entity_type.manager'
+      - '@config.factory'
+  dst.commands.fields:
+    class: Drupal\dst_entity_generate\Commands\DstegFields
+    tags:
+      - { name: drush.command }
+    arguments:
+      - '@dst_entity_generate.google_sheet'
+      - '@entity_type.manager'
+      - '@config.factory'

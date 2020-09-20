@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
@@ -32,17 +33,28 @@ class DstegBundle extends DrushCommands {
   protected $sheet;
 
   /**
+   * Config Factory service.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
    *   Google sheet.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Config factory service.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager) {
-    parent::__construct();
+  public function __construct(GoogleSheetApi $sheet,
+                              EntityTypeManagerInterface $entityTypeManager,
+                              ConfigFactoryInterface $configFactory) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
+    $this->config = $configFactory->get('dst_entity_generate.settings');
   }
 
   /**

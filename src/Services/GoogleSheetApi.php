@@ -2,12 +2,12 @@
 
 namespace Drupal\dst_entity_generate\Services;
 
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 
 /**
- * Class GoogleSheetApi.
+ * Class GoogleSheetApi to connect with Google Sheets.
  */
 class GoogleSheetApi {
 

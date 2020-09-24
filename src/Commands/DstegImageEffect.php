@@ -4,6 +4,7 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
@@ -48,6 +49,13 @@ class DstegImageEffect extends DrushCommands {
   protected $logger;
 
   /**
+   * Private variable to check debug mode.
+   *
+   * @var mixed
+   */
+  private $debugMode;
+
+  /**
    * DstegImageEffect constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -58,13 +66,16 @@ class DstegImageEffect extends DrushCommands {
    *   The image effect manager.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   LoggerChannelFactory service definition.
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value
+   *   The Key Value Factory definition.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, ImageEffectManager $effect_manager, LoggerChannelFactoryInterface $loggerChannelFactory) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, ImageEffectManager $effect_manager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->effectManager = $effect_manager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
+    $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
   }
 
   /**
@@ -127,12 +138,18 @@ class DstegImageEffect extends DrushCommands {
       return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
-      $this->yell($this->t('Exception occured @exception', [
-        '@exception' => $exception,
-      ]));
-      $this->logger->error('Exception occured @exception', [
-        '@exception' => $exception,
-      ]);
+      if ($this->debugMode) {
+        $exception_message = $this->t('Exception occurred @exception', [
+          '@exception' => $exception->getMessage(),
+        ]);
+        $this->yell($exception_message);
+        $this->logger->error($exception_message);
+      }
+      else {
+        $exception_message = $this->t('Error occurred while processing image effects.');
+        $this->yell($exception_message);
+        $this->logger->error($exception_message);
+      }
       return CommandResult::exitCode(self::EXIT_FAILURE);
     }
   }

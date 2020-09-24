@@ -21,3 +21,4 @@ services:
       - '@entity_type.manager'
       - '@plugin.manager.image.effect'
       - '@logger.factory'
+      - '@keyvalue'

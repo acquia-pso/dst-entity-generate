@@ -6,7 +6,7 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\dst_entity_generate\DstConstants;
+use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
@@ -67,7 +67,7 @@ class DstegUserRoles extends DrushCommands {
   public function generateUserRoles() {
     try {
       $this->say($this->t('Generating Drupal user roles.'));
-      $user_role_data = $this->googleSheetApi->getData(DstConstants::USER_ROLES);
+      $user_role_data = $this->googleSheetApi->getData(DstegConstants::USER_ROLES);
       if (!empty($user_role_data)) {
         $user_role_storage = $this->entityTypeManager->getStorage('user_role');
         foreach ($user_role_data as $user_role) {
@@ -106,10 +106,10 @@ class DstegUserRoles extends DrushCommands {
       return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
-      $this->yell($this->t('Exception occured @exception', [
+      $this->yell($this->t('Exception occurred @exception', [
         '@exception' => $exception,
       ]));
-      $this->logger->error('Exception occured @exception', [
+      $this->logger->error('Exception occurred @exception', [
         '@exception' => $exception,
       ]);
       return CommandResult::exitCode(self::EXIT_FAILURE);

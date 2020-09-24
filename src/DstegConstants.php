@@ -3,11 +3,11 @@
 namespace Drupal\dst_entity_generate;
 
 /**
- * Class DstConstants have names of DST sheet tabs.
+ * Class DstegConstants have names of DST sheet tabs.
  *
  * @package Drupal\dst_entity_generate
  */
-final class DstConstants {
+final class DstegConstants {
 
   // Constants containing sheet names.
   const BUNDLES = 'Bundles';

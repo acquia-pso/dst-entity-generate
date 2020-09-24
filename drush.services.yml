@@ -20,3 +20,4 @@ services:
       - '@dst_entity_generate.google_sheet'
       - '@entity_type.manager'
       - '@plugin.manager.image.effect'
+      - '@logger.factory'

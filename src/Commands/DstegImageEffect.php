@@ -4,6 +4,7 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\image\ImageEffectManager;
@@ -40,6 +41,13 @@ class DstegImageEffect extends DrushCommands {
   protected $effectManager;
 
   /**
+   * Logger service definition.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
    * DstegImageEffect constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -48,12 +56,15 @@ class DstegImageEffect extends DrushCommands {
    *   The EntityType Manager.
    * @param \Drupal\image\ImageEffectManager $effect_manager
    *   The image effect manager.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
+   *   LoggerChannelFactory service definition.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, ImageEffectManager $effect_manager) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, ImageEffectManager $effect_manager, LoggerChannelFactoryInterface $loggerChannelFactory) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->effectManager = $effect_manager;
+    $this->logger = $loggerChannelFactory->get('dst_entity_generate');
   }
 
   /**
@@ -67,44 +78,63 @@ class DstegImageEffect extends DrushCommands {
     $this->say($this->t('Generating Drupal Image Effects.'));
     $image_effects = $this->sheet->getData('Image effects');
 
-    // Get all existing image effect plugin definitions.
-    $image_effect_definitions = $this->effectManager->getDefinitions();
-    // Get all existing image styles.
-    $image_styles = $this->entityTypeManager->getStorage('image_style')->loadMultiple();
+    try {
+      // Get all existing image effect plugin definitions.
+      $image_effect_definitions = $this->effectManager->getDefinitions();
+      // Get all existing image styles.
+      $image_styles = $this->entityTypeManager->getStorage('image_style')->loadMultiple();
 
-    foreach ($image_effects as $image_effect) {
-      if ($image_effect['x'] === 'w') {
-        foreach ($image_styles as $image_style) {
-          if ($image_style->label() === $image_effect['image_style']) {
-            foreach ($image_effect_definitions as $image_effect_definition) {
-              if ($image_effect_definition['label']->__toString() === $image_effect['effect']) {
-                $settings = $this->getConfigurationsFromSummery($image_effect['summary']);
-                if (!empty($settings)) {
-                  $configuration = [
-                    'uuid' => NULL,
-                    'id' => $image_effect_definition['id'],
-                    'weight' => 0,
-                    'data' => $settings,
-                  ];
-                  $effect = $this->effectManager->createInstance($configuration['id'], $configuration);
+      foreach ($image_effects as $image_effect) {
+        if ($image_effect['x'] === 'w') {
+          foreach ($image_styles as $image_style) {
+            if ($image_style->label() === $image_effect['image_style']) {
+              foreach ($image_effect_definitions as $image_effect_definition) {
+                if ($image_effect_definition['label']->__toString() === $image_effect['effect']) {
+                  $settings = $this->getConfigurationsFromSummery($image_effect['summary']);
+                  if (!empty($settings)) {
+                    $configuration = [
+                      'uuid' => NULL,
+                      'id' => $image_effect_definition['id'],
+                      'weight' => 0,
+                      'data' => $settings,
+                    ];
+                    $effect = $this->effectManager->createInstance($configuration['id'], $configuration);
 
-                  $image_style->addImageEffect($effect->getConfiguration());
-                  $image_style->save();
-                  $this->say($this->t('Image effect @effect created in @style', [
-                    '@effect' => $image_effect['effect'],
-                    '@style' => $image_effect['image_style'],
-                  ]));
-                }
-                else {
-                  $this->say($this->t('Please provide Image effect settings in Summery.'));
+                    $image_style->addImageEffect($effect->getConfiguration());
+                    if ($image_style->save() == 2) {
+                      $success_message = $this->t('Image effect @effect created in @style', [
+                        '@effect' => $image_effect['effect'],
+                        '@style' => $image_effect['image_style'],
+                      ]);
+                      $this->say($success_message);
+                      $this->logger->info($success_message);
+                    }
+                  }
+                  else {
+                    $incomplete_requirement_message = $this->t('Please provide Image effect settings in Summery to create @effect effect in @style.', [
+                      '@effect' => $image_effect['effect'],
+                      '@style' => $image_effect['image_style'],
+                    ]);
+                    $this->say($incomplete_requirement_message);
+                    $this->logger->info($incomplete_requirement_message);
+                  }
                 }
               }
             }
           }
         }
       }
+      return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
-    return CommandResult::exitCode(self::EXIT_SUCCESS);
+    catch (\Exception $exception) {
+      $this->yell($this->t('Exception occured @exception', [
+        '@exception' => $exception,
+      ]));
+      $this->logger->error('Exception occured @exception', [
+        '@exception' => $exception,
+      ]);
+      return CommandResult::exitCode(self::EXIT_FAILURE);
+    }
   }
 
   /**

@@ -20,3 +20,12 @@ services:
       - '@dst_entity_generate.google_sheet'
       - '@entity_type.manager'
       - '@config.factory'
+
+  dst.commands.user_roles:
+    class: Drupal\dst_entity_generate\Commands\DstegUserRoles
+    arguments:
+      - '@dst_entity_generate.google_sheet_api'
+      - '@entity_type.manager'
+      - '@logger.factory'
+    tags:
+      - { name: drush.command }

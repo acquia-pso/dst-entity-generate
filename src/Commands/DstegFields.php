@@ -6,13 +6,14 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class DstCommands.
+ * Drush command to generate fields.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
@@ -69,9 +70,9 @@ class DstegFields extends DrushCommands {
   public function generateFields() {
     $this->say($this->t('Generating Drupal Fields.'));
     // Call all the methods to generate the Drupal entities.
-    $fields_data = $this->sheet->getData("Fields");
+    $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
 
-    $bundles_data = $this->sheet->getData("Bundles");
+    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
     foreach ($bundles_data as $bundle) {
       $bundleArr[$bundle['name']] = $bundle['machine_name'];
     }
@@ -85,59 +86,75 @@ class DstegFields extends DrushCommands {
         }
         if (isset($bundleVal)) {
           if ($fields['x'] === 'w') {
+            try {
+              // Deleting field.
+              $field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
+              if (!empty($field)) {
+                $field->delete();
+              }
 
-            // Deleting field.
-            $field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
-            if (!empty($field)) {
-              $field->delete();
+              // Deleting field storage.
+              $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
+              if (!empty($field_storage)) {
+                $field_storage->delete();
+              }
+
+              // Create field storage.
+              switch ($fields['field_type']) {
+                case 'Text (plain)':
+                  FieldStorageConfig::create([
+                    'field_name' => $fields['machine_name'],
+                    'entity_type' => 'node',
+                    'type' => 'string',
+                  ])->save();
+                  break;
+
+                case 'Text (formatted, long)':
+                  FieldStorageConfig::create([
+                    'field_name' => $fields['machine_name'],
+                    'entity_type' => 'node',
+                    'type' => 'text',
+                  ])->save();
+                  break;
+
+                case 'Date':
+                  FieldStorageConfig::create([
+                    'field_name' => $fields['machine_name'],
+                    'entity_type' => 'node',
+                    'type' => 'datetime',
+                  ])->save();
+                  break;
+
+                case 'Date range':
+                  FieldStorageConfig::create([
+                    'field_name' => $fields['machine_name'],
+                    'entity_type' => 'node',
+                    'type' => 'daterange',
+                  ])->save();
+                  break;
+              }
+
+              $node_types_storage = $this->entityTypeManager->getStorage('node_type');
+              $ct = $node_types_storage->load($bundleVal);
+              if ($ct != NULL) {
+                // Create field instance.
+                FieldConfig::create([
+                  'field_name' => $fields['machine_name'],
+                  'entity_type' => 'node',
+                  'bundle' => $bundleVal,
+                  'label' => $fields['field_label'],
+                ])->save();
+              }
+              else {
+                $this->say($this->t('The content type @type is no present.', ['@type' => $bundleVal]));
+              }
             }
-
-            // Deleting field storage.
-            $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
-            if (!empty($field_storage)) {
-              $field_storage->delete();
+            catch (\Exception $exception) {
+              $this->yell($this->t('Error creating fields : @exception', [
+                '@exception' => $exception,
+              ]));
+              return CommandResult::exitCode(self::EXIT_FAILURE);
             }
-
-            switch ($fields['field_type']) {
-              case 'Text (plain)':
-                FieldStorageConfig::create([
-                  'field_name' => $fields['machine_name'],
-                  'entity_type' => 'node',
-                  'type' => 'string',
-                ])->save();
-                break;
-
-              case 'Text (formatted, long)':
-                FieldStorageConfig::create([
-                  'field_name' => $fields['machine_name'],
-                  'entity_type' => 'node',
-                  'type' => 'text',
-                ])->save();
-                break;
-
-              case 'Date':
-                FieldStorageConfig::create([
-                  'field_name' => $fields['machine_name'],
-                  'entity_type' => 'node',
-                  'type' => 'datetime',
-                ])->save();
-                break;
-
-              case 'Date range':
-                FieldStorageConfig::create([
-                  'field_name' => $fields['machine_name'],
-                  'entity_type' => 'node',
-                  'type' => 'daterange',
-                ])->save();
-                break;
-            }
-            FieldConfig::create([
-              'field_name' => $fields['machine_name'],
-              'entity_type' => 'node',
-              'bundle' => $bundleVal,
-              'label' => $fields['field_label'],
-            ])->save();
-
           }
         }
       }

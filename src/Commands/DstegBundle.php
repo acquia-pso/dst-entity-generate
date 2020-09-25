@@ -6,11 +6,12 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class DstCommands.
+ * Drush command to generate content types.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
@@ -68,7 +69,7 @@ class DstegBundle extends DrushCommands {
     $this->say($this->t('Generating Drupal Content types.'));
 
     // Call all the methods to generate the Drupal entities.
-    $bundles_data = $this->sheet->getData("Bundles");
+    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
 
     if (!empty($bundles_data)) {
       $node_types_storage = $this->entityTypeManager->getStorage('node_type');

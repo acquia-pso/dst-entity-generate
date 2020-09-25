@@ -17,8 +17,9 @@ services:
     tags:
       - { name: drush.command }
     arguments:
-      - '@dst_entity_generate.google_sheet'
+      - '@dst_entity_generate.google_sheet_api'
       - '@entity_type.manager'
       - '@plugin.manager.image.effect'
       - '@logger.factory'
       - '@keyvalue'
+      - '@config.factory'

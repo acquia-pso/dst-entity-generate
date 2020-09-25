@@ -4,3 +4,5 @@ description: 'Extends the Drupal Spec tool to build Drupal entities using the ar
 package: Drupal Spec Tool Generate
 core_version_requirement: ^8.8.0 || ^9
 configure: dst_entity_generate.google_sheet_api_settings
+dependencies:
+  - drupal:datetime_range

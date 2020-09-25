@@ -11,6 +11,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\image\ImageEffectManager;
 use Drush\Commands\DrushCommands;
+use Drupal\dst_entity_generate\DstegConstants;
 
 /**
  * Class to provide functionality to generate Image effects.
@@ -98,7 +99,7 @@ class DstegImageEffect extends DrushCommands {
    */
   public function generateImageEffects() {
     $this->say($this->t('Generating Drupal Image Effects.'));
-    $image_effects = $this->sheet->getData('Image effects');
+    $image_effects = $this->sheet->getData(DstegConstants::IMAGE_EFFECTS);
 
     $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     if ($sync_entities && array_key_exists('image_effects', $sync_entities) && $sync_entities['image_effects']['All'] === 'All') {
@@ -125,7 +126,7 @@ class DstegImageEffect extends DrushCommands {
                       $effect = $this->effectManager->createInstance($configuration['id'], $configuration);
 
                       $image_style->addImageEffect($effect->getConfiguration());
-                      if ($image_style->save() == 2) {
+                      if ($image_style->save() === 2) {
                         $success_message = $this->t('Image effect @effect created in @style', [
                           '@effect' => $image_effect['effect'],
                           '@style' => $image_effect['image_style'],
@@ -181,7 +182,7 @@ class DstegImageEffect extends DrushCommands {
     $settings = [];
     // Summery pattern "W×H".
     $raw_config = preg_split("/(×|x|X)/", $summery);
-    if (count($raw_config) == 2 && is_numeric($raw_config[0]) && is_numeric($raw_config[1])) {
+    if (count($raw_config) === 2 && is_numeric($raw_config[0]) && is_numeric($raw_config[1])) {
       $settings['width'] = $raw_config[0];
       $settings['height'] = $raw_config[1];
     }
@@ -189,10 +190,10 @@ class DstegImageEffect extends DrushCommands {
       // Summery pattern "Width X Height X".
       $raw_config = explode(' ', $summery);
       for ($i = 0; $i < count($raw_config); $i++) {
-        if (is_string($raw_config[$i]) && strtolower($raw_config[$i]) == 'width' && is_numeric($raw_config[$i + 1])) {
+        if (is_string($raw_config[$i]) && strtolower($raw_config[$i]) === 'width' && is_numeric($raw_config[$i + 1])) {
           $settings['width'] = $raw_config[$i + 1];
         }
-        if (is_string($raw_config[$i]) && strtolower($raw_config[$i]) == 'height' && is_numeric($raw_config[$i + 1])) {
+        if (is_string($raw_config[$i]) && strtolower($raw_config[$i]) === 'height' && is_numeric($raw_config[$i + 1])) {
           $settings['height'] = $raw_config[$i + 1];
         }
       }

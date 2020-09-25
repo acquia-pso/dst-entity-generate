@@ -1,6 +1,6 @@
 services:
   dst.commands:
-    class: Drupal\dst_entity_generate\Commands\DstCommands
+    class: \Drupal\dst_entity_generate\Commands\DstCommands
     arguments: ['@string_translation']
     tags:
       - { name: drush.command }
@@ -20,3 +20,14 @@ services:
       - '@logger.factory'
     tags:
       - { name: drush.command }
+  dst.commands.image_effect:
+    class: Drupal\dst_entity_generate\Commands\DstegImageEffect
+    tags:
+      - { name: drush.command }
+    arguments:
+      - '@dst_entity_generate.google_sheet_api'
+      - '@entity_type.manager'
+      - '@plugin.manager.image.effect'
+      - '@logger.factory'
+      - '@keyvalue'
+      - '@config.factory'

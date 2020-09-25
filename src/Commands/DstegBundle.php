@@ -78,31 +78,37 @@ class DstegBundle extends DrushCommands {
       $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
 
       if (!empty($bundles_data)) {
-        $node_types_storage = $this->entityTypeManager->getStorage('node_type');
-        foreach ($bundles_data as $bundle) {
-          if ($bundle['type'] === 'Content type' && $bundle['x'] === 'w') {
-            $ct = $node_types_storage->load($bundle['machine_name']);
-            if ($ct == NULL) {
-              $result = $node_types_storage->create([
-                'type' => $bundle['machine_name'],
-                'name' => $bundle['name'],
-                'description' => $bundle['description'],
-              ])->save();
-              if ($result === SAVED_NEW) {
-                $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
+        try {
+          $node_types_storage = $this->entityTypeManager->getStorage('node_type');
+          foreach ($bundles_data as $bundle) {
+            if ($bundle['type'] === 'Content type' && $bundle['x'] === 'w') {
+              $ct = $node_types_storage->load($bundle['machine_name']);
+              if ($ct == NULL) {
+                $result = $node_types_storage->create([
+                  'type' => $bundle['machine_name'],
+                  'name' => $bundle['name'],
+                  'description' => $bundle['description'],
+                ])->save();
+                if ($result === SAVED_NEW) {
+                  $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
+                }
+              }
+              else {
+                $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
               }
             }
-            else {
-              $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
-            }
           }
-
         }
-
+        catch (\Exception $exception) {
+          $this->yell($this->t('Error creating content type : @exception', [
+            '@exception' => $exception,
+          ]));
+          $command_result = self::EXIT_FAILURE;
+        }
       }
     }
     else {
-      $this->yell('Generation of content type is disabled, Skipping.');
+      $this->yell('Content type sync is disabled, Skipping.');
     }
     // Generate fields now.
     $command_result = $this->generateFields();
@@ -211,7 +217,7 @@ class DstegBundle extends DrushCommands {
       }
     }
     else {
-      $this->yell('Generation of field is disabled, Skipping.');
+      $this->yell('Fields sync is disabled, Skipping.');
     }
     return CommandResult::exitCode($command_result);
   }

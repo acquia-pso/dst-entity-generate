@@ -3,7 +3,6 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstConstants;
@@ -67,29 +66,17 @@ class DstegImageStyle extends DrushCommands
           // Create image style only if it is in Wait and implement state.
           if ($imageStyle['x'] === 'w') {
             $sized_image = ImageStyle::load($imageStyle['machine_name']);
-            if ($sized_image == null || empty($sized_image)) {
+            if ($sized_image === null || empty($sized_image)) {
               // Create image style.
               $style = ImageStyle::create([
                 'name' => $imageStyle['machine_name'],
                 'label' => $imageStyle['style_name'],
               ]);
 
-              // Add an image effect.
-              $effect = [
-                'id' => 'image_scale_and_crop',
-                'data' => [
-                  'anchor' => 'center-center',
-                  'width' => 120,
-                  'height' => 121,
-                ],
-                'weight' => 0,
-              ];
-              $this->effectUuid = $style->addImageEffect($effect);
-
               $style->save();
 
               if ($style === 1) {
-                $message = $this->t('New image style @imagestyle created', [
+                $message = $this->t('New image style @imagestyle created.', [
                   '@imagestyle' => $imageStyle['machine_name'],
                 ]);
                 $this->say($message);
@@ -98,7 +85,7 @@ class DstegImageStyle extends DrushCommands
 
             }
             else {
-              $imageStyle_exist = $this->t('Image style @imagestyle already present', [
+              $imageStyle_exist = $this->t('Image style @imagestyle already present.', [
                 '@imagestyle' => $imageStyle['machine_name'],
               ]);
               $this->say($imageStyle_exist);
@@ -112,10 +99,10 @@ class DstegImageStyle extends DrushCommands
       return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
-      $this->yell($this->t('Exception occured @exception', [
+      $this->yell($this->t('Exception occurred @exception', [
         '@exception' => $exception,
       ]));
-      $this->logger->error('Exception occured @exception', [
+      $this->logger->error('Exception occurred @exception', [
         '@exception' => $exception,
       ]);
       return CommandResult::exitCode(self::EXIT_FAILURE);

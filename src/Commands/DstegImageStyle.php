@@ -47,6 +47,8 @@ class DstegImageStyle extends DrushCommands
    *   Google Sheet Api service definition.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   LoggerChannelFactory service definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The EntityType Manager.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
                               LoggerChannelFactoryInterface $loggerChannelFactory,

@@ -55,6 +55,8 @@ class DstegMenus extends DrushCommands {
    *   EntityTypeManager service definition.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   LoggerChannelFactory service definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   ConfigFactoryInterface service definition.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
                               EntityTypeManagerInterface $entityTypeManager,

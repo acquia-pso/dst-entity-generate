@@ -28,5 +28,6 @@ services:
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@logger.factory'
+      - '@entity_type.manager'
     tags:
       - { name: drush.command }

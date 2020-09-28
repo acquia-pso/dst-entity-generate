@@ -3,12 +3,12 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\dst_entity_generate\DstConstants;
+use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
-use Drupal\image\Entity\ImageStyle;
 
 /**
  * Class DstegImageStyle.
@@ -34,6 +34,13 @@ class DstegImageStyle extends DrushCommands
   protected $logger;
 
   /**
+   * The EntityType Manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * DstCommands constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
@@ -42,10 +49,12 @@ class DstegImageStyle extends DrushCommands
    *   LoggerChannelFactory service definition.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
-                              LoggerChannelFactoryInterface $loggerChannelFactory) {
+                              LoggerChannelFactoryInterface $loggerChannelFactory,
+  EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct();
     $this->googleSheetApi = $googleSheetApi;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -58,17 +67,17 @@ class DstegImageStyle extends DrushCommands
   public function generateImageStyle() {
     try {
       $this->say($this->t('Generating Drupal Image Style.'));
-      $imageStyle_data = $this->googleSheetApi->getData(DstConstants::IMAGE_STYLES);
+      $imageStyle_data = $this->googleSheetApi->getData(DstegConstants::IMAGE_STYLES);
       if (!empty($imageStyle_data)) {
 
         // Call all the methods to generate the Drupal image style.
         foreach ($imageStyle_data as $imageStyle) {
           // Create image style only if it is in Wait and implement state.
           if ($imageStyle['x'] === 'w') {
-            $sized_image = ImageStyle::load($imageStyle['machine_name']);
+            $sized_image = $this->entityTypeManager->getStorage('image_style')->load($imageStyle['machine_name']);
             if ($sized_image === null || empty($sized_image)) {
               // Create image style.
-              $style = ImageStyle::create([
+              $style = $this->entityTypeManager->getStorage('image_style')->create([
                 'name' => $imageStyle['machine_name'],
                 'label' => $imageStyle['style_name'],
               ]);

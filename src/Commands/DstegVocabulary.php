@@ -97,9 +97,10 @@ class DstegVocabulary extends DrushCommands {
             $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
             $vocabularies = $vocab_storage->loadMultiple();
             if (!isset($vocabularies[$bundle['machine_name']])) {
+              $description = isset($bundle['description']) ? $bundle['description'] : $bundle['name'] . ' vocabulary.';
               $result = $vocab_storage->create([
                 'vid' => $bundle['machine_name'],
-                'description' => isset($bundle['description']) ? $bundle['description'] : '',
+                'description' => $description,
                 'name' => $bundle['name'],
               ])->save();
               if ($result === 1) {

@@ -83,11 +83,11 @@ class DstegBundle extends DrushCommands {
           foreach ($bundles_data as $bundle) {
             if ($bundle['type'] === 'Content type' && $bundle['x'] === 'w') {
               $ct = $node_types_storage->load($bundle['machine_name']);
-              if ($ct == NULL) {
+              if ($ct === NULL) {
                 $result = $node_types_storage->create([
                   'type' => $bundle['machine_name'],
                   'name' => $bundle['name'],
-                  'description' => $bundle['description'],
+                  'description' => empty($bundle['description'])?'':$bundle['description'],
                 ])->save();
                 if ($result === SAVED_NEW) {
                   $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
@@ -178,14 +178,6 @@ class DstegBundle extends DrushCommands {
                       'field_name' => $fields['machine_name'],
                       'entity_type' => 'node',
                       'type' => 'datetime',
-                    ])->save();
-                    break;
-
-                  case 'Date range':
-                    FieldStorageConfig::create([
-                      'field_name' => $fields['machine_name'],
-                      'entity_type' => 'node',
-                      'type' => 'daterange',
                     ])->save();
                     break;
                 }

@@ -5,6 +5,7 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
@@ -43,6 +44,13 @@ class DstegBundle extends DrushCommands {
   protected $syncEntities;
 
   /**
+   * Drupal\Core\Extension\ModuleHandlerInterface definition.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -51,13 +59,17 @@ class DstegBundle extends DrushCommands {
    *   Entity Type manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   Config factory service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   Module handler service.
    */
   public function __construct(GoogleSheetApi $sheet,
                               EntityTypeManagerInterface $entityTypeManager,
-                              ConfigFactoryInterface $configFactory) {
+                              ConfigFactoryInterface $configFactory,
+                              ModuleHandlerInterface $moduleHandler) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -87,7 +99,7 @@ class DstegBundle extends DrushCommands {
                 $result = $node_types_storage->create([
                   'type' => $bundle['machine_name'],
                   'name' => $bundle['name'],
-                  'description' => empty($bundle['description'])?'':$bundle['description'],
+                  'description' => empty($bundle['description']) ? '' : $bundle['description'],
                 ])->save();
                 if ($result === SAVED_NEW) {
                   $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
@@ -130,8 +142,11 @@ class DstegBundle extends DrushCommands {
 
       $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
       foreach ($bundles_data as $bundle) {
-        $bundleArr[$bundle['name']] = $bundle['machine_name'];
+        if ($bundle['type'] === 'Content type') {
+          $bundleArr[$bundle['name']] = $bundle['machine_name'];
+        }
       }
+
       if (!empty($fields_data)) {
         foreach ($fields_data as $fields) {
           $bundleVal = '';
@@ -145,41 +160,85 @@ class DstegBundle extends DrushCommands {
               try {
                 // Deleting field.
                 $field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
+
+                // Skip field if present.
                 if (!empty($field)) {
-                  $field->delete();
+                  $this->say($this->t(
+                    'The field @field is present in @ctype skipping.',
+                    [
+                      '@field' => $fields['machine_name'],
+                      '@ctype' => $bundleVal,
+                    ]
+                  ));
+                  continue;
                 }
 
                 // Deleting field storage.
                 $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
-                if (!empty($field_storage)) {
-                  $field_storage->delete();
-                }
+                if (empty($field_storage)) {
+                  // Create field storage.
+                  switch ($fields['field_type']) {
+                    case 'Text (plain)':
+                      FieldStorageConfig::create([
+                        'field_name' => $fields['machine_name'],
+                        'entity_type' => 'node',
+                        'type' => 'string',
+                      ])->save();
+                      break;
 
-                // Create field storage.
-                switch ($fields['field_type']) {
-                  case 'Text (plain)':
-                    FieldStorageConfig::create([
-                      'field_name' => $fields['machine_name'],
-                      'entity_type' => 'node',
-                      'type' => 'string',
-                    ])->save();
-                    break;
+                    case 'Text (formatted, long)':
+                      FieldStorageConfig::create([
+                        'field_name' => $fields['machine_name'],
+                        'entity_type' => 'node',
+                        'type' => 'text',
+                      ])->save();
+                      break;
 
-                  case 'Text (formatted, long)':
-                    FieldStorageConfig::create([
-                      'field_name' => $fields['machine_name'],
-                      'entity_type' => 'node',
-                      'type' => 'text',
-                    ])->save();
-                    break;
+                    case 'Date':
+                      FieldStorageConfig::create([
+                        'field_name' => $fields['machine_name'],
+                        'entity_type' => 'node',
+                        'type' => 'datetime',
+                      ])->save();
+                      break;
 
-                  case 'Date':
-                    FieldStorageConfig::create([
-                      'field_name' => $fields['machine_name'],
-                      'entity_type' => 'node',
-                      'type' => 'datetime',
-                    ])->save();
-                    break;
+                    case 'Date range':
+                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                        FieldStorageConfig::create([
+                          'field_name' => $fields['machine_name'],
+                          'entity_type' => 'node',
+                          'type' => 'daterange',
+                        ])->save();
+                      }
+                      else {
+                        $this->yell($this->t('Date range module is not installed hence skipping generation of field.'));
+                        continue 2;
+                      }
+                      break;
+
+                    case 'Link':
+                      if ($this->moduleHandler->moduleExists('link')) {
+                        FieldStorageConfig::create([
+                          'field_name' => $fields['machine_name'],
+                          'entity_type' => 'node',
+                          'type' => 'link',
+                        ])->save();
+                      }
+                      else {
+                        $this->yell($this->t('Date range module is not installed hence skipping generation of field.'));
+                        continue 2;
+                      }
+                      break;
+
+                    default:
+                      $this->yell($this->t('Support for generating field of type @ftype is currently not supported.',
+                        ['@ftype' => $fields['field_type']]));
+                      continue 2;
+                  }
+
+                  $this->say($this->t('Field storage created for @field',
+                    ['@field' => $fields['machine_name']]
+                  ));
                 }
 
                 $node_types_storage = $this->entityTypeManager->getStorage('node_type');
@@ -192,6 +251,12 @@ class DstegBundle extends DrushCommands {
                     'bundle' => $bundleVal,
                     'label' => $fields['field_label'],
                   ])->save();
+                  $this->say($this->t('Field @field is created in content type @ctype',
+                    [
+                      '@field' => $fields['machine_name'],
+                      '@ctype' => $bundleVal,
+                    ]
+                  ));
                 }
                 else {
                   $this->say($this->t('The content type @type is no present.', ['@type' => $bundleVal]));

@@ -41,3 +41,20 @@ services:
       - '@logger.factory'
       - '@keyvalue'
       - '@config.factory'
+  dst.commands.workflow:
+    class: Drupal\dst_entity_generate\Commands\DstegWorkflows
+    arguments:
+      - '@dst_entity_generate.google_sheet_api'
+      - '@entity_type.manager'
+      - '@logger.factory'
+      - '@keyvalue'
+      - '@config.factory'
+  dst.commands.image_style:
+    class: Drupal\dst_entity_generate\Commands\DstegImageStyle
+    arguments:
+      - '@dst_entity_generate.google_sheet_api'
+      - '@logger.factory'
+      - '@entity_type.manager'
+      - '@config.factory'
+    tags:
+      - { name: drush.command }

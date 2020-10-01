@@ -110,6 +110,9 @@ class DstegBundle extends DrushCommands {
               }
             }
           }
+
+          // Generate fields now.
+          $command_result = $this->generateFields();
         }
         catch (\Exception $exception) {
           $this->yell($this->t('Error creating content type : @exception', [
@@ -122,8 +125,6 @@ class DstegBundle extends DrushCommands {
     else {
       $this->yell('Content type sync is disabled, Skipping.');
     }
-    // Generate fields now.
-    $command_result = $this->generateFields();
 
     return CommandResult::exitCode($command_result);
   }

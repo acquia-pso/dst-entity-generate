@@ -99,7 +99,7 @@ class DstegBundle extends DrushCommands {
                 $result = $node_types_storage->create([
                   'type' => $bundle['machine_name'],
                   'name' => $bundle['name'],
-                  'description' => empty($bundle['description']) ? '' : $bundle['description'],
+                  'description' => empty($bundle['description']) ? $bundle['name'] . ' content type' : $bundle['description'],
                 ])->save();
                 if ($result === SAVED_NEW) {
                   $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
@@ -161,7 +161,7 @@ class DstegBundle extends DrushCommands {
                 // Deleting field.
                 $field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
 
-                // Skip field if present.
+                // Skip if field is present.
                 if (!empty($field)) {
                   $this->say($this->t(
                     'The field @field is present in @ctype skipping.',
@@ -173,59 +173,43 @@ class DstegBundle extends DrushCommands {
                   continue;
                 }
 
-                // Deleting field storage.
+                // Check if field storage is present.
                 $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
-                      FieldStorageConfig::create([
-                        'field_name' => $fields['machine_name'],
-                        'entity_type' => 'node',
-                        'type' => 'string',
-                      ])->save();
+                      $this->createFieldStorate($fields['machine_name'], 'node', 'string');
                       break;
 
                     case 'Text (formatted, long)':
-                      FieldStorageConfig::create([
-                        'field_name' => $fields['machine_name'],
-                        'entity_type' => 'node',
-                        'type' => 'text',
-                      ])->save();
+                      $this->createFieldStorate($fields['machine_name'], 'node', 'text');
                       break;
 
                     case 'Date':
-                      FieldStorageConfig::create([
-                        'field_name' => $fields['machine_name'],
-                        'entity_type' => 'node',
-                        'type' => 'datetime',
-                      ])->save();
+                      $this->createFieldStorate($fields['machine_name'], 'node', 'datetime');
                       break;
 
                     case 'Date range':
                       if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        FieldStorageConfig::create([
-                          'field_name' => $fields['machine_name'],
-                          'entity_type' => 'node',
-                          'type' => 'daterange',
-                        ])->save();
+                        $this->createFieldStorate($fields['machine_name'], 'node', 'daterange');
                       }
                       else {
-                        $this->yell($this->t('Date range module is not installed hence skipping generation of field.'));
+                        $this->yell($this->t('The date range module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
                         continue 2;
                       }
                       break;
 
                     case 'Link':
                       if ($this->moduleHandler->moduleExists('link')) {
-                        FieldStorageConfig::create([
-                          'field_name' => $fields['machine_name'],
-                          'entity_type' => 'node',
-                          'type' => 'link',
-                        ])->save();
+                        $this->createFieldStorate($fields['machine_name'], 'node', 'link');
                       }
                       else {
-                        $this->yell($this->t('Date range module is not installed hence skipping generation of field.'));
+                        $this->yell($this->t('The link module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
                         continue 2;
                       }
                       break;
@@ -251,7 +235,7 @@ class DstegBundle extends DrushCommands {
                     'bundle' => $bundleVal,
                     'label' => $fields['field_label'],
                   ])->save();
-                  $this->say($this->t('Field @field is created in content type @ctype',
+                  $this->say($this->t('@field field is created in content type @ctype',
                     [
                       '@field' => $fields['machine_name'],
                       '@ctype' => $bundleVal,
@@ -259,7 +243,7 @@ class DstegBundle extends DrushCommands {
                   ));
                 }
                 else {
-                  $this->say($this->t('The content type @type is no present.', ['@type' => $bundleVal]));
+                  $this->say($this->t('The @type content type does not exists.', ['@type' => $bundleVal]));
                 }
               }
               catch (\Exception $exception) {
@@ -277,6 +261,24 @@ class DstegBundle extends DrushCommands {
       $this->yell('Fields sync is disabled, Skipping.');
     }
     return CommandResult::exitCode($command_result);
+  }
+
+  /**
+   * Create field storage helper function.
+   *
+   * @param string $field_machine_name
+   *   Field machine name.
+   * @param string $entity_type
+   *   Entity type.
+   * @param string $field_type
+   *   Field type.
+   */
+  protected function createFieldStorate($field_machine_name, string $entity_type, string $field_type): void {
+    FieldStorageConfig::create([
+      'field_name' => $field_machine_name,
+      'entity_type' => $entity_type,
+      'type' => $field_type,
+    ])->save();
   }
 
 }

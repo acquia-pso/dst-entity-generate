@@ -155,6 +155,12 @@ class DstegBundle extends DrushCommands {
           if (array_key_exists($bundle_name, $bundleArr)) {
             $bundleVal = $bundleArr[$bundle_name];
           }
+
+          // Skip fields which are not part of content type.
+          if (!str_contains($fields['bundle'], 'Content type')) {
+            continue;
+          }
+
           if (isset($bundleVal)) {
             if ($fields['x'] === 'w') {
               try {

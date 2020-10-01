@@ -5,10 +5,13 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
 use Drupal\dst_entity_generate\DstegConstants;
 
@@ -57,6 +60,13 @@ class DstegVocabulary extends DrushCommands {
   protected $configFactory;
 
   /**
+   * Drupal\Core\Extension\ModuleHandlerInterface definition.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -69,14 +79,17 @@ class DstegVocabulary extends DrushCommands {
    *   The Key Value Factory definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   Module handler service.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $moduleHandler) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
     $this->configFactory = $config_factory;
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -120,7 +133,6 @@ class DstegVocabulary extends DrushCommands {
             }
           }
         }
-        return CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       catch (\Exception $exception) {
         if ($this->debugMode) {
@@ -138,6 +150,160 @@ class DstegVocabulary extends DrushCommands {
         return CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
+    // Generate fields now.
+    $command_result = $this->generateFields();
+    return CommandResult::exitCode($command_result);
+  }
+
+  /**
+   * Helper function to generate fields.
+   */
+  public function generateFields() {
+    $command_result = self::EXIT_SUCCESS;
+    $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $create_fields = $sync_entities['fields'];
+    $this->say($this->t('Generating Drupal Fields.'));
+    if ($create_fields['All'] === 'All') {
+      $this->say($this->t('Generating Drupal Fields.'));
+      // Call all the methods to generate the Drupal entities.
+      $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
+      $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
+      $bundleArr = [];
+      foreach ($bundles_data as $bundle) {
+        if ($bundle['type'] === 'Vocabulary') {
+          $bundleArr[$bundle['name']] = $bundle['machine_name'];
+        }
+      }
+      if (!empty($fields_data)) {
+        foreach ($fields_data as $fields) {
+          $bundle = $fields['bundle'];
+          $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
+          if (array_key_exists($bundle_name, $bundleArr)) {
+            $bundleVal = $bundleArr[$bundle_name];
+          }
+          if (isset($bundleVal)) {
+            if ($fields['x'] === 'w') {
+              try {
+                // Deleting field.
+                $field = FieldConfig::loadByName('taxonomy_vocabulary', $bundleVal, $fields['machine_name']);
+
+                // Skip field if present.
+                if (!empty($field)) {
+                  $this->say($this->t(
+                    'The field @field is present in @vocab skipping.',
+                    [
+                      '@field' => $fields['machine_name'],
+                      '@vocab' => $bundleVal,
+                    ]
+                  ));
+                  continue;
+                }
+                // Check if field storage is present.
+                $field_storage = FieldStorageConfig::loadByName('taxonomy_vocabulary', $fields['machine_name']);
+                if (empty($field_storage)) {
+                  // Create field storage.
+                  switch ($fields['field_type']) {
+                    case 'Text (plain)':
+                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'string');
+                      break;
+
+                    case 'Text (formatted, long)':
+                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'text');
+                      break;
+
+                    case 'Date':
+                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'datetime');
+                      break;
+
+                    case 'Date range':
+                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'daterange');
+                      }
+                      else {
+                        $this->yell($this->t('The Date range module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
+                        continue 2;
+                      }
+                      break;
+
+                    case 'Link':
+                      if ($this->moduleHandler->moduleExists('link')) {
+                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'link');
+                      }
+                      else {
+                        $this->yell($this->t('The Link module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
+                        continue 2;
+                      }
+                      break;
+
+                    default:
+                      $this->yell($this->t('Support for generating field of type @ftype is currently not supported.',
+                        ['@ftype' => $fields['field_type']]));
+                      continue 2;
+                  }
+
+                  $this->say($this->t('Field storage created for @field',
+                    ['@field' => $fields['machine_name']]
+                  ));
+                }
+
+                $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
+                $vocab = $vocab_storage->load($bundleVal);
+                if ($vocab != NULL) {
+                  // Create field instance.
+                  FieldConfig::create([
+                    'field_name' => $fields['machine_name'],
+                    'entity_type' => 'taxonomy_term',
+                    'bundle' => $bundleVal,
+                    'label' => $fields['field_label'],
+                  ])->save();
+                  $this->say($this->t('@field field is created in vocabulary @vocab.',
+                    [
+                      '@field' => $fields['machine_name'],
+                      '@vocab' => $bundleVal,
+                    ]
+                  ));
+                }
+                else {
+                  $this->say($this->t('The @vocab vocabulary does not exists.', ['@vocab' => $bundleVal]));
+                }
+              }
+              catch (\Exception $exception) {
+                $this->yell($this->t('Error creating fields : @exception', [
+                  '@exception' => $exception,
+                ]));
+                $command_result = self::EXIT_FAILURE;
+              }
+            }
+          }
+        }
+      }
+    }
+    else {
+      $this->yell('Fields sync is disabled, Skipping.');
+    }
+    return CommandResult::exitCode($command_result);
+  }
+
+  /**
+   * Create field storage helper function.
+   *
+   * @param string $field_machine_name
+   *   Field machine name.
+   * @param string $entity_type
+   *   Entity type.
+   * @param string $field_type
+   *   Field type.
+   */
+  protected function createFieldStorage(string $field_machine_name, string $entity_type, string $field_type): void {
+    FieldStorageConfig::create([
+      'field_name' => $field_machine_name,
+      'entity_type' => $entity_type,
+      'type' => $field_type,
+    ])->save();
   }
 
 }

@@ -68,3 +68,4 @@ services:
       - '@logger.factory'
       - '@keyvalue'
       - '@config.factory'
+      - '@module_handler'

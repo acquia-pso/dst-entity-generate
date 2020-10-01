@@ -133,6 +133,9 @@ class DstegVocabulary extends DrushCommands {
             }
           }
         }
+        // Generate fields now.
+        $command_result = $this->generateFields();
+        return CommandResult::exitCode($command_result);
       }
       catch (\Exception $exception) {
         if ($this->debugMode) {
@@ -150,9 +153,6 @@ class DstegVocabulary extends DrushCommands {
         return CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
-    // Generate fields now.
-    $command_result = $this->generateFields();
-    return CommandResult::exitCode($command_result);
   }
 
   /**

@@ -40,5 +40,12 @@ services:
       - '@logger.factory'
       - '@keyvalue'
       - '@config.factory'
+  dst.commands.image_style:
+    class: Drupal\dst_entity_generate\Commands\DstegImageStyle
+    arguments:
+      - '@dst_entity_generate.google_sheet_api'
+      - '@logger.factory'
+      - '@entity_type.manager'
+      - '@config.factory'
     tags:
       - { name: drush.command }

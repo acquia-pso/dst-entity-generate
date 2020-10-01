@@ -185,20 +185,20 @@ class DstegBundle extends DrushCommands {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
-                      $this->createFieldStorate($fields['machine_name'], 'node', 'string');
+                      $this->createFieldStorage($fields['machine_name'], 'node', 'string');
                       break;
 
                     case 'Text (formatted, long)':
-                      $this->createFieldStorate($fields['machine_name'], 'node', 'text');
+                      $this->createFieldStorage($fields['machine_name'], 'node', 'text');
                       break;
 
                     case 'Date':
-                      $this->createFieldStorate($fields['machine_name'], 'node', 'datetime');
+                      $this->createFieldStorage($fields['machine_name'], 'node', 'datetime');
                       break;
 
                     case 'Date range':
                       if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        $this->createFieldStorate($fields['machine_name'], 'node', 'daterange');
+                        $this->createFieldStorage($fields['machine_name'], 'node', 'daterange');
                       }
                       else {
                         $this->yell($this->t('The date range module is not installed. Skipping @field field generation.',
@@ -210,7 +210,7 @@ class DstegBundle extends DrushCommands {
 
                     case 'Link':
                       if ($this->moduleHandler->moduleExists('link')) {
-                        $this->createFieldStorate($fields['machine_name'], 'node', 'link');
+                        $this->createFieldStorage($fields['machine_name'], 'node', 'link');
                       }
                       else {
                         $this->yell($this->t('The link module is not installed. Skipping @field field generation.',
@@ -279,7 +279,7 @@ class DstegBundle extends DrushCommands {
    * @param string $field_type
    *   Field type.
    */
-  protected function createFieldStorate($field_machine_name, string $entity_type, string $field_type): void {
+  protected function createFieldStorage($field_machine_name, string $entity_type, string $field_type): void {
     FieldStorageConfig::create([
       'field_name' => $field_machine_name,
       'entity_type' => $entity_type,

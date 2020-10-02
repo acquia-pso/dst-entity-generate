@@ -8,6 +8,7 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drush\Commands\DrushCommands;
 use Drupal\Core\Config\ConfigFactoryInterface;
 
@@ -24,6 +25,13 @@ class DstegMenus extends DrushCommands {
    * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
    */
   protected $googleSheetApi;
+
+  /**
+   * DSTEG General service definition.
+   *
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
+   */
+  protected $generalApi;
 
   /**
    * Entity type manager service definition.
@@ -59,11 +67,13 @@ class DstegMenus extends DrushCommands {
    *   ConfigFactoryInterface service definition.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
+                              GeneralApi $generalApi,
                               EntityTypeManagerInterface $entityTypeManager,
                               LoggerChannelFactoryInterface $loggerChannelFactory,
                               ConfigFactoryInterface $configFactory) {
     parent::__construct();
     $this->googleSheetApi = $googleSheetApi;
+    $this->generalApi = $generalApi;
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
@@ -77,11 +87,11 @@ class DstegMenus extends DrushCommands {
    * @usage drush dst:generate:menus
    */
   public function generateMenus() {
-    if (!empty($this->syncEntities) && $this->syncEntities[strtolower(DstegConstants::MENUS)]['All'] !== 'All') {
-      $skip_message = $this->t("Skipping Menus sync! It's disabled on general settings.");
-      $this->say($skip_message);
-      $this->logger->info($skip_message);
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
+    $result = FALSE;
+    if($message = $this->generalApi->can_sync_entity(DstegConstants::MENUS)) {
+      $this->say($message);
+      $this->logger->info($message);
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     try {
       $this->say($this->t('Generating Drupal Menus.'));
@@ -122,7 +132,7 @@ class DstegMenus extends DrushCommands {
           }
         }
       }
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
       $this->yell($this->t('Exception occurred @exception', [
@@ -131,8 +141,9 @@ class DstegMenus extends DrushCommands {
       $this->logger->error('Exception occurred @exception', [
         '@exception' => $exception,
       ]);
-      return CommandResult::exitCode(self::EXIT_FAILURE);
+      $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
+    return $result;
   }
 
 }

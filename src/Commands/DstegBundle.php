@@ -104,6 +104,15 @@ class DstegBundle extends DrushCommands {
                 if ($result === SAVED_NEW) {
                   $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
                 }
+
+                $display_mode_name = 'node.' . $bundle['machine_name'] . '.default';
+
+                /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+                $form_display = $this->entityTypeManager->getStorage('entity_form_display')
+                  ->load($display_mode_name);
+                if ($form_display === NULL) {
+                  // @todo : Create default form display mode.
+                }
               }
               else {
                 $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
@@ -186,20 +195,24 @@ class DstegBundle extends DrushCommands {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
-                      $this->createFieldStorage($fields['machine_name'], 'node', 'string');
+                      $fields['drupal_field_type'] = 'string';
+                      $this->createFieldStorage($fields, 'node');
                       break;
 
                     case 'Text (formatted, long)':
-                      $this->createFieldStorage($fields['machine_name'], 'node', 'text');
+                      $fields['drupal_field_type'] = 'text_long';
+                      $this->createFieldStorage($fields, 'node');
                       break;
 
                     case 'Date':
-                      $this->createFieldStorage($fields['machine_name'], 'node', 'datetime');
+                      $fields['drupal_field_type'] = 'datetime';
+                      $this->createFieldStorage($fields, 'node');
                       break;
 
                     case 'Date range':
                       if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        $this->createFieldStorage($fields['machine_name'], 'node', 'daterange');
+                        $fields['drupal_field_type'] = 'daterange';
+                        $this->createFieldStorage($fields, 'node');
                       }
                       else {
                         $this->yell($this->t('The date range module is not installed. Skipping @field field generation.',
@@ -211,7 +224,8 @@ class DstegBundle extends DrushCommands {
 
                     case 'Link':
                       if ($this->moduleHandler->moduleExists('link')) {
-                        $this->createFieldStorage($fields['machine_name'], 'node', 'link');
+                        $fields['drupal_field_type'] = 'link';
+                        $this->createFieldStorage($fields, 'node');
                       }
                       else {
                         $this->yell($this->t('The link module is not installed. Skipping @field field generation.',
@@ -235,13 +249,29 @@ class DstegBundle extends DrushCommands {
                 $node_types_storage = $this->entityTypeManager->getStorage('node_type');
                 $ct = $node_types_storage->load($bundleVal);
                 if ($ct != NULL) {
+
+                  $required = $fields['req'] === 'y' ? TRUE : FALSE;
                   // Create field instance.
                   FieldConfig::create([
                     'field_name' => $fields['machine_name'],
                     'entity_type' => 'node',
                     'bundle' => $bundleVal,
                     'label' => $fields['field_label'],
+                    'required' => $required,
                   ])->save();
+
+                  $display_mode_name = 'node.' . $bundleVal . '.default';
+                  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
+                  $form_display = $this->entityTypeManager->getStorage('entity_form_display')
+                    ->load($display_mode_name);
+                  // Check if display mode is present.
+                  if ($form_display) {
+                    $form_display->setComponent($fields['machine_name'],
+                      ['region' => 'content']
+                    );
+                    $form_display->save();
+                  }
+
                   $this->say($this->t('@field field is created in content type @ctype',
                     [
                       '@field' => $fields['machine_name'],
@@ -273,18 +303,24 @@ class DstegBundle extends DrushCommands {
   /**
    * Create field storage helper function.
    *
-   * @param string $field_machine_name
-   *   Field machine name.
+   * @param array $field
+   *   Field details.
    * @param string $entity_type
    *   Entity type.
-   * @param string $field_type
-   *   Field type.
    */
-  protected function createFieldStorage($field_machine_name, string $entity_type, string $field_type): void {
+  protected function createFieldStorage(array $field, string $entity_type): void {
+    $cardinality = $field['vals.'];
+    if ($cardinality === '*') {
+      $cardinality = -1;
+    }
+    elseif ($cardinality === '-') {
+      $cardinality = 1;
+    }
     FieldStorageConfig::create([
-      'field_name' => $field_machine_name,
+      'field_name' => $field['machine_name'],
       'entity_type' => $entity_type,
-      'type' => $field_type,
+      'type' => $field['drupal_field_type'],
+      'cardinality' => $cardinality,
     ])->save();
   }
 

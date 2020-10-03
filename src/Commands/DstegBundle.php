@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Helper;
+use Drupal\dst_entity_generate\Services\Helper;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
@@ -60,7 +60,7 @@ class DstegBundle extends DrushCommands {
   /**
    * Helper class for entity generation.
    *
-   * @var \Drupal\dst_entity_generate\Helper
+   * @var \Drupal\dst_entity_generate\Services\Helper
    */
   protected $helper;
 
@@ -77,7 +77,7 @@ class DstegBundle extends DrushCommands {
    *   Module handler service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
-   * @param \Drupal\dst_entity_generate\Helper $dstegHelper
+   * @param \Drupal\dst_entity_generate\Services\Helper $dstegHelper
    *   The helper service for DSTEG.
    */
   public function __construct(GoogleSheetApi $sheet,

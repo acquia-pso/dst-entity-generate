@@ -11,5 +11,5 @@ services:
       - '@messenger'
 
   dst_entity_generate.helper:
-    class: Drupal\dst_entity_generate\Helper
+    class: Drupal\dst_entity_generate\Services\Helper
     arguments: ['@config.factory', '@module_handler', '@entity_display.repository', '@entity_type.manager', '@dst_entity_generate.google_sheet_api', '@logger.factory', '@entity_display.repository']

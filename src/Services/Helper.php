@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\dst_entity_generate;
+namespace Drupal\dst_entity_generate\Services;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 

@@ -4,13 +4,13 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
+use Drupal\dst_entity_generate\Helper;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -51,6 +51,20 @@ class DstegBundle extends DrushCommands {
   protected $moduleHandler;
 
   /**
+   * Entity display mode repository.
+   *
+   * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
+   */
+  protected $displayRepository;
+
+  /**
+   * Helper class for entity generation.
+   *
+   * @var \Drupal\dst_entity_generate\Helper
+   */
+  protected $helper;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -61,15 +75,24 @@ class DstegBundle extends DrushCommands {
    *   Config factory service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
+   *   Display mode repository.
+   * @param \Drupal\dst_entity_generate\Helper $dstegHelper
+   *   The helper service for DSTEG.
    */
   public function __construct(GoogleSheetApi $sheet,
                               EntityTypeManagerInterface $entityTypeManager,
                               ConfigFactoryInterface $configFactory,
-                              ModuleHandlerInterface $moduleHandler) {
+                              ModuleHandlerInterface $moduleHandler,
+                              EntityDisplayRepositoryInterface $displayRepository,
+                              Helper $dstegHelper) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
-    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
+      ->get('sync_entities');
     $this->moduleHandler = $moduleHandler;
+    $this->displayRepository = $displayRepository;
+    $this->helper = $dstegHelper;
   }
 
   /**
@@ -105,14 +128,14 @@ class DstegBundle extends DrushCommands {
                   $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
                 }
 
-                $display_mode_name = 'node.' . $bundle['machine_name'] . '.default';
+                // Create display modes for newly created content type.
+                // Assign widget settings for the default form mode.
+                $this->displayRepository->getFormDisplay('node', $bundle['machine_name'])
+                  ->save();
 
-                /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-                $form_display = $this->entityTypeManager->getStorage('entity_form_display')
-                  ->load($display_mode_name);
-                if ($form_display === NULL) {
-                  // @todo : Create default form display mode.
-                }
+                // Assign display settings for the display view modes.
+                $this->displayRepository->getViewDisplay('node', $bundle['machine_name'])
+                  ->save();
               }
               else {
                 $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
@@ -121,7 +144,7 @@ class DstegBundle extends DrushCommands {
           }
 
           // Generate fields now.
-          $command_result = $this->generateFields();
+          $command_result = $this->helper->generateFields();
         }
         catch (\Exception $exception) {
           $this->yell($this->t('Error creating content type : @exception', [
@@ -136,192 +159,6 @@ class DstegBundle extends DrushCommands {
     }
 
     return CommandResult::exitCode($command_result);
-  }
-
-  /**
-   * Helper function to generate fields.
-   */
-  public function generateFields() {
-    $command_result = self::EXIT_SUCCESS;
-
-    $create_fields = $this->syncEntities['fields'];
-    if ($create_fields['All'] === 'All') {
-      $this->say($this->t('Generating Drupal Fields.'));
-      // Call all the methods to generate the Drupal entities.
-      $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
-
-      $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
-      foreach ($bundles_data as $bundle) {
-        if ($bundle['type'] === 'Content type') {
-          $bundleArr[$bundle['name']] = $bundle['machine_name'];
-        }
-      }
-
-      if (!empty($fields_data)) {
-        foreach ($fields_data as $fields) {
-          $bundleVal = '';
-          $bundle = $fields['bundle'];
-          $bundle_name = substr($bundle, 0, -15);
-          if (array_key_exists($bundle_name, $bundleArr)) {
-            $bundleVal = $bundleArr[$bundle_name];
-          }
-
-          // Skip fields which are not part of content type.
-          if (!str_contains($fields['bundle'], 'Content type')) {
-            continue;
-          }
-
-          if (isset($bundleVal)) {
-            if ($fields['x'] === 'w') {
-              try {
-                // Deleting field.
-                $field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
-
-                // Skip if field is present.
-                if (!empty($field)) {
-                  $this->say($this->t(
-                    'The field @field is present in @ctype skipping.',
-                    [
-                      '@field' => $fields['machine_name'],
-                      '@ctype' => $bundleVal,
-                    ]
-                  ));
-                  continue;
-                }
-
-                // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
-                if (empty($field_storage)) {
-                  // Create field storage.
-                  switch ($fields['field_type']) {
-                    case 'Text (plain)':
-                      $fields['drupal_field_type'] = 'string';
-                      $this->createFieldStorage($fields, 'node');
-                      break;
-
-                    case 'Text (formatted, long)':
-                      $fields['drupal_field_type'] = 'text_long';
-                      $this->createFieldStorage($fields, 'node');
-                      break;
-
-                    case 'Date':
-                      $fields['drupal_field_type'] = 'datetime';
-                      $this->createFieldStorage($fields, 'node');
-                      break;
-
-                    case 'Date range':
-                      if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        $fields['drupal_field_type'] = 'daterange';
-                        $this->createFieldStorage($fields, 'node');
-                      }
-                      else {
-                        $this->yell($this->t('The date range module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    case 'Link':
-                      if ($this->moduleHandler->moduleExists('link')) {
-                        $fields['drupal_field_type'] = 'link';
-                        $this->createFieldStorage($fields, 'node');
-                      }
-                      else {
-                        $this->yell($this->t('The link module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    default:
-                      $this->yell($this->t('Support for generating field of type @ftype is currently not supported.',
-                        ['@ftype' => $fields['field_type']]));
-                      continue 2;
-                  }
-
-                  $this->say($this->t('Field storage created for @field',
-                    ['@field' => $fields['machine_name']]
-                  ));
-                }
-
-                $node_types_storage = $this->entityTypeManager->getStorage('node_type');
-                $ct = $node_types_storage->load($bundleVal);
-                if ($ct != NULL) {
-
-                  $required = $fields['req'] === 'y' ? TRUE : FALSE;
-                  // Create field instance.
-                  FieldConfig::create([
-                    'field_name' => $fields['machine_name'],
-                    'entity_type' => 'node',
-                    'bundle' => $bundleVal,
-                    'label' => $fields['field_label'],
-                    'required' => $required,
-                  ])->save();
-
-                  $display_mode_name = 'node.' . $bundleVal . '.default';
-                  /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
-                  $form_display = $this->entityTypeManager->getStorage('entity_form_display')
-                    ->load($display_mode_name);
-                  // Check if display mode is present.
-                  if ($form_display) {
-                    $form_display->setComponent($fields['machine_name'],
-                      ['region' => 'content']
-                    );
-                    $form_display->save();
-                  }
-
-                  $this->say($this->t('@field field is created in content type @ctype',
-                    [
-                      '@field' => $fields['machine_name'],
-                      '@ctype' => $bundleVal,
-                    ]
-                  ));
-                }
-                else {
-                  $this->say($this->t('The @type content type does not exists.', ['@type' => $bundleVal]));
-                }
-              }
-              catch (\Exception $exception) {
-                $this->yell($this->t('Error creating fields : @exception', [
-                  '@exception' => $exception,
-                ]));
-                $command_result = self::EXIT_FAILURE;
-              }
-            }
-          }
-        }
-      }
-    }
-    else {
-      $this->yell('Fields sync is disabled, Skipping.');
-    }
-    return CommandResult::exitCode($command_result);
-  }
-
-  /**
-   * Create field storage helper function.
-   *
-   * @param array $field
-   *   Field details.
-   * @param string $entity_type
-   *   Entity type.
-   */
-  protected function createFieldStorage(array $field, string $entity_type): void {
-    $cardinality = $field['vals.'];
-    if ($cardinality === '*') {
-      $cardinality = -1;
-    }
-    elseif ($cardinality === '-') {
-      $cardinality = 1;
-    }
-    FieldStorageConfig::create([
-      'field_name' => $field['machine_name'],
-      'entity_type' => $entity_type,
-      'type' => $field['drupal_field_type'],
-      'cardinality' => $cardinality,
-    ])->save();
   }
 
 }

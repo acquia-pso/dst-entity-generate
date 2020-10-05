@@ -9,3 +9,10 @@ services:
       - '@logger.factory'
       - '@keyvalue'
       - '@messenger'
+  dst_entity_generate.general_api:
+    class: Drupal\dst_entity_generate\Services\GeneralApi
+    arguments:
+      - '@logger.factory'
+      - '@keyvalue'
+      - '@config.factory'
+      - '@entity_type.manager'

@@ -4,22 +4,14 @@ namespace Drupal\dst_entity_generate\Services;
 
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Class GoogleSheetApi to connect with Google Sheets.
  */
 class GeneralApi {
-
-  /**
-   * Private variable to check debug mode.
-   *
-   * @var mixed
-   */
-  private $debugMode;
 
   /**
    * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
@@ -29,34 +21,6 @@ class GeneralApi {
   protected $logger;
 
   /**
-   * KeyValue store having google sheet settings storage.
-   *
-   * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
-   */
-  protected $googleSheetStorage;
-
-  /**
-   * KeyValue store having entity generate settings storage.
-   *
-   * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
-   */
-  protected $entityGenerateStorage;
-
-  /**
-   * Messenger service definition.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
-
-  /**
-   * Google Service Sheets definition.
-   *
-   * @var \Google_Service_Sheets
-   */
-  protected $googleSheetService;
-
-  /**
    * The config object.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -64,28 +28,93 @@ class GeneralApi {
   protected $configFactory;
 
   /**
+   * Private variable to check debug mode.
+   *
+   * @var mixed
+   */
+  private $debugMode;
+
+  /**
+   * Consolidation\Log\Logger definition.
+   *
+   * @var Consolidation\Log\Logger
+   */
+  protected $cLogger;
+
+  /**
+   * Entity type manager service definition.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  use StringTranslationTrait;
+
+  /**
    * Constructs a new GoogleSpreadsheetAccess object.
    */
   public function __construct(LoggerChannelFactoryInterface $logger_factory,
                               KeyValueFactoryInterface $key_value,
-                              MessengerInterface $messenger,
-                              GoogleSheetApi $googleSheetApi,
-                              ConfigFactoryInterface $configFactory) {
+                              ConfigFactoryInterface $configFactory,
+                              EntityTypeManagerInterface $entityTypeManager) {
 
     $this->logger = $logger_factory->get('dst_entity_generate');
-    $this->googleSheetStorage = $key_value->get('dst_google_sheet_storage');
+    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $this->entityGenerateStorage = $key_value->get('dst_entity_generate_storage');
     $this->debugMode = $this->entityGenerateStorage->get('debug_mode');
-    $this->messenger = $messenger;
-    $this->googleSheetApi = $googleSheetApi;
-    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $this->entityTypeManager = $entityTypeManager;
   }
 
-  public function can_sync_entity($entity) {
+  /**
+   * The function to decide whether the sync of the Entity supplied is possible.
+   *
+   * @param string $entity
+   *   The entity to check.
+   *
+   * @return mixed
+   *   Return FALSE or a message for skipping the entity.
+   */
+  public function canSyncEntity(string $entity) {
     $message = FALSE;
-    if (!empty($this->syncEntities) && $this->syncEntities[strtolower($entity)]['All'] !== 'All') {
-      $message = $this->t("Skipping, @entity entity sync is disabled.");
+    $entity = strtolower(str_replace(" ", "_", $entity));
+    if (!empty($this->syncEntities) && $this->syncEntities[$entity]['All'] !== 'All') {
+      $message = $this->t("Skipping, @entity entity sync is disabled.",
+      ['@entity' => $entity]);
     }
     return $message;
   }
+
+  /**
+   * If "Debug mode" is on, log a message using the logger.
+   *
+   * @param array $message
+   *   Message which needs to be logged.
+   */
+  public function logMessage(array $message) {
+    if ($this->debugMode) {
+      $this->logger->debug(implode("<br />", $message));
+    }
+  }
+
+  /**
+   * Helper function to get all the existing entities.
+   *
+   * @param string $entity_type
+   *   The entity type for which we require to load the entities for.
+   * @param string $loading_type
+   *   The method supports loading just entity types or multiple.
+   *
+   * @return mixed
+   *   Return the multiple entities which got loaded.
+   */
+  public function getAllEntities(string $entity_type, string $loading_type = 'default') {
+    if ($loading_type === 'all') {
+      $results = $this->entityTypeManager->getStorage($entity_type)->loadMultiple();
+    }
+    else {
+      $results = $this->entityTypeManager->getStorage($entity_type);
+    }
+    return $results;
+  }
+
 }

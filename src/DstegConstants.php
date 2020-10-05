@@ -20,5 +20,6 @@ final class DstegConstants {
   const IMAGE_STYLES = 'Image styles';
   const IMAGE_EFFECTS = 'Image effects';
   const OVERVIEW = 'Overview';
+  const SKIP_ENTITY_MESSAGE = 'Skipping: @entity entity sync is disabled.';
 
 }

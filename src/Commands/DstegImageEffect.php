@@ -69,9 +69,11 @@ class DstegImageEffect extends DrushCommands {
    */
   public function generateImageEffects() {
     $result = FALSE;
-    $message = $this->generalApi->canSyncEntity(DstegConstants::IMAGE_EFFECTS);
+    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::IMAGE_EFFECTS);
     $logMessages = [];
-    if ($message !== FALSE) {
+    if ($skipEntitySync) {
+      $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
+      ['@entity' => DstegConstants::IMAGE_EFFECTS]);
       // @todo yell() and say() needs to be part of the `logMessage() method`.
       $this->yell($message, 100, 'yellow');
       $logMessages[] = $message;

@@ -35,13 +35,6 @@ class GeneralApi {
   private $debugMode;
 
   /**
-   * Consolidation\Log\Logger definition.
-   *
-   * @var Consolidation\Log\Logger
-   */
-  protected $cLogger;
-
-  /**
    * Entity type manager service definition.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -69,19 +62,18 @@ class GeneralApi {
    * The function to decide whether the sync of the Entity supplied is possible.
    *
    * @param string $entity
-   *   The entity to check.
+   *   The entity type to check.
    *
-   * @return mixed
-   *   Return FALSE or a message for skipping the entity.
+   * @return bool
+   *   Returns TRUE if the entity should be skipped.
    */
-  public function canSyncEntity(string $entity) {
-    $message = FALSE;
+  public function skipEntitySync(string $entity) {
+    $skipEntitySync = FALSE;
     $entity = strtolower(str_replace(" ", "_", $entity));
     if (!empty($this->syncEntities) && $this->syncEntities[$entity]['All'] !== 'All') {
-      $message = $this->t("Skipping, @entity entity sync is disabled.",
-      ['@entity' => $entity]);
+      $skipEntitySync = TRUE;
     }
-    return $message;
+    return $skipEntitySync;
   }
 
   /**

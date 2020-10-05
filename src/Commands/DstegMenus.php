@@ -55,9 +55,11 @@ class DstegMenus extends DrushCommands {
    */
   public function generateMenus() {
     $result = FALSE;
-    $message = $this->generalApi->canSyncEntity(DstegConstants::MENUS);
+    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::MENUS);
     $logMessages = [];
-    if ($message !== FALSE) {
+    if ($skipEntitySync) {
+      $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
+      ['@entity' => DstegConstants::MENUS]);
       // @todo yell() and say() needs to be part of the `logMessage() method`.
       $this->yell($message, 100, 'yellow');
       $logMessages[] = $message;
@@ -76,15 +78,11 @@ class DstegMenus extends DrushCommands {
                 ->load($menu['machine_name']);
               // Prevent exception if menu is already present.
               if (!isset($is_menu_present) || empty($is_menu_present)) {
-                $is_saved = $this
-                  ->entityTypeManager
-                  ->getStorage('menu')
-                  ->create([
-                    'id' => $menu['machine_name'],
-                    'label' => $menu['title'],
-                    'description' => $menu['description'],
-                  ])
-                  ->save();
+                $is_saved = $menus_storage->create([
+                  'id' => $menu['machine_name'],
+                  'label' => $menu['title'],
+                  'description' => $menu['description'],
+                ])->save();
                 if ($is_saved === 1) {
                   $success_message = $this->t('New menu @menu created.', [
                     '@menu' => $menu['title'],

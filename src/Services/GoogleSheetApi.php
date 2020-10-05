@@ -3,48 +3,28 @@
 namespace Drupal\dst_entity_generate\Services;
 
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class GoogleSheetApi to connect with Google Sheets.
  */
 class GoogleSheetApi {
 
-  /**
-   * Private variable to check debug mode.
-   *
-   * @var mixed
-   */
-  private $debugMode;
-
-  /**
-   * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $logger;
+  use StringTranslationTrait;
 
   /**
    * KeyValue store having google sheet settings storage.
    *
-   * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
   protected $googleSheetStorage;
 
   /**
    * KeyValue store having entity generate settings storage.
    *
-   * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
   protected $entityGenerateStorage;
-
-  /**
-   * Messenger service definition.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
 
   /**
    * Google Service Sheets definition.
@@ -54,24 +34,29 @@ class GoogleSheetApi {
   protected $googleSheetService;
 
   /**
+   * DSTEG General service definition.
+   *
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
+   */
+  protected $generalApi;
+
+  /**
    * Constructs a new GoogleSpreadsheetAccess object.
    */
-  public function __construct(LoggerChannelFactoryInterface $logger_factory,
-                              KeyValueFactoryInterface $key_value,
-                              MessengerInterface $messenger) {
-
-    $this->logger = $logger_factory->get('dst_entity_generate');
-    $this->googleSheetStorage = $key_value->get('dst_google_sheet_storage');
-    $this->entityGenerateStorage = $key_value->get('dst_entity_generate_storage');
-    $this->debugMode = $this->entityGenerateStorage->get('debug_mode');
-    $this->messenger = $messenger;
+  public function __construct(KeyValueFactoryInterface $keyvalue,
+                              GeneralApi $generalApi) {
+    $this->googleSheetStorage = $keyvalue->get('dst_google_sheet_storage');
+    $this->entityGenerateStorage = $keyvalue->get('dst_entity_generate_storage');
+    $this->generalApi = $generalApi;
 
     if (empty($this->googleSheetStorage->get('name'))
       || empty($this->googleSheetStorage->get('credentials'))
       || empty($this->googleSheetStorage->get('access_token'))
       || empty($this->googleSheetStorage->get('spreadsheet_id'))) {
       // Log the missing configuration of google spreadsheet.
-      $this->logger->error("Data missing in configuration of google spreadsheet.");
+      $this->generalApi->logMessage(
+        $this->t('Data missing in configuration of google spreadsheet.')
+      );
     }
     else {
       $client = $this->getClient();
@@ -88,7 +73,7 @@ class GoogleSheetApi {
    *   Google Client if successfully created.
    */
   public function getClient() {
-    $google_client = [];
+    $google_client = $logMessages = [];
     try {
       $google_client = new \Google_Client();
       $google_client->setApplicationName($this->googleSheetStorage->get('name'));
@@ -108,22 +93,13 @@ class GoogleSheetApi {
           $settings->set('access_token', json_encode($google_client->getAccessToken()));
         }
       }
-      $this->logger->info('Google Client created successfully.');
-      if ($this->debugMode) {
-        $this->messenger->addStatus('Google Client created successfully.');
-      }
+      $logMessages[] = $this->t('Google Client created successfully.');
     }
     catch (\Exception $e) {
       // Log the access error of google spreadsheet.
-      $this->logger->error('Error creating Google Client @error', [
-        '@error' => $e->getMessage(),
-      ]);
-      if ($this->debugMode) {
-        $this->messenger->addError('Error creating Google Client @error', [
-          '@error' => $e->getMessage(),
-        ]);
-      }
+      $logMessages[] = $this->t('Error creating Google Client @error', ['@error' => $e->getMessage()]);
     }
+    $this->generalApi->logMessage($logMessages);
     return $google_client;
   }
 
@@ -140,16 +116,13 @@ class GoogleSheetApi {
    *   whole sheet.
    */
   public function getData($range) {
-    $sheet_values = [];
+    $sheet_values = $logMessages = [];
     try {
       if (!empty($this->googleSheetService)) {
         $google_sheet_service = $this->googleSheetService;
         $response = $google_sheet_service->spreadsheets_values->get($this->googleSheetStorage->get('spreadsheet_id'), $range);
         if (!empty($response)) {
-          $this->logger->info('Data fetched successfully.');
-          if ($this->debugMode) {
-            $this->messenger->addStatus('Data fetched successfully.');
-          }
+          $logMessages[] = $this->t('Data fetched successfully.');
           $sheet_values = $response->getValues();
           $headers = $sheet_values[0];
 
@@ -169,23 +142,16 @@ class GoogleSheetApi {
           }
         }
         else {
-          $this->logger->notice('Response is empty.');
-          if ($this->debugMode) {
-            $this->messenger->addError('Response is empty.');
-          }
+          $logMessages[] = $this->t('Response is empty.');
         }
       }
     }
     catch (\Exception $exception) {
-      $this->logger->notice('Error in fetching data from Spec Tool Sheet @exception', [
+      $logMessages[] = $this->t('Error while fetching data from DST Sheet @exception', [
         '@exception' => $exception,
       ]);
-      if ($this->debugMode) {
-        $this->messenger->addError('Error in fetching data from Spec Tool Sheet @exception', [
-          '@exception' => $exception->getMessage(),
-        ]);
-      }
     }
+    $this->generalApi->logMessage($logMessages);
     return $sheet_values;
   }
 

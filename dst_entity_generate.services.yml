@@ -6,9 +6,8 @@ services:
   dst_entity_generate.google_sheet_api:
     class: Drupal\dst_entity_generate\Services\GoogleSheetApi
     arguments:
-      - '@logger.factory'
       - '@keyvalue'
-      - '@messenger'
+      - '@dst_entity_generate.general_api'
   dst_entity_generate.general_api:
     class: Drupal\dst_entity_generate\Services\GeneralApi
     arguments:

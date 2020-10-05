@@ -8,9 +8,7 @@ services:
     class: Drupal\dst_entity_generate\Commands\DstegMenus
     arguments:
       - '@dst_entity_generate.google_sheet_api'
-      - '@entity_type.manager'
-      - '@logger.factory'
-      - '@config.factory'
+      - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
   dst.commands.bundle:
@@ -36,11 +34,8 @@ services:
       - { name: drush.command }
     arguments:
       - '@dst_entity_generate.google_sheet_api'
-      - '@entity_type.manager'
+      - '@dst_entity_generate.general_api'
       - '@plugin.manager.image.effect'
-      - '@logger.factory'
-      - '@keyvalue'
-      - '@config.factory'
   dst.commands.workflow:
     class: Drupal\dst_entity_generate\Commands\DstegWorkflows
     arguments:

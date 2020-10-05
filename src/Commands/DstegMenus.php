@@ -3,13 +3,11 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drush\Commands\DrushCommands;
-use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Drush command to generate menus.
@@ -26,47 +24,26 @@ class DstegMenus extends DrushCommands {
   protected $googleSheetApi;
 
   /**
-   * Entity type manager service definition.
+   * DSTEG General service definition.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
    */
-  protected $entityTypeManager;
-
-  /**
-   * Logger service definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
-
-  /**
-   * Config Factory service.
-   *
-   * @var array
-   */
-  protected $syncEntities;
+  protected $generalApi;
 
   /**
    * DstCommands constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
    *   Google Sheet Api service definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   EntityTypeManager service definition.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   General Api service definition.
    *   LoggerChannelFactory service definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   ConfigFactoryInterface service definition.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
-                              EntityTypeManagerInterface $entityTypeManager,
-                              LoggerChannelFactoryInterface $loggerChannelFactory,
-                              ConfigFactoryInterface $configFactory) {
+                              GeneralApi $generalApi) {
     parent::__construct();
     $this->googleSheetApi = $googleSheetApi;
-    $this->entityTypeManager = $entityTypeManager;
-    $this->logger = $loggerChannelFactory->get('dst_entity_generate');
-    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $this->generalApi = $generalApi;
   }
 
   /**
@@ -77,62 +54,73 @@ class DstegMenus extends DrushCommands {
    * @usage drush dst:generate:menus
    */
   public function generateMenus() {
-    if (!empty($this->syncEntities) && $this->syncEntities[strtolower(DstegConstants::MENUS)]['All'] !== 'All') {
-      $skip_message = $this->t("Skipping Menus sync! It's disabled on general settings.");
-      $this->say($skip_message);
-      $this->logger->info($skip_message);
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
+    $result = FALSE;
+    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::MENUS);
+    $logMessages = [];
+    if ($skipEntitySync) {
+      $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
+      ['@entity' => DstegConstants::MENUS]);
+      // @todo yell() and say() needs to be part of the `logMessage() method`.
+      $this->yell($message, 100, 'yellow');
+      $logMessages[] = $message;
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
-    try {
-      $this->say($this->t('Generating Drupal Menus.'));
-      $menus_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
-      if (!empty($menus_data)) {
-        $menus_storage = $this->entityTypeManager->getStorage('menu');
-        foreach ($menus_data as $menu) {
-          // Create menus only if it is in Wait and implement state.
-          if ($menu['x'] === 'w') {
-            $is_menu_present = $menus_storage
-              ->load($menu['machine_name']);
-            // Prevent exception if menu is already present.
-            if (!isset($is_menu_present) || empty($is_menu_present)) {
-              $is_saved = $this
-                ->entityTypeManager
-                ->getStorage('menu')
-                ->create([
+    if ($result === FALSE) {
+      try {
+        $this->yell($this->t('Generating Menus.'), 100, 'blue');
+        $entity_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
+        if (!empty($entity_data)) {
+          $menus_storage = $this->generalApi->getAllEntities('menu');
+          foreach ($entity_data as $menu) {
+            // Create menus only if it is in Wait and implement state.
+            if ($menu['x'] === 'w') {
+              $is_menu_present = $menus_storage
+                ->load($menu['machine_name']);
+              // Prevent exception if menu is already present.
+              if (!isset($is_menu_present) || empty($is_menu_present)) {
+                $is_saved = $menus_storage->create([
                   'id' => $menu['machine_name'],
                   'label' => $menu['title'],
                   'description' => $menu['description'],
-                ])
-                ->save();
-              if ($is_saved === 1) {
-                $success_message = $this->t('New menu @menu created.', [
+                ])->save();
+                if ($is_saved === 1) {
+                  $success_message = $this->t('New menu @menu created.', [
+                    '@menu' => $menu['title'],
+                  ]);
+                  $this->say($success_message);
+                  $logMessages[] = $success_message;
+                }
+              }
+              else {
+                $present_message = $this->t('Skipping, Menu @menu already exists.', [
                   '@menu' => $menu['title'],
                 ]);
-                $this->say($success_message);
-                $this->logger->info($success_message);
+                $this->say($present_message);
+                $logMessages[] = $present_message;
               }
             }
-            else {
-              $present_message = $this->t('Menu @menu already present, Skipping.', [
-                '@menu' => $menu['title'],
-              ]);
-              $this->say($present_message);
-              $this->logger->info($present_message);
-            }
+
           }
         }
+        else {
+          $no_data_message = $this->t('There is no data for the Menu entity in your DST sheet.');
+          $this->say($no_data_message);
+          $logMessages[] = $no_data_message;
+        }
+        $this->yell($this->t('Finished generating Menus.'), 100, 'blue');
+        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
+      catch (\Exception $exception) {
+        $exception_message = $this->t('Exception occurred @exception', [
+          '@exception' => $exception,
+        ]);
+        $this->yell($exception_message);
+        $logMessages[] = $exception_message;
+        $result = CommandResult::exitCode(self::EXIT_FAILURE);
+      }
     }
-    catch (\Exception $exception) {
-      $this->yell($this->t('Exception occurred @exception', [
-        '@exception' => $exception,
-      ]));
-      $this->logger->error('Exception occurred @exception', [
-        '@exception' => $exception,
-      ]);
-      return CommandResult::exitCode(self::EXIT_FAILURE);
-    }
+    $this->generalApi->logMessage($logMessages);
+    return $result;
   }
 
 }

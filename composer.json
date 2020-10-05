@@ -21,7 +21,8 @@
     "enable-patching": true
   },
   "require": {
-    "cweagans/composer-patches": "^1.6"
+    "cweagans/composer-patches": "^1.6",
+    "google/apiclient": "^2.0"
   },
   "require-dev": {
     "acquia/coding-standards": "^0.4.1",

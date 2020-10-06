@@ -25,7 +25,6 @@
 
   <!-- Include existing standards. -->
   <rule ref="Drupal"/>
-  <rule ref="AcquiaDrupalStrict"/>
   <rule ref="DrupalPractice">
     <!-- Ignore specific sniffs. -->
     <exclude name="DrupalPractice.InfoFiles.NamespacedDependency"/>

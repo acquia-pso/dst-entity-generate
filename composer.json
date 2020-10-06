@@ -1,6 +1,8 @@
 {
   "name": "acquia-pso/dst-entity-generate",
+  "type": "drupal-module",
   "description": "Drush powered command line tool for working with Drupal Spec tool.",
+  "version": "1.0.0",
   "license": "GPL-2.0+",
   "authors": [
     {
@@ -9,9 +11,17 @@
       "role": "Maintainer"
     }
   ],
-  "version": "1.0.0",
-  "type": "drupal-module",
-  "minimum-stability": "dev",
+  "require": {
+    "cweagans/composer-patches": "^1.6",
+    "google/apiclient": "^2.0"
+  },
+  "require-dev": {
+    "acquia/coding-standards": "^0.4.1",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+    "ergebnis/composer-normalize": "^2.8",
+    "vijaycs85/drupal-quality-checker": "dev-master"
+  },
+  "suggest": {},
   "extra": {
     "drush": {
       "services": {
@@ -20,13 +30,5 @@
     },
     "enable-patching": true
   },
-  "require": {
-    "cweagans/composer-patches": "^1.6"
-  },
-  "require-dev": {
-    "acquia/coding-standards": "^0.4.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
-  },
-  "suggest": {
-  }
+  "minimum-stability": "dev"
 }

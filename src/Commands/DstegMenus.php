@@ -50,7 +50,7 @@ class DstegMenus extends DrushCommands {
    * Generate all the Drupal Menus from Drupal Spec tool sheet.
    *
    * @command dst:generate:menus
-   * @aliases dst:mn
+   * @aliases dst:m
    * @usage drush dst:generate:menus
    */
   public function generateMenus() {

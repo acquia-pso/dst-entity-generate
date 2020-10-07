@@ -2,7 +2,6 @@ services:
   logger.channel.dst_entity_generate:
     parent: logger.channel_base
     arguments: ['dst_entity_generate']
-
   dst_entity_generate.google_sheet_api:
     class: Drupal\dst_entity_generate\Services\GoogleSheetApi
     arguments:
@@ -15,3 +14,4 @@ services:
       - '@keyvalue'
       - '@config.factory'
       - '@entity_type.manager'
+      - '@entity_display.repository'

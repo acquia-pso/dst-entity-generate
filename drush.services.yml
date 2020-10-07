@@ -26,8 +26,7 @@ services:
     class: Drupal\dst_entity_generate\Commands\DstegUserRoles
     arguments:
       - '@dst_entity_generate.google_sheet_api'
-      - '@entity_type.manager'
-      - '@logger.factory'
+      - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
   dst.commands.image_effect:
@@ -42,10 +41,9 @@ services:
     class: Drupal\dst_entity_generate\Commands\DstegWorkflows
     arguments:
       - '@dst_entity_generate.google_sheet_api'
-      - '@entity_type.manager'
-      - '@logger.factory'
-      - '@keyvalue'
-      - '@config.factory'
+      - '@dst_entity_generate.general_api'
+    tags:
+      - { name: drush.command }
   dst.commands.image_style:
     class: Drupal\dst_entity_generate\Commands\DstegImageStyle
     arguments:

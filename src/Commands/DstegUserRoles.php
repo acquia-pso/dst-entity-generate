@@ -3,10 +3,9 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
@@ -25,36 +24,25 @@ class DstegUserRoles extends DrushCommands {
   protected $googleSheetApi;
 
   /**
-   * Entity type manager service definition.
+   * GeneralApi service definition.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
    */
-  protected $entityTypeManager;
-
-  /**
-   * Logger service definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
+  protected $generalApi;
 
   /**
    * DstCommands constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
    *   Google Sheet Api service definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   EntityTypeManager service definition.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
-   *   LoggerChannelFactory service definition.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   GeneralApi service definition.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
-                              EntityTypeManagerInterface $entityTypeManager,
-                              LoggerChannelFactoryInterface $loggerChannelFactory) {
+                              GeneralApi $generalApi) {
     parent::__construct();
     $this->googleSheetApi = $googleSheetApi;
-    $this->entityTypeManager = $entityTypeManager;
-    $this->logger = $loggerChannelFactory->get('dst_entity_generate');
+    $this->generalApi = $generalApi;
   }
 
   /**
@@ -66,54 +54,72 @@ class DstegUserRoles extends DrushCommands {
    */
   public function generateUserRoles() {
     try {
-      $this->say($this->t('Generating Drupal user roles.'));
-      $user_role_data = $this->googleSheetApi->getData(DstegConstants::USER_ROLES);
-      if (!empty($user_role_data)) {
-        $user_role_storage = $this->entityTypeManager->getStorage('user_role');
-        foreach ($user_role_data as $user_role) {
-          // Create role only if it is in Wait and implement state.
-          if ($user_role['x'] === 'w') {
-            $is_role_present = $user_role_storage
-              ->load($user_role['machine_name']);
-            // Prevent exception if role is already present.
-            if (!isset($is_role_present) || empty($is_role_present)) {
-              $is_saved = $this
-                ->entityTypeManager
-                ->getStorage('user_role')
-                ->create([
-                  'id' => $user_role['machine_name'],
-                  'label' => $user_role['name'],
-                ])
-                ->save();
-              if ($is_saved === 1) {
-                $success_message = $this->t('New role @role created', [
+      $result = FALSE;
+      $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::USER_ROLES);
+      $logMessages = [];
+      if ($skipEntitySync) {
+        $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
+          ['@entity' => DstegConstants::USER_ROLES]);
+        $this->yell($message, 100, 'yellow');
+        $logMessages[] = $message;
+        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+      }
+      elseif (!$result) {
+        $this->yell($this->t('Generating user roles.'), 100, 'blue');
+        $user_role_data = $this->googleSheetApi->getData(DstegConstants::USER_ROLES);
+        if (!empty($user_role_data)) {
+          $user_role_storage = $this->generalApi->getAllEntities('user_role');
+          foreach ($user_role_data as $user_role) {
+            // Create role only if it is in Wait and implement state.
+            if ($user_role['x'] === 'w') {
+              $is_role_present = $user_role_storage
+                ->load($user_role['machine_name']);
+              // Prevent exception if role is already present.
+              if (!isset($is_role_present) || empty($is_role_present)) {
+                $is_saved = $user_role_storage
+                  ->create([
+                    'id' => $user_role['machine_name'],
+                    'label' => $user_role['name'],
+                  ])
+                  ->save();
+                if ($is_saved === 1) {
+                  $success_message = $this->t('New role @role created.', [
+                    '@role' => $user_role['name'],
+                  ]);
+                  $this->say($success_message);
+                  $logMessages[] = $success_message;
+                }
+              }
+              else {
+                $present_message = $this->t('Role @role already present.', [
                   '@role' => $user_role['name'],
                 ]);
-                $this->say($success_message);
-                $this->logger->info($success_message);
+                $this->say($present_message);
+                $logMessages[] = $present_message;
               }
-            }
-            else {
-              $present_message = $this->t('Role @role already present', [
-                '@role' => $user_role['name'],
-              ]);
-              $this->say($present_message);
-              $this->logger->info($present_message);
             }
           }
         }
+        else {
+          $no_data_message = $this->t('There is no data for the User role entity in your DST sheet.');
+          $this->say($no_data_message);
+          $logMessages[] = $no_data_message;
+        }
+        $this->yell($this->t('Finished generating User roles.'), 100, 'blue');
+        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
-      $this->yell($this->t('Exception occurred @exception', [
-        '@exception' => $exception,
-      ]));
-      $this->logger->error('Exception occurred @exception', [
+      $exception_message = $this->t('Exception occurred @exception', [
         '@exception' => $exception,
       ]);
-      return CommandResult::exitCode(self::EXIT_FAILURE);
+      $this->yell($exception_message);
+      $logMessages[] = $exception_message;
+      $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
+
+    $this->generalApi->logMessage($logMessages);
+    return $result;
   }
 
 }

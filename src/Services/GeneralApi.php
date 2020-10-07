@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Services;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -15,6 +16,7 @@ use Drupal\field\Entity\FieldStorageConfig;
  * Class GoogleSheetApi to connect with Google Sheets.
  */
 class GeneralApi {
+  use StringTranslationTrait;
 
   /**
    * Drupal\Core\Logger\LoggerChannelFactoryInterface definition.
@@ -51,7 +53,12 @@ class GeneralApi {
    */
   protected $displayRepository;
 
-  use StringTranslationTrait;
+  /**
+   * Module handler interface definition.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * Constructs a new GoogleSpreadsheetAccess object.
@@ -60,7 +67,8 @@ class GeneralApi {
                               KeyValueFactoryInterface $key_value,
                               ConfigFactoryInterface $configFactory,
                               EntityTypeManagerInterface $entityTypeManager,
-                              EntityDisplayRepositoryInterface $displayRepository) {
+                              EntityDisplayRepositoryInterface $displayRepository,
+                              ModuleHandlerInterface $moduleHandler) {
 
     $this->logger = $logger_factory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
@@ -68,6 +76,7 @@ class GeneralApi {
     $this->debugMode = $this->entityGenerateStorage->get('debug_mode');
     $this->entityTypeManager = $entityTypeManager;
     $this->displayRepository = $displayRepository;
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -185,6 +194,19 @@ class GeneralApi {
     else {
       $this->logger->notice($this->t('The @type content type does not exists.', ['@type' => $bundle_machine_name]));
     }
+  }
+
+  /**
+   * Helper function to check if module is enabled.
+   *
+   * @param string $module_name
+   *   The module name to check.
+   *
+   * @return bool
+   *   Returns module exists status.
+   */
+  public function isModuleEnabled(string $module_name) {
+    return $this->moduleHandler->moduleExists($module_name);
   }
 
 }

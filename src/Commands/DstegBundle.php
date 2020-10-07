@@ -11,7 +11,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
-use Drupal\dst_entity_generate\Services\Helper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
@@ -80,7 +79,7 @@ class DstegBundle extends DrushCommands {
    *   Module handler service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
-   * @param \Drupal\dst_entity_generate\Services\Helper $dstegHelper
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
    */
   public function __construct(GoogleSheetApi $sheet,

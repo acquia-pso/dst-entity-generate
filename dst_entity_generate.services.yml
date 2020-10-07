@@ -15,3 +15,4 @@ services:
       - '@config.factory'
       - '@entity_type.manager'
       - '@entity_display.repository'
+      - '@module_handler'

@@ -87,7 +87,7 @@ class DstegImageEffect extends DrushCommands {
           // Get all existing image effect plugin definitions.
           $image_effect_definitions = $this->effectManager->getDefinitions();
           // Get all existing image styles.
-          $image_styles = $this->generalApi->getAllEntities('image_style', 'multiple');
+          $image_styles = $this->generalApi->getAllEntities('image_style', 'all');
           $any_matching_style = FALSE;
           foreach ($entity_data as $image_effect) {
             if ($image_effect['x'] === 'w') {

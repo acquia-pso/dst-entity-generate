@@ -100,10 +100,10 @@ class DstegVocabulary extends DrushCommands {
    * @usage drush dst:generate:vocabs
    */
   public function generateVocabularies() {
-    $this->say($this->t('Generating Drupal Vocabularies.'));
     $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
-    if ($sync_entities && array_key_exists('bundles', $sync_entities) && $sync_entities['bundles']['Vocabularies'] === 'Vocabularies') {
+    if ($sync_entities && array_key_exists('bundles', $sync_entities) && ($sync_entities['bundles']['Vocabularies'] === 'Vocabularies' || $sync_entities['bundles']['All'] === 'All')) {
       try {
+        $this->say($this->t('Generating Drupal Vocabularies.'));
         $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
         foreach ($bundles as $bundle) {
           if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
@@ -152,6 +152,9 @@ class DstegVocabulary extends DrushCommands {
         }
         return CommandResult::exitCode(self::EXIT_FAILURE);
       }
+    }
+    else {
+      $this->yell('Vocabulary sync is disabled, Skipping.');
     }
   }
 

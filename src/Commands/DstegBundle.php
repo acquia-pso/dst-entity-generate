@@ -9,8 +9,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\Helper;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\dst_entity_generate\Services\Helper;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -60,7 +63,7 @@ class DstegBundle extends DrushCommands {
   /**
    * Helper class for entity generation.
    *
-   * @var \Drupal\dst_entity_generate\Services\Helper
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
    */
   protected $helper;
 
@@ -85,14 +88,14 @@ class DstegBundle extends DrushCommands {
                               ConfigFactoryInterface $configFactory,
                               ModuleHandlerInterface $moduleHandler,
                               EntityDisplayRepositoryInterface $displayRepository,
-                              Helper $dstegHelper) {
+                              GeneralApi $generalApi) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
       ->get('sync_entities');
     $this->moduleHandler = $moduleHandler;
     $this->displayRepository = $displayRepository;
-    $this->helper = $dstegHelper;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -144,7 +147,7 @@ class DstegBundle extends DrushCommands {
           }
 
           // Generate fields now.
-          $command_result = $this->helper->generateFields();
+          $command_result = $this->generateFields();
         }
         catch (\Exception $exception) {
           $this->yell($this->t('Error creating content type : @exception', [
@@ -159,6 +162,133 @@ class DstegBundle extends DrushCommands {
     }
 
     return CommandResult::exitCode($command_result);
+  }
+
+  /**
+   * Helper function to generate fields.
+   */
+  public function generateFields() {
+    $command_result = TRUE;
+
+    $create_fields = $this->syncEntities['fields'];
+    if ($create_fields['All'] === 'All') {
+      $this->logger->notice($this->t('Generating Drupal Fields.'));
+      // Call all the methods to generate the Drupal entities.
+      $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
+
+      $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
+      foreach ($bundles_data as $bundle) {
+        if ($bundle['type'] === 'Content type') {
+          $bundleArr[$bundle['name']] = $bundle['machine_name'];
+        }
+      }
+
+      if (!empty($fields_data)) {
+        foreach ($fields_data as $fields) {
+          $bundleVal = '';
+          $bundle = $fields['bundle'];
+          $bundle_name = substr($bundle, 0, -15);
+          if (array_key_exists($bundle_name, $bundleArr)) {
+            $bundleVal = $bundleArr[$bundle_name];
+          }
+
+          // Skip fields which are not part of content type.
+          if (!str_contains($fields['bundle'], 'Content type')) {
+            continue;
+          }
+
+          if (isset($bundleVal)) {
+            if ($fields['x'] === 'w') {
+              try {
+                // Deleting field.
+                $drupal_field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
+
+                // Skip if field is present.
+                if (!empty($drupal_field)) {
+                  $this->logger->notice($this->t(
+                    'The field @field is present in @ctype skipping.',
+                    [
+                      '@field' => $fields['machine_name'],
+                      '@ctype' => $bundleVal,
+                    ]
+                  ));
+                  continue;
+                }
+
+                // Check if field storage is present.
+                $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
+                if (empty($field_storage)) {
+                  // Create field storage.
+                  switch ($fields['field_type']) {
+                    case 'Text (plain)':
+                      $fields['drupal_field_type'] = 'string';
+                      $this->helper->createFieldStorage($fields, 'node');
+                      break;
+
+                    case 'Text (formatted, long)':
+                      $fields['drupal_field_type'] = 'text_long';
+                      $this->helper->createFieldStorage($fields, 'node');
+                      break;
+
+                    case 'Date':
+                      $fields['drupal_field_type'] = 'datetime';
+                      $this->helper->createFieldStorage($fields, 'node');
+                      break;
+
+                    case 'Date range':
+                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                        $fields['drupal_field_type'] = 'daterange';
+                        $this->helper->createFieldStorage($fields, 'node');
+                      }
+                      else {
+                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
+                        continue 2;
+                      }
+                      break;
+
+                    case 'Link':
+                      if ($this->moduleHandler->moduleExists('link')) {
+                        $fields['drupal_field_type'] = 'link';
+                        $this->helper->createFieldStorage($fields, 'node');
+                      }
+                      else {
+                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
+                          ['@field' => $fields['machine_name']]
+                        ));
+                        continue 2;
+                      }
+                      break;
+
+                    default:
+                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
+                        ['@ftype' => $fields['field_type']]));
+                      continue 2;
+                  }
+
+                  $this->logger->notice($this->t('Field storage created for @field',
+                    ['@field' => $fields['machine_name']]
+                  ));
+                }
+
+                $this->helper->addField($bundleVal, $fields);
+              }
+              catch (\Exception $exception) {
+                $this->logger->error($this->t('Error creating fields : @exception', [
+                  '@exception' => $exception,
+                ]));
+                $command_result = FALSE;
+              }
+            }
+          }
+        }
+      }
+    }
+    else {
+      $this->logger->notice('Fields sync is disabled, Skipping.');
+    }
+    return $command_result;
   }
 
 }

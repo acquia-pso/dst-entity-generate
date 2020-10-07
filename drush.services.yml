@@ -21,7 +21,7 @@ services:
       - '@config.factory'
       - '@module_handler'
       - '@entity_display.repository'
-      - '@dst_entity_generate.helper'
+      - '@dst_entity_generate.general_api'
   dst.commands.user_roles:
     class: Drupal\dst_entity_generate\Commands\DstegUserRoles
     arguments:

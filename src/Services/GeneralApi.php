@@ -2,11 +2,14 @@
 
 namespace Drupal\dst_entity_generate\Services;
 
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Class GoogleSheetApi to connect with Google Sheets.
@@ -41,6 +44,13 @@ class GeneralApi {
    */
   protected $entityTypeManager;
 
+  /**
+   * Entity display mode repository.
+   *
+   * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
+   */
+  protected $displayRepository;
+
   use StringTranslationTrait;
 
   /**
@@ -49,13 +59,15 @@ class GeneralApi {
   public function __construct(LoggerChannelFactoryInterface $logger_factory,
                               KeyValueFactoryInterface $key_value,
                               ConfigFactoryInterface $configFactory,
-                              EntityTypeManagerInterface $entityTypeManager) {
+                              EntityTypeManagerInterface $entityTypeManager,
+                              EntityDisplayRepositoryInterface $displayRepository) {
 
     $this->logger = $logger_factory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $this->entityGenerateStorage = $key_value->get('dst_entity_generate_storage');
     $this->debugMode = $this->entityGenerateStorage->get('debug_mode');
     $this->entityTypeManager = $entityTypeManager;
+    $this->displayRepository = $displayRepository;
   }
 
   /**
@@ -107,6 +119,72 @@ class GeneralApi {
       $results = $this->entityTypeManager->getStorage($entity_type);
     }
     return $results;
+  }
+
+  /**
+   * Create field storage helper function.
+   *
+   * @param array $field
+   *   Field details.
+   * @param string $entity_type
+   *   Entity type.
+   */
+  public function createFieldStorage(array $field, string $entity_type): void {
+    $cardinality = $field['vals.'];
+    if ($cardinality === '*') {
+      $cardinality = -1;
+    }
+    elseif ($cardinality === '-') {
+      $cardinality = 1;
+    }
+    FieldStorageConfig::create([
+      'field_name' => $field['machine_name'],
+      'entity_type' => $entity_type,
+      'type' => $field['drupal_field_type'],
+      'cardinality' => $cardinality,
+    ])->save();
+  }
+
+  /**
+   * Helper function to add field to content type.
+   *
+   * @param string $bundle_machine_name
+   *   Content type machine name.
+   * @param array $field_data
+   *   Field data.
+   */
+  public function addField(string $bundle_machine_name, array $field_data): void {
+    $node_types_storage = $this->entityTypeManager->getStorage('node_type');
+    $ct = $node_types_storage->load($bundle_machine_name);
+    if ($ct != NULL) {
+
+      $required = $field_data['req'] === 'y' ? TRUE : FALSE;
+      // Create field instance.
+      FieldConfig::create([
+        'field_name' => $field_data['machine_name'],
+        'entity_type' => 'node',
+        'bundle' => $bundle_machine_name,
+        'label' => $field_data['field_label'],
+        'required' => $required,
+      ])->save();
+
+      // Set form display for new field.
+      $this->displayRepository->getFormDisplay('node', $bundle_machine_name)
+        ->setComponent($field_data['machine_name'],
+          ['region' => 'content']
+        )
+        ->save();
+
+      $this->logger->notice($this->t('@field field is created in content type @ctype',
+        [
+          '@field' => $field_data['machine_name'],
+          '@ctype' => $bundle_machine_name,
+        ]
+      ));
+    }
+    else {
+      $this->logger->notice($this->t('The @type content type does not exists.', ['@type' => $bundle_machine_name]));
+    }
   }
 
 }

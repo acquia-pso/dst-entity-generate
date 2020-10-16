@@ -1,7 +1,15 @@
 services:
   dst.commands:
     class: \Drupal\dst_entity_generate\Commands\DstCommands
-    arguments: ['@string_translation']
+    arguments:
+    - '@string_translation'
+    - '@dst.commands.bundle'
+    - '@dst.commands.menus'
+    - '@dst.commands.user_roles'
+    - '@dst.commands.image_effect'
+    - '@dst.commands.workflow'
+    - '@dst.commands.image_style'
+    - '@dst.commands.vocabulary'
     tags:
       - { name: drush.command }
   dst.commands.menus:

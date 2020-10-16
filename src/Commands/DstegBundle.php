@@ -201,7 +201,7 @@ class DstegBundle extends DrushCommands {
               try {
                 $entity_type_id = 'node_type';
                 $entity_type = 'node';
-                $drupal_field = FieldConfig::loadByName($entity_type_id, $bundleVal, $fields['machine_name']);
+                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
 
                 // Skip if field is present.
                 if (!empty($drupal_field)) {
@@ -216,7 +216,7 @@ class DstegBundle extends DrushCommands {
                 }
 
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName($entity_type_id, $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {

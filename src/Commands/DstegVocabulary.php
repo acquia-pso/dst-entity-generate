@@ -200,7 +200,7 @@ class DstegVocabulary extends DrushCommands {
               try {
                 $entity_type_id = 'taxonomy_vocabulary';
                 $entity_type = 'taxonomy_term';
-                $field = FieldConfig::loadByName($entity_type_id, $bundleVal, $fields['machine_name']);
+                $field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
 
                 // Skip field if present.
                 if (!empty($field)) {
@@ -214,7 +214,7 @@ class DstegVocabulary extends DrushCommands {
                   continue;
                 }
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName($entity_type_id, $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {

@@ -161,38 +161,46 @@ class GeneralApi {
    *   Content type machine name.
    * @param array $field_data
    *   Field data.
+   * @param string $entity_type_id
+   *   Entity type id.
+   * @param string $entity_type
+   *   Entity type.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function addField(string $bundle_machine_name, array $field_data): void {
-    $node_types_storage = $this->entityTypeManager->getStorage('node_type');
-    $ct = $node_types_storage->load($bundle_machine_name);
-    if ($ct != NULL) {
+  public function addField(string $bundle_machine_name, array $field_data, string $entity_type_id, string $entity_type): void {
+    $entity_types_storage = $this->entityTypeManager->getStorage($entity_type_id);
+    $bundle = $entity_types_storage->load($bundle_machine_name);
+    if ($bundle != NULL) {
 
-      $required = $field_data['req'] === 'y' ? TRUE : FALSE;
+      $required = $field_data['req'] === 'y';
       // Create field instance.
       FieldConfig::create([
         'field_name' => $field_data['machine_name'],
-        'entity_type' => 'node',
+        'entity_type' => $entity_type,
         'bundle' => $bundle_machine_name,
         'label' => $field_data['field_label'],
         'required' => $required,
       ])->save();
 
       // Set form display for new field.
-      $this->displayRepository->getFormDisplay('node', $bundle_machine_name)
+      $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
         ->setComponent($field_data['machine_name'],
           ['region' => 'content']
         )
         ->save();
 
-      $this->logger->notice($this->t('@field field is created in content type @ctype',
+      $this->logger->notice($this->t('@field field is created in bundle "@bundle"',
         [
           '@field' => $field_data['machine_name'],
-          '@ctype' => $bundle_machine_name,
+          '@bundle' => $bundle->label(),
         ]
       ));
     }
     else {
-      $this->logger->notice($this->t('The @type content type does not exists.', ['@type' => $bundle_machine_name]));
+      $this->logger->notice($this->t('The @bundle bundle does not exists.', ['@bundle' => $bundle_machine_name]));
     }
   }
 

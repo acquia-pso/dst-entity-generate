@@ -5,10 +5,10 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -60,11 +60,11 @@ class DstegVocabulary extends DrushCommands {
   protected $configFactory;
 
   /**
-   * Drupal\Core\Extension\ModuleHandlerInterface definition.
+   * Helper class for entity generation.
    *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
    */
-  protected $moduleHandler;
+  protected $helper;
 
   /**
    * DstegBundle constructor.
@@ -79,17 +79,17 @@ class DstegVocabulary extends DrushCommands {
    *   The Key Value Factory definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module handler service.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, GeneralApi $generalApi) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
     $this->configFactory = $config_factory;
-    $this->moduleHandler = $moduleHandler;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -165,9 +165,8 @@ class DstegVocabulary extends DrushCommands {
     $command_result = self::EXIT_SUCCESS;
     $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $create_fields = $sync_entities['fields'];
-    $this->say($this->t('Generating Drupal Fields.'));
     if ($create_fields['All'] === 'All') {
-      $this->say($this->t('Generating Drupal Fields.'));
+      $this->logger->notice($this->t('Generating Drupal Fields.'));
       // Call all the methods to generate the Drupal entities.
       $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
       $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
@@ -187,12 +186,13 @@ class DstegVocabulary extends DrushCommands {
           if (isset($bundleVal)) {
             if ($fields['x'] === 'w') {
               try {
-                // Deleting field.
-                $field = FieldConfig::loadByName('taxonomy_vocabulary', $bundleVal, $fields['machine_name']);
+                $entity_type_id = 'taxonomy_vocabulary';
+                $entity_type = 'taxonomy_term';
+                $field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
 
                 // Skip field if present.
                 if (!empty($field)) {
-                  $this->say($this->t(
+                  $this->logger->notice($this->t(
                     'The field @field is present in @vocab skipping.',
                     [
                       '@field' => $fields['machine_name'],
@@ -202,28 +202,32 @@ class DstegVocabulary extends DrushCommands {
                   continue;
                 }
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName('taxonomy_vocabulary', $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'string');
+                      $fields['drupal_field_type'] = 'string';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Text (formatted, long)':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'text');
+                      $fields['drupal_field_type'] = 'text_long';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'datetime');
+                      $fields['drupal_field_type'] = 'datetime';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date range':
-                      if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'daterange');
+                      if ($this->helper->isModuleEnabled('datetime_range')) {
+                        $fields['drupal_field_type'] = 'daterange';
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->yell($this->t('The Date range module is not installed. Skipping @field field generation.',
+                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
                         ));
                         continue 2;
@@ -231,11 +235,12 @@ class DstegVocabulary extends DrushCommands {
                       break;
 
                     case 'Link':
-                      if ($this->moduleHandler->moduleExists('link')) {
-                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'link');
+                      if ($this->helper->isModuleEnabled('link')) {
+                        $fields['drupal_field_type'] = 'link';
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->yell($this->t('The Link module is not installed. Skipping @field field generation.',
+                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
                         ));
                         continue 2;
@@ -243,36 +248,17 @@ class DstegVocabulary extends DrushCommands {
                       break;
 
                     default:
-                      $this->yell($this->t('Support for generating field of type @ftype is currently not supported.',
+                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
                         ['@ftype' => $fields['field_type']]));
                       continue 2;
                   }
 
-                  $this->say($this->t('Field storage created for @field',
+                  $this->logger->notice($this->t('Field storage created for @field',
                     ['@field' => $fields['machine_name']]
                   ));
                 }
 
-                $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
-                $vocab = $vocab_storage->load($bundleVal);
-                if ($vocab != NULL) {
-                  // Create field instance.
-                  FieldConfig::create([
-                    'field_name' => $fields['machine_name'],
-                    'entity_type' => 'taxonomy_term',
-                    'bundle' => $bundleVal,
-                    'label' => $fields['field_label'],
-                  ])->save();
-                  $this->say($this->t('@field field is created in vocabulary @vocab.',
-                    [
-                      '@field' => $fields['machine_name'],
-                      '@vocab' => $bundleVal,
-                    ]
-                  ));
-                }
-                else {
-                  $this->say($this->t('The @vocab vocabulary does not exists.', ['@vocab' => $bundleVal]));
-                }
+                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->yell($this->t('Error creating fields : @exception', [
@@ -289,24 +275,6 @@ class DstegVocabulary extends DrushCommands {
       $this->yell('Fields sync is disabled, Skipping.');
     }
     return CommandResult::exitCode($command_result);
-  }
-
-  /**
-   * Create field storage helper function.
-   *
-   * @param string $field_machine_name
-   *   Field machine name.
-   * @param string $entity_type
-   *   Entity type.
-   * @param string $field_type
-   *   Field type.
-   */
-  protected function createFieldStorage(string $field_machine_name, string $entity_type, string $field_type): void {
-    FieldStorageConfig::create([
-      'field_name' => $field_machine_name,
-      'entity_type' => $entity_type,
-      'type' => $field_type,
-    ])->save();
   }
 
 }

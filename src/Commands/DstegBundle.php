@@ -6,7 +6,6 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
@@ -46,13 +45,6 @@ class DstegBundle extends DrushCommands {
   protected $syncEntities;
 
   /**
-   * Drupal\Core\Extension\ModuleHandlerInterface definition.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * Entity display mode repository.
    *
    * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
@@ -75,8 +67,6 @@ class DstegBundle extends DrushCommands {
    *   Entity Type manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   Config factory service.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module handler service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
@@ -85,14 +75,12 @@ class DstegBundle extends DrushCommands {
   public function __construct(GoogleSheetApi $sheet,
                               EntityTypeManagerInterface $entityTypeManager,
                               ConfigFactoryInterface $configFactory,
-                              ModuleHandlerInterface $moduleHandler,
                               EntityDisplayRepositoryInterface $displayRepository,
                               GeneralApi $generalApi) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
       ->get('sync_entities');
-    $this->moduleHandler = $moduleHandler;
     $this->displayRepository = $displayRepository;
     $this->helper = $generalApi;
   }
@@ -199,8 +187,9 @@ class DstegBundle extends DrushCommands {
           if (isset($bundleVal)) {
             if ($fields['x'] === 'w') {
               try {
-                // Deleting field.
-                $drupal_field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
+                $entity_type_id = 'node_type';
+                $entity_type = 'node';
+                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
 
                 // Skip if field is present.
                 if (!empty($drupal_field)) {
@@ -215,29 +204,29 @@ class DstegBundle extends DrushCommands {
                 }
 
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
                       $fields['drupal_field_type'] = 'string';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Text (formatted, long)':
                       $fields['drupal_field_type'] = 'text_long';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date':
                       $fields['drupal_field_type'] = 'datetime';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date range':
-                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                      if ($this->helper->isModuleEnabled('datetime_range')) {
                         $fields['drupal_field_type'] = 'daterange';
-                        $this->helper->createFieldStorage($fields, 'node');
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
                         $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
@@ -248,9 +237,9 @@ class DstegBundle extends DrushCommands {
                       break;
 
                     case 'Link':
-                      if ($this->moduleHandler->moduleExists('link')) {
+                      if ($this->helper->isModuleEnabled('link')) {
                         $fields['drupal_field_type'] = 'link';
-                        $this->helper->createFieldStorage($fields, 'node');
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
                         $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
@@ -271,7 +260,7 @@ class DstegBundle extends DrushCommands {
                   ));
                 }
 
-                $this->helper->addField($bundleVal, $fields);
+                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->logger->error($this->t('Error creating fields : @exception', [

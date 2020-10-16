@@ -199,8 +199,9 @@ class DstegBundle extends DrushCommands {
           if (isset($bundleVal)) {
             if ($fields['x'] === 'w') {
               try {
-                // Deleting field.
-                $drupal_field = FieldConfig::loadByName('node', $bundleVal, $fields['machine_name']);
+                $entity_type_id = 'node_type';
+                $entity_type = 'node';
+                $drupal_field = FieldConfig::loadByName($entity_type_id, $bundleVal, $fields['machine_name']);
 
                 // Skip if field is present.
                 if (!empty($drupal_field)) {
@@ -215,29 +216,29 @@ class DstegBundle extends DrushCommands {
                 }
 
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName('node', $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type_id, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
                       $fields['drupal_field_type'] = 'string';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Text (formatted, long)':
                       $fields['drupal_field_type'] = 'text_long';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date':
                       $fields['drupal_field_type'] = 'datetime';
-                      $this->helper->createFieldStorage($fields, 'node');
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date range':
                       if ($this->moduleHandler->moduleExists('datetime_range')) {
                         $fields['drupal_field_type'] = 'daterange';
-                        $this->helper->createFieldStorage($fields, 'node');
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
                         $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
@@ -250,7 +251,7 @@ class DstegBundle extends DrushCommands {
                     case 'Link':
                       if ($this->moduleHandler->moduleExists('link')) {
                         $fields['drupal_field_type'] = 'link';
-                        $this->helper->createFieldStorage($fields, 'node');
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
                         $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
@@ -271,7 +272,7 @@ class DstegBundle extends DrushCommands {
                   ));
                 }
 
-                $this->helper->addField($bundleVal, $fields);
+                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->logger->error($this->t('Error creating fields : @exception', [

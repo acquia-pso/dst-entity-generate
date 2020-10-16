@@ -64,3 +64,4 @@ services:
       - '@keyvalue'
       - '@config.factory'
       - '@module_handler'
+      - '@dst_entity_generate.general_api'

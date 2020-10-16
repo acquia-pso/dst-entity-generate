@@ -9,6 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -67,6 +68,13 @@ class DstegVocabulary extends DrushCommands {
   protected $moduleHandler;
 
   /**
+   * Helper class for entity generation.
+   *
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
+   */
+  protected $helper;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -81,8 +89,10 @@ class DstegVocabulary extends DrushCommands {
    *   The config factory.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $moduleHandler, GeneralApi $generalApi) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
@@ -90,6 +100,7 @@ class DstegVocabulary extends DrushCommands {
     $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
     $this->configFactory = $config_factory;
     $this->moduleHandler = $moduleHandler;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -187,8 +198,9 @@ class DstegVocabulary extends DrushCommands {
           if (isset($bundleVal)) {
             if ($fields['x'] === 'w') {
               try {
-                // Deleting field.
-                $field = FieldConfig::loadByName('taxonomy_vocabulary', $bundleVal, $fields['machine_name']);
+                $entity_type_id = 'taxonomy_vocabulary';
+                $entity_type = 'taxonomy_term';
+                $field = FieldConfig::loadByName($entity_type_id, $bundleVal, $fields['machine_name']);
 
                 // Skip field if present.
                 if (!empty($field)) {
@@ -202,28 +214,32 @@ class DstegVocabulary extends DrushCommands {
                   continue;
                 }
                 // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName('taxonomy_vocabulary', $fields['machine_name']);
+                $field_storage = FieldStorageConfig::loadByName($entity_type_id, $fields['machine_name']);
                 if (empty($field_storage)) {
                   // Create field storage.
                   switch ($fields['field_type']) {
                     case 'Text (plain)':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'string');
+                      $fields['drupal_field_type'] = 'string';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Text (formatted, long)':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'text');
+                      $fields['drupal_field_type'] = 'text_long';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date':
-                      $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'datetime');
+                      $fields['drupal_field_type'] = 'datetime';
+                      $this->helper->createFieldStorage($fields, $entity_type);
                       break;
 
                     case 'Date range':
                       if ($this->moduleHandler->moduleExists('datetime_range')) {
-                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'daterange');
+                        $fields['drupal_field_type'] = 'daterange';
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->yell($this->t('The Date range module is not installed. Skipping @field field generation.',
+                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
                         ));
                         continue 2;
@@ -232,10 +248,11 @@ class DstegVocabulary extends DrushCommands {
 
                     case 'Link':
                       if ($this->moduleHandler->moduleExists('link')) {
-                        $this->createFieldStorage($fields['machine_name'], 'taxonomy_term', 'link');
+                        $fields['drupal_field_type'] = 'link';
+                        $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->yell($this->t('The Link module is not installed. Skipping @field field generation.',
+                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
                         ));
                         continue 2;
@@ -243,7 +260,7 @@ class DstegVocabulary extends DrushCommands {
                       break;
 
                     default:
-                      $this->yell($this->t('Support for generating field of type @ftype is currently not supported.',
+                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
                         ['@ftype' => $fields['field_type']]));
                       continue 2;
                   }
@@ -253,26 +270,7 @@ class DstegVocabulary extends DrushCommands {
                   ));
                 }
 
-                $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
-                $vocab = $vocab_storage->load($bundleVal);
-                if ($vocab != NULL) {
-                  // Create field instance.
-                  FieldConfig::create([
-                    'field_name' => $fields['machine_name'],
-                    'entity_type' => 'taxonomy_term',
-                    'bundle' => $bundleVal,
-                    'label' => $fields['field_label'],
-                  ])->save();
-                  $this->say($this->t('@field field is created in vocabulary @vocab.',
-                    [
-                      '@field' => $fields['machine_name'],
-                      '@vocab' => $bundleVal,
-                    ]
-                  ));
-                }
-                else {
-                  $this->say($this->t('The @vocab vocabulary does not exists.', ['@vocab' => $bundleVal]));
-                }
+                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->yell($this->t('Error creating fields : @exception', [
@@ -290,23 +288,4 @@ class DstegVocabulary extends DrushCommands {
     }
     return CommandResult::exitCode($command_result);
   }
-
-  /**
-   * Create field storage helper function.
-   *
-   * @param string $field_machine_name
-   *   Field machine name.
-   * @param string $entity_type
-   *   Entity type.
-   * @param string $field_type
-   *   Field type.
-   */
-  protected function createFieldStorage(string $field_machine_name, string $entity_type, string $field_type): void {
-    FieldStorageConfig::create([
-      'field_name' => $field_machine_name,
-      'entity_type' => $entity_type,
-      'type' => $field_type,
-    ])->save();
-  }
-
 }

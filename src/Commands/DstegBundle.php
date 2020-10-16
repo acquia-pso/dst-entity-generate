@@ -46,13 +46,6 @@ class DstegBundle extends DrushCommands {
   protected $syncEntities;
 
   /**
-   * Drupal\Core\Extension\ModuleHandlerInterface definition.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * Entity display mode repository.
    *
    * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
@@ -75,8 +68,6 @@ class DstegBundle extends DrushCommands {
    *   Entity Type manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   Config factory service.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module handler service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
@@ -85,14 +76,12 @@ class DstegBundle extends DrushCommands {
   public function __construct(GoogleSheetApi $sheet,
                               EntityTypeManagerInterface $entityTypeManager,
                               ConfigFactoryInterface $configFactory,
-                              ModuleHandlerInterface $moduleHandler,
                               EntityDisplayRepositoryInterface $displayRepository,
                               GeneralApi $generalApi) {
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
       ->get('sync_entities');
-    $this->moduleHandler = $moduleHandler;
     $this->displayRepository = $displayRepository;
     $this->helper = $generalApi;
   }
@@ -236,7 +225,7 @@ class DstegBundle extends DrushCommands {
                       break;
 
                     case 'Date range':
-                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                      if ($this->helper->isModuleEnabled('datetime_range')) {
                         $fields['drupal_field_type'] = 'daterange';
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }
@@ -249,7 +238,7 @@ class DstegBundle extends DrushCommands {
                       break;
 
                     case 'Link':
-                      if ($this->moduleHandler->moduleExists('link')) {
+                      if ($this->helper->isModuleEnabled('link')) {
                         $fields['drupal_field_type'] = 'link';
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }

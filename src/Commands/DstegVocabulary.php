@@ -61,13 +61,6 @@ class DstegVocabulary extends DrushCommands {
   protected $configFactory;
 
   /**
-   * Drupal\Core\Extension\ModuleHandlerInterface definition.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * Helper class for entity generation.
    *
    * @var \Drupal\dst_entity_generate\Services\GeneralApi
@@ -87,19 +80,16 @@ class DstegVocabulary extends DrushCommands {
    *   The Key Value Factory definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module handler service.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $moduleHandler, GeneralApi $generalApi) {
+  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, GeneralApi $generalApi) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
     $this->configFactory = $config_factory;
-    $this->moduleHandler = $moduleHandler;
     $this->helper = $generalApi;
   }
 
@@ -176,9 +166,8 @@ class DstegVocabulary extends DrushCommands {
     $command_result = self::EXIT_SUCCESS;
     $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $create_fields = $sync_entities['fields'];
-    $this->say($this->t('Generating Drupal Fields.'));
     if ($create_fields['All'] === 'All') {
-      $this->say($this->t('Generating Drupal Fields.'));
+      $this->logger->notice($this->t('Generating Drupal Fields.'));
       // Call all the methods to generate the Drupal entities.
       $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
       $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
@@ -204,7 +193,7 @@ class DstegVocabulary extends DrushCommands {
 
                 // Skip field if present.
                 if (!empty($field)) {
-                  $this->say($this->t(
+                  $this->logger->notice($this->t(
                     'The field @field is present in @vocab skipping.',
                     [
                       '@field' => $fields['machine_name'],
@@ -234,7 +223,7 @@ class DstegVocabulary extends DrushCommands {
                       break;
 
                     case 'Date range':
-                      if ($this->moduleHandler->moduleExists('datetime_range')) {
+                      if ($this->helper->isModuleEnabled('datetime_range')) {
                         $fields['drupal_field_type'] = 'daterange';
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }
@@ -247,7 +236,7 @@ class DstegVocabulary extends DrushCommands {
                       break;
 
                     case 'Link':
-                      if ($this->moduleHandler->moduleExists('link')) {
+                      if ($this->helper->isModuleEnabled('link')) {
                         $fields['drupal_field_type'] = 'link';
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }
@@ -265,7 +254,7 @@ class DstegVocabulary extends DrushCommands {
                       continue 2;
                   }
 
-                  $this->say($this->t('Field storage created for @field',
+                  $this->logger->notice($this->t('Field storage created for @field',
                     ['@field' => $fields['machine_name']]
                   ));
                 }

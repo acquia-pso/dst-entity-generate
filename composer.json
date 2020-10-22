@@ -13,6 +13,7 @@
   ],
   "require": {
     "cweagans/composer-patches": "^1.6",
+    "drush/drush": "^10.3",
     "google/apiclient": "^2.0"
   },
   "require-dev": {
@@ -30,5 +31,6 @@
     },
     "enable-patching": true
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

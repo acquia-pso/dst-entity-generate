@@ -182,63 +182,12 @@ class Vocabulary extends BaseEntityGenerate {
                   ));
                   continue;
                 }
-                // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
-                if (empty($field_storage)) {
-                  // Create field storage.
-                  switch ($fields['field_type']) {
-                    case 'Text (plain)':
-                      $fields['drupal_field_type'] = 'string';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Text (formatted, long)':
-                      $fields['drupal_field_type'] = 'text_long';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Date':
-                      $fields['drupal_field_type'] = 'datetime';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Date range':
-                      if ($this->helper->isModuleEnabled('datetime_range')) {
-                        $fields['drupal_field_type'] = 'daterange';
-                        $this->helper->createFieldStorage($fields, $entity_type);
-                      }
-                      else {
-                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    case 'Link':
-                      if ($this->helper->isModuleEnabled('link')) {
-                        $fields['drupal_field_type'] = 'link';
-                        $this->helper->createFieldStorage($fields, $entity_type);
-                      }
-                      else {
-                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    default:
-                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
-                        ['@ftype' => $fields['field_type']]));
-                      continue 2;
-                  }
-
-                  $this->logger->notice($this->t('Field storage created for @field',
-                    ['@field' => $fields['machine_name']]
-                  ));
+                // Create field storage.
+                $result = $this->helper->fieldStorageHandler($fields, $entity_type);
+                switch ($result) {
+                  case 2:
+                    continue 2;
                 }
-
                 $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {

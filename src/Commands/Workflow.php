@@ -4,17 +4,17 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
-use Drush\Commands\DrushCommands;
 
 /**
  * Class provides functionality of workflows, states generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Workflow extends DrushCommands {
+class Workflow extends BaseEntityGenerate {
   use StringTranslationTrait;
 
   /**

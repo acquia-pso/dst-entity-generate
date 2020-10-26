@@ -5,14 +5,15 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drush\Commands\DrushCommands;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 
 /**
  * Class provides functionality of supported entity generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class GenerateAll extends DrushCommands {
+class GenerateAll extends BaseEntityGenerate {
+
   use StringTranslationTrait;
 
   /**

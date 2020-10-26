@@ -4,17 +4,17 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drush\Commands\DrushCommands;
 
 /**
  * Class provides functionality of Menus generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Menu extends DrushCommands {
+class Menu extends BaseEntityGenerate {
   use StringTranslationTrait;
   /**
    * Google Sheet Api service definition.
@@ -41,7 +41,6 @@ class Menu extends DrushCommands {
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
                               GeneralApi $generalApi) {
-    parent::__construct();
     $this->googleSheetApi = $googleSheetApi;
     $this->generalApi = $generalApi;
   }

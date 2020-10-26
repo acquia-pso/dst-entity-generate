@@ -7,19 +7,19 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drush\Commands\DrushCommands;
 
 /**
  * Drush command to generate content types.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegBundle extends DrushCommands {
+class DstegBundle extends BaseEntityGenerate {
 
   use StringTranslationTrait;
 

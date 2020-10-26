@@ -4,18 +4,18 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\image\ImageEffectManager;
-use Drush\Commands\DrushCommands;
 
 /**
  * Class to provide functionality to generate Image effects.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegImageEffect extends DrushCommands {
+class DstegImageEffect extends BaseEntityGenerate {
 
   use StringTranslationTrait;
 

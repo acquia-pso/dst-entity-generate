@@ -8,11 +8,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drush\Commands\DrushCommands;
 use Drupal\dst_entity_generate\DstegConstants;
 
 /**
@@ -20,7 +20,7 @@ use Drupal\dst_entity_generate\DstegConstants;
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegVocabulary extends DrushCommands {
+class DstegVocabulary extends BaseEntityGenerate {
 
   use StringTranslationTrait;
 

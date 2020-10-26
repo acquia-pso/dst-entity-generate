@@ -7,16 +7,16 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
-use Drush\Commands\DrushCommands;
 
 /**
  * Drush command to generate image style.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegImageStyle extends DrushCommands {
+class DstegImageStyle extends BaseEntityGenerate {
   use StringTranslationTrait;
   /**
    * Google Sheet Api service definition.

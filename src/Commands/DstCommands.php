@@ -5,14 +5,14 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drush\Commands\DrushCommands;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 
 /**
  * Drush Commands to generate entities from sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstCommands extends DrushCommands {
+class DstCommands extends BaseEntityGenerate {
   use StringTranslationTrait;
 
   /**

@@ -1,26 +1,26 @@
 services:
-  dst.commands:
-    class: \Drupal\dst_entity_generate\Commands\DstCommands
+  dst_entity_generate.commands:
+    class: \Drupal\dst_entity_generate\Commands\GenerateAll
     arguments:
     - '@string_translation'
-    - '@dst.commands.bundle'
-    - '@dst.commands.menus'
-    - '@dst.commands.user_roles'
-    - '@dst.commands.image_effect'
-    - '@dst.commands.workflow'
-    - '@dst.commands.image_style'
-    - '@dst.commands.vocabulary'
+    - '@dst_entity_generate.commands.bundle'
+    - '@dst_entity_generate.commands.menus'
+    - '@dst_entity_generate.commands.user_roles'
+    - '@dst_entity_generate.commands.image_effect'
+    - '@dst_entity_generate.commands.workflow'
+    - '@dst_entity_generate.commands.image_style'
+    - '@dst_entity_generate.commands.vocabulary'
     tags:
       - { name: drush.command }
-  dst.commands.menus:
-    class: Drupal\dst_entity_generate\Commands\DstegMenus
+  dst_entity_generate.commands.menus:
+    class: Drupal\dst_entity_generate\Commands\Menu
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
-  dst.commands.bundle:
-    class: Drupal\dst_entity_generate\Commands\DstegBundle
+  dst_entity_generate.commands.bundle:
+    class: Drupal\dst_entity_generate\Commands\Bundle
     tags:
       - { name: drush.command }
     arguments:
@@ -29,30 +29,30 @@ services:
       - '@config.factory'
       - '@entity_display.repository'
       - '@dst_entity_generate.general_api'
-  dst.commands.user_roles:
-    class: Drupal\dst_entity_generate\Commands\DstegUserRoles
+  dst_entity_generate.commands.user_roles:
+    class: Drupal\dst_entity_generate\Commands\UserRole
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
-  dst.commands.image_effect:
-    class: Drupal\dst_entity_generate\Commands\DstegImageEffect
+  dst_entity_generate.commands.image_effect:
+    class: Drupal\dst_entity_generate\Commands\ImageEffect
     tags:
       - { name: drush.command }
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
       - '@plugin.manager.image.effect'
-  dst.commands.workflow:
-    class: Drupal\dst_entity_generate\Commands\DstegWorkflows
+  dst_entity_generate.commands.workflow:
+    class: Drupal\dst_entity_generate\Commands\Workflow
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
-  dst.commands.image_style:
-    class: Drupal\dst_entity_generate\Commands\DstegImageStyle
+  dst_entity_generate.commands.image_style:
+    class: Drupal\dst_entity_generate\Commands\ImageStyle
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@logger.factory'
@@ -60,8 +60,8 @@ services:
       - '@config.factory'
     tags:
       - { name: drush.command }
-  dst.commands.vocabulary:
-    class: Drupal\dst_entity_generate\Commands\DstegVocabulary
+  dst_entity_generate.commands.vocabulary:
+    class: Drupal\dst_entity_generate\Commands\Vocabulary
     tags:
       - { name: drush.command }
     arguments:

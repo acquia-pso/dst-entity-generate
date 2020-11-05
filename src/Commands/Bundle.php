@@ -15,11 +15,11 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush command to generate content types.
+ * Class provides functionality of Content types generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegBundle extends DrushCommands {
+class Bundle extends DrushCommands {
 
   use StringTranslationTrait;
 

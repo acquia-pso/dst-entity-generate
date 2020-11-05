@@ -8,59 +8,59 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush Commands to generate entities from sheet.
+ * Class provides functionality of supported entity generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstCommands extends DrushCommands {
+class GenerateAll extends DrushCommands {
   use StringTranslationTrait;
 
   /**
-   * DstegBundle command definition.
+   * Bundle command definition.
    *
-   * @var DstegBundle
+   * @var Bundle
    */
   protected $dstegBundle;
 
   /**
-   * DstegMenus command definition.
+   * Menu command definition.
    *
-   * @var DstegMenus
+   * @var Menu
    */
   protected $dstegMenus;
 
   /**
-   * DstegUserRoles command definition.
+   * UserRole command definition.
    *
-   * @var DstegUserRoles
+   * @var UserRole
    */
   protected $dstegUserRoles;
 
   /**
-   * DstegImageEffect command definition.
+   * ImageEffect command definition.
    *
-   * @var DstegImageEffect
+   * @var ImageEffect
    */
   protected $dstegImageEffect;
 
   /**
-   * DstegWorkflows command definition.
+   * Workflow command definition.
    *
-   * @var DstegWorkflows
+   * @var Workflow
    */
   protected $dstegWorkflows;
 
   /**
-   * DstegImageStyle command definition.
+   * ImageStyle command definition.
    *
-   * @var DstegImageStyle
+   * @var ImageStyle
    */
   protected $dstegImageStyle;
 
   /**
    * DstegVocabulary command definition.
    *
-   * @var DstegVocabulary
+   * @var Vocabulary
    */
   protected $dstegVocabulary;
 
@@ -69,29 +69,29 @@ class DstCommands extends DrushCommands {
    *
    * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
    *   StringTranslation service definition.
-   * @param DstegBundle $dstegBundle
-   *   DstegBundle command definition.
-   * @param DstegMenus $dstegMenus
+   * @param Bundle $dstegBundle
+   *   Bundle command definition.
+   * @param Menu $dstegMenus
    *   DstegMenus command definition.
-   * @param DstegUserRoles $dstegUserRoles
+   * @param UserRole $dstegUserRoles
    *   DstegUserRoles command definition.
-   * @param DstegImageEffect $dstegImageEffect
-   *   DstegImageEffect command definition.
-   * @param DstegWorkflows $dstegWorkflows
+   * @param ImageEffect $dstegImageEffect
+   *   ImageEffect command definition.
+   * @param Workflow $dstegWorkflows
    *   DstegWorkflows command definition.
-   * @param DstegImageStyle $dstegImageStyle
+   * @param ImageStyle $dstegImageStyle
    *   DstegImageStyle command definition.
-   * @param DstegVocabulary $dstegVocabulary
-   *   DstegVocabulary command definition.
+   * @param Vocabulary $dstegVocabulary
+   *   Vocabulary command definition.
    */
   public function __construct(TranslationInterface $stringTranslation,
-                              DstegBundle $dstegBundle,
-                              DstegMenus $dstegMenus,
-                              DstegUserRoles $dstegUserRoles,
-                              DstegImageEffect $dstegImageEffect,
-                              DstegWorkflows $dstegWorkflows,
-                              DstegImageStyle $dstegImageStyle,
-                              DstegVocabulary $dstegVocabulary) {
+                              Bundle $dstegBundle,
+                              Menu $dstegMenus,
+                              UserRole $dstegUserRoles,
+                              ImageEffect $dstegImageEffect,
+                              Workflow $dstegWorkflows,
+                              ImageStyle $dstegImageStyle,
+                              Vocabulary $dstegVocabulary) {
     parent::__construct();
     $this->stringTranslation = $stringTranslation;
     $this->dstegBundle = $dstegBundle;

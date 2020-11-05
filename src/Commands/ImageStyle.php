@@ -12,11 +12,11 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush command to generate image style.
+ * Class provides functionality of Image styles generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegImageStyle extends DrushCommands {
+class ImageStyle extends DrushCommands {
   use StringTranslationTrait;
   /**
    * Google Sheet Api service definition.

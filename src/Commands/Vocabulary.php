@@ -16,11 +16,11 @@ use Drush\Commands\DrushCommands;
 use Drupal\dst_entity_generate\DstegConstants;
 
 /**
- * Class to provide functionality to generate Vocabulary.
+ * Class provides functionality of Vocabularies generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegVocabulary extends DrushCommands {
+class Vocabulary extends DrushCommands {
 
   use StringTranslationTrait;
 

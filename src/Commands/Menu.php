@@ -3,7 +3,6 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;

@@ -15,7 +15,6 @@ use Drupal\dst_entity_generate\Services\GeneralApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class Menu extends BaseEntityGenerate {
-  use StringTranslationTrait;
   /**
    * Google Sheet Api service definition.
    *
@@ -33,16 +32,14 @@ class Menu extends BaseEntityGenerate {
   /**
    * DstCommands constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
-   *   Google Sheet Api service definition.
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   GoogleSheetApi service class object.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   General Api service definition.
    *   LoggerChannelFactory service definition.
    */
-  public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi) {
-    $this->googleSheetApi = $googleSheetApi;
-    $this->generalApi = $generalApi;
+  public function __construct(GoogleSheetApi $sheet, GeneralApi $generalApi) {
+    parent::__construct($sheet, $generalApi);
   }
 
   /**
@@ -54,7 +51,7 @@ class Menu extends BaseEntityGenerate {
    */
   public function generateMenus() {
     $result = FALSE;
-    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::MENUS);
+    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::MENUS);
     $logMessages = [];
     if ($skipEntitySync) {
       $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
@@ -67,9 +64,9 @@ class Menu extends BaseEntityGenerate {
     if ($result === FALSE) {
       try {
         $this->yell($this->t('Generating Menus.'), 100, 'blue');
-        $entity_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
+        $entity_data = $this->sheet->getData(DstegConstants::MENUS);
         if (!empty($entity_data)) {
-          $menus_storage = $this->generalApi->getAllEntities('menu');
+          $menus_storage = $this->helper->getAllEntities('menu');
           foreach ($entity_data as $menu) {
             // Create menus only if it is in Wait and implement state.
             if ($menu['x'] === 'w') {
@@ -118,7 +115,7 @@ class Menu extends BaseEntityGenerate {
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
-    $this->generalApi->logMessage($logMessages);
+    $this->helper->logMessage($logMessages);
     return $result;
   }
 

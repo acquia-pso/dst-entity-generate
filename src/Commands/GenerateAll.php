@@ -3,9 +3,10 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
+use Drupal\dst_entity_generate\Services\GeneralApi;
+use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
  * Class provides functionality of supported entity generation from DST sheet.
@@ -13,8 +14,6 @@ use Drupal\dst_entity_generate\BaseEntityGenerate;
  * @package Drupal\dst_entity_generate\Commands
  */
 class GenerateAll extends BaseEntityGenerate {
-
-  use StringTranslationTrait;
 
   /**
    * Bundle command definition.

@@ -15,7 +15,6 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class Workflow extends BaseEntityGenerate {
-  use StringTranslationTrait;
 
   /**
    * Google Sheet Api service definition.
@@ -62,9 +61,7 @@ class Workflow extends BaseEntityGenerate {
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
                               GeneralApi $generalApi) {
-    parent::__construct();
-    $this->googleSheetApi = $googleSheetApi;
-    $this->generalApi = $generalApi;
+    parent::__construct($googleSheetApi, $generalApi);
   }
 
   /**
@@ -75,13 +72,13 @@ class Workflow extends BaseEntityGenerate {
    * @usage drush dst:generate:workflow
    */
   public function generateWorkflows() {
-    $workflow_enabled = $this->generalApi->isModuleEnabled('workflows');
-    $content_moderation_enabled = $this->generalApi->isModuleEnabled('content_moderation');
+    $workflow_enabled = $this->helper->isModuleEnabled('workflows');
+    $content_moderation_enabled = $this->helper->isModuleEnabled('content_moderation');
 
     try {
-      $is_import_workflow = (!$this->generalApi->skipEntitySync(DstegConstants::WORKFLOWS));
-      $is_import_workflow_states = (!$this->generalApi->skipEntitySync(DstegConstants::WORKFLOW_STATES));
-      $is_import_workflow_transitions = (!$this->generalApi->skipEntitySync(DstegConstants::WORKFLOW_TRANSITIONS));
+      $is_import_workflow = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOWS));
+      $is_import_workflow_states = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOW_STATES));
+      $is_import_workflow_transitions = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOW_TRANSITIONS));
 
       if (!$workflow_enabled) {
         $this->showMessageOnCli($this->t('Please install workflows module.'));
@@ -95,8 +92,8 @@ class Workflow extends BaseEntityGenerate {
       else {
         $default_weight = 0;
         $this->yell($this->t('Generating Workflows.'), 100, 'blue');
-        $workflow_storage = $this->generalApi->getAllEntities('workflow');
-        $google_sheet_api = $this->googleSheetApi;
+        $workflow_storage = $this->helper->getAllEntities('workflow');
+        $google_sheet_api = $this->sheet;
         $workflow_map = [];
 
         // Get workflows from the sheet and prepare a map.
@@ -215,7 +212,7 @@ class Workflow extends BaseEntityGenerate {
     catch (\Exception $exception) {
       $this->say('Exception occurred while import.');
       $this->yell($exception);
-      $this->generalApi->logMessage(['Exception occurred @exception', [
+      $this->helper->logMessage(['Exception occurred @exception', [
         '@exception' => $exception,
       ],
       ]
@@ -232,7 +229,7 @@ class Workflow extends BaseEntityGenerate {
    *   The translated message string.
    */
   private function showMessageOnCli(string $message) {
-    $this->generalApi->logMessage([$message]);
+    $this->helper->logMessage([$message]);
     $this->say($message);
   }
 

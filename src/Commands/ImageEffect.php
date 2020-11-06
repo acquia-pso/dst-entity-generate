@@ -17,22 +17,6 @@ use Drupal\image\ImageEffectManager;
  */
 class ImageEffect extends BaseEntityGenerate {
 
-  use StringTranslationTrait;
-
-  /**
-   * GoogleSheetApi service class object.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $sheet;
-
-  /**
-   * DSTEG General service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
-
   /**
    * The image effect manager.
    *
@@ -54,9 +38,7 @@ class ImageEffect extends BaseEntityGenerate {
   public function __construct(GoogleSheetApi $sheet,
                               GeneralApi $generalApi,
                               ImageEffectManager $effect_manager) {
-    parent::__construct();
-    $this->sheet = $sheet;
-    $this->generalApi = $generalApi;
+    parent::__construct($sheet, $generalApi);
     $this->effectManager = $effect_manager;
   }
 
@@ -69,7 +51,7 @@ class ImageEffect extends BaseEntityGenerate {
    */
   public function generateImageEffects() {
     $result = FALSE;
-    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::IMAGE_EFFECTS);
+    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::IMAGE_EFFECTS);
     $logMessages = [];
     if ($skipEntitySync) {
       $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
@@ -87,7 +69,7 @@ class ImageEffect extends BaseEntityGenerate {
           // Get all existing image effect plugin definitions.
           $image_effect_definitions = $this->effectManager->getDefinitions();
           // Get all existing image styles.
-          $image_styles = $this->generalApi->getAllEntities('image_style', 'all');
+          $image_styles = $this->helper->getAllEntities('image_style', 'all');
           $any_matching_style = FALSE;
           foreach ($entity_data as $image_effect) {
             if ($image_effect['x'] === 'w') {
@@ -171,7 +153,7 @@ class ImageEffect extends BaseEntityGenerate {
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
-    $this->generalApi->logMessage($logMessages);
+    $this->helper->logMessage($logMessages);
     return $result;
   }
 

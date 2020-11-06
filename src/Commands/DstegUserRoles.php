@@ -15,20 +15,6 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class DstegUserRoles extends BaseEntityGenerate {
-  use StringTranslationTrait;
-  /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
-
-  /**
-   * GeneralApi service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
 
   /**
    * DstCommands constructor.
@@ -40,9 +26,7 @@ class DstegUserRoles extends BaseEntityGenerate {
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
                               GeneralApi $generalApi) {
-    parent::__construct();
-    $this->googleSheetApi = $googleSheetApi;
-    $this->generalApi = $generalApi;
+    parent::__construct($googleSheetApi, $generalApi);
   }
 
   /**
@@ -55,7 +39,7 @@ class DstegUserRoles extends BaseEntityGenerate {
   public function generateUserRoles() {
     try {
       $result = FALSE;
-      $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::USER_ROLES);
+      $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::USER_ROLES);
       $logMessages = [];
       if ($skipEntitySync) {
         $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
@@ -66,9 +50,9 @@ class DstegUserRoles extends BaseEntityGenerate {
       }
       elseif (!$result) {
         $this->yell($this->t('Generating user roles.'), 100, 'blue');
-        $user_role_data = $this->googleSheetApi->getData(DstegConstants::USER_ROLES);
+        $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
         if (!empty($user_role_data)) {
-          $user_role_storage = $this->generalApi->getAllEntities('user_role');
+          $user_role_storage = $this->helper->getAllEntities('user_role');
           foreach ($user_role_data as $user_role) {
             // Create role only if it is in Wait and implement state.
             if ($user_role['x'] === 'w') {
@@ -118,7 +102,7 @@ class DstegUserRoles extends BaseEntityGenerate {
       $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
 
-    $this->generalApi->logMessage($logMessages);
+    $this->helper->logMessage($logMessages);
     return $result;
   }
 

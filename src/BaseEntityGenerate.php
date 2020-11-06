@@ -36,7 +36,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
    */
-  public function __construct(GoogleSheetApi $sheet,GeneralApi $generalApi ) {
+  public function __construct(GoogleSheetApi $sheet, GeneralApi $generalApi) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->helper = $generalApi;

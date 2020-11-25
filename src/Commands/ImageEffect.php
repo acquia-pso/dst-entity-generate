@@ -11,11 +11,11 @@ use Drupal\image\ImageEffectManager;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class to provide functionality to generate Image effects.
+ * Class provides functionality of Image effects generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegImageEffect extends DrushCommands {
+class ImageEffect extends DrushCommands {
 
   use StringTranslationTrait;
 

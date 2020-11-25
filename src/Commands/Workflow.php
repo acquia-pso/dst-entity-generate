@@ -10,11 +10,11 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush Commands to generate workflows and its states from sheet.
+ * Class provides functionality of workflows, states generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegWorkflows extends DrushCommands {
+class Workflow extends DrushCommands {
   use StringTranslationTrait;
 
   /**

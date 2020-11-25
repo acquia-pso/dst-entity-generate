@@ -10,11 +10,11 @@ use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drush\Commands\DrushCommands;
 
 /**
- * Drush command to generate menus.
+ * Class provides functionality of Menus generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class DstegMenus extends DrushCommands {
+class Menu extends DrushCommands {
   use StringTranslationTrait;
   /**
    * Google Sheet Api service definition.

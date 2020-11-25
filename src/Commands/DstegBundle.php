@@ -79,7 +79,7 @@ class DstegBundle extends BaseEntityGenerate {
 
     $create_ct = $this->syncEntities['bundles'];
     if ($create_ct['All'] === 'All' || $create_ct['Content types'] === 'Content types') {
-      $this->say($this->t('Generating Drupal Content types.'));
+      $this->showMessage($this->t('Generating Drupal Content types.'), 'info');
 
       // Call all the methods to generate the Drupal entities.
       $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
@@ -110,24 +110,25 @@ class DstegBundle extends BaseEntityGenerate {
                   ->save();
               }
               else {
-                $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
+                $this->showMessage($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
               }
             }
           }
+          $this->showMessage($this->t('Drupal Content types generation completed.'), 'info');
 
           // Generate fields now.
           $command_result = $this->generateFields();
         }
         catch (\Exception $exception) {
-          $this->yell($this->t('Error creating content type : @exception', [
+          $this->showMessage($this->t('Error creating content type : @exception', [
             '@exception' => $exception,
-          ]));
+          ]), 'error');
           $command_result = self::EXIT_FAILURE;
         }
       }
     }
     else {
-      $this->yell('Content type sync is disabled, Skipping.');
+      $this->showMessage('Content type sync is disabled, Skipping.', 'warning');
     }
 
     return CommandResult::exitCode($command_result);
@@ -141,7 +142,7 @@ class DstegBundle extends BaseEntityGenerate {
 
     $create_fields = $this->syncEntities['fields'];
     if ($create_fields['All'] === 'All') {
-      $this->logger->notice($this->t('Generating Drupal Fields.'));
+      $this->showMessage($this->t('Generating Drupal Fields.'), 'info');
       // Call all the methods to generate the Drupal entities.
       $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
 
@@ -175,7 +176,7 @@ class DstegBundle extends BaseEntityGenerate {
 
                 // Skip if field is present.
                 if (!empty($drupal_field)) {
-                  $this->logger->notice($this->t(
+                  $this->showMessage($this->t(
                     'The field @field is present in @ctype skipping.',
                     [
                       '@field' => $fields['machine_name'],
@@ -211,9 +212,9 @@ class DstegBundle extends BaseEntityGenerate {
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
+                        $this->showMessage($this->t('The date range module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
-                        ));
+                        ), 'warning');
                         continue 2;
                       }
                       break;
@@ -224,20 +225,20 @@ class DstegBundle extends BaseEntityGenerate {
                         $this->helper->createFieldStorage($fields, $entity_type);
                       }
                       else {
-                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
+                        $this->showMessage($this->t('The link module is not installed. Skipping @field field generation.',
                           ['@field' => $fields['machine_name']]
-                        ));
+                        ), 'warning');
                         continue 2;
                       }
                       break;
 
                     default:
-                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
-                        ['@ftype' => $fields['field_type']]));
+                      $this->showMessage($this->t('Support for generating field of type @ftype is currently not supported.',
+                        ['@ftype' => $fields['field_type']]), 'warning');
                       continue 2;
                   }
 
-                  $this->logger->notice($this->t('Field storage created for @field',
+                  $this->showMessage($this->t('Field storage created for @field',
                     ['@field' => $fields['machine_name']]
                   ));
                 }
@@ -245,9 +246,9 @@ class DstegBundle extends BaseEntityGenerate {
                 $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
-                $this->logger->error($this->t('Error creating fields : @exception', [
+                $this->showMessage($this->t('Error creating fields : @exception', [
                   '@exception' => $exception,
-                ]));
+                ]), 'error');
                 $command_result = FALSE;
               }
             }
@@ -256,7 +257,7 @@ class DstegBundle extends BaseEntityGenerate {
       }
     }
     else {
-      $this->logger->notice('Fields sync is disabled, Skipping.');
+      $this->showMessage('Fields sync is disabled, Skipping.', 'warning');
     }
     return $command_result;
   }

@@ -84,7 +84,7 @@ class DstegVocabulary extends BaseEntityGenerate {
     $sync_entities = $this->configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     if ($sync_entities && array_key_exists('bundles', $sync_entities) && ($sync_entities['bundles']['Vocabularies'] === 'Vocabularies' || $sync_entities['bundles']['All'] === 'All')) {
       try {
-        $this->say($this->t('Generating Drupal Vocabularies.'));
+        $this->showMessage($this->t('Generating Drupal Vocabularies.'), 'info');
         $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
         foreach ($bundles as $bundle) {
           if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
@@ -101,19 +101,19 @@ class DstegVocabulary extends BaseEntityGenerate {
                 $success_message = $this->t('Vocabulary @vocab is created.', [
                   '@vocab' => $bundle['name'],
                 ]);
-                $this->say($success_message);
-                $this->logger->info($success_message);
+                $this->showMessage($success_message);
               }
             }
             else {
               $present_message = $this->t('Vocabulary @vocab is already present.', [
                 '@vocab' => $bundle['name'],
               ]);
-              $this->say($present_message);
-              $this->logger->info($present_message);
+              $this->showMessage($present_message);
             }
           }
         }
+
+        $this->showMessage($this->t('Drupal Vocabularies are generated.'), 'info');
         // Generate fields now.
         $command_result = $this->generateFields();
         return CommandResult::exitCode($command_result);
@@ -123,19 +123,19 @@ class DstegVocabulary extends BaseEntityGenerate {
           $exception_message = $this->t('Exception occurred @exception.', [
             '@exception' => $exception->getMessage(),
           ]);
-          $this->yell($exception_message);
+          $this->showMessage($exception_message, 'error');
           $this->logger->error($exception_message);
         }
         else {
           $exception_message = $this->t('Error occurred while processing Vocabularies.');
-          $this->yell($exception_message);
+          $this->showMessage($exception_message, 'error');
           $this->logger->error($exception_message);
         }
         return CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
     else {
-      $this->yell('Vocabulary sync is disabled, Skipping.');
+      $this->showMessage('Vocabulary sync is disabled, Skipping.', 'warning');
     }
   }
 

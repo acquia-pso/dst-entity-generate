@@ -10,6 +10,8 @@ services:
     - '@dst.commands.workflow'
     - '@dst.commands.image_style'
     - '@dst.commands.vocabulary'
+    - '@dst_entity_generate.google_sheet_api'
+    - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
   dst.commands.menus:
@@ -58,6 +60,7 @@ services:
       - '@logger.factory'
       - '@entity_type.manager'
       - '@config.factory'
+      - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
   dst.commands.vocabulary:

@@ -6,9 +6,9 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
@@ -17,7 +17,7 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class DstegImageStyle extends BaseEntityGenerate {
-  use StringTranslationTrait;
+
   /**
    * Google Sheet Api service definition.
    *
@@ -49,21 +49,23 @@ class DstegImageStyle extends BaseEntityGenerate {
   /**
    * DstCommands constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
-   *   Google Sheet Api service definition.
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   GoogleSheetApi service class object.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   LoggerChannelFactory service definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The EntityType Manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   Config factory service.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   General Api service definition.
    */
-  public function __construct(GoogleSheetApi $googleSheetApi,
+  public function __construct(GoogleSheetApi $sheet,
                               LoggerChannelFactoryInterface $loggerChannelFactory,
                               EntityTypeManagerInterface $entityTypeManager,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct();
-    $this->googleSheetApi = $googleSheetApi;
+                              ConfigFactoryInterface $configFactory,
+                              GeneralApi $generalApi) {
+    parent::__construct($sheet, $generalApi);
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $this->entityTypeManager = $entityTypeManager;
@@ -81,7 +83,7 @@ class DstegImageStyle extends BaseEntityGenerate {
     if ($imageStyleSync['All'] === 'All') {
       try {
         $this->say($this->t('Generating Drupal Image Style.'));
-        $imageStyle_data = $this->googleSheetApi->getData(DstegConstants::IMAGE_STYLES);
+        $imageStyle_data = $this->sheet->getData(DstegConstants::IMAGE_STYLES);
         if (!empty($imageStyle_data)) {
 
           // Call all the methods to generate the Drupal image style.

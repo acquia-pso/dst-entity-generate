@@ -3,9 +3,10 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
+use Drupal\dst_entity_generate\Services\GeneralApi;
+use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
  * Drush Commands to generate entities from sheet.
@@ -13,7 +14,6 @@ use Drupal\dst_entity_generate\BaseEntityGenerate;
  * @package Drupal\dst_entity_generate\Commands
  */
 class DstCommands extends BaseEntityGenerate {
-  use StringTranslationTrait;
 
   /**
    * DstegBundle command definition.
@@ -83,6 +83,10 @@ class DstCommands extends BaseEntityGenerate {
    *   DstegImageStyle command definition.
    * @param DstegVocabulary $dstegVocabulary
    *   DstegVocabulary command definition.
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   GoogleSheetApi service class object.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
   public function __construct(TranslationInterface $stringTranslation,
                               DstegBundle $dstegBundle,
@@ -91,8 +95,10 @@ class DstCommands extends BaseEntityGenerate {
                               DstegImageEffect $dstegImageEffect,
                               DstegWorkflows $dstegWorkflows,
                               DstegImageStyle $dstegImageStyle,
-                              DstegVocabulary $dstegVocabulary) {
-    parent::__construct();
+                              DstegVocabulary $dstegVocabulary,
+                              GoogleSheetApi $sheet,
+                              GeneralApi $generalApi) {
+    parent::__construct($sheet, $generalApi);
     $this->stringTranslation = $stringTranslation;
     $this->dstegBundle = $dstegBundle;
     $this->dstegMenus = $dstegMenus;

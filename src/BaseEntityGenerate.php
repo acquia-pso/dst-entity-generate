@@ -66,32 +66,4 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
   }
 
-  /**
-   * Helper function to say message on cli as well log them.
-   *
-   * @param string $message
-   *   The translated message string.
-   * @param string $type
-   *   The type of message to display.
-   */
-  protected function showMessage(string $message, string $type = 'progress') {
-
-    switch ($type) {
-      case 'info':
-        $this->yell($message, 100, 'blue');
-        break;
-
-      case 'warning':
-        $this->yell($message, 100, 'yellow');
-        break;
-
-      case 'error':
-        $this->yell($message, 100, 'red');
-        break;
-
-      default:
-        $this->say($message);
-    }
-  }
-
 }

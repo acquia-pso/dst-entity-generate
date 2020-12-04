@@ -52,12 +52,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
 
     $googleSheetStorage = $keyValueStorage->get('dst_google_sheet_storage');
 
-    $requiredConfigs = [
-      'name',
-      'credentials',
-      'access_token',
-      'spreadsheet_id',
-    ];
+    $requiredConfigs = ['name', 'credentials', 'access_token', 'spreadsheet_id'];
 
     foreach ($requiredConfigs as $config) {
       if (empty($googleSheetStorage->get($config))) {

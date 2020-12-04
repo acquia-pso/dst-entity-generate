@@ -5,8 +5,8 @@ namespace Drupal\dst_entity_generate\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
  * Class provides functionality of Menus generation from DST sheet.
@@ -55,13 +55,14 @@ class Menu extends BaseEntityGenerate {
     if ($skipEntitySync) {
       $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
       ['@entity' => DstegConstants::MENUS]);
-      $this->showMessage($message, 'warning');
+      // @todo yell() and say() needs to be part of the `logMessage() method`.
+      $this->yell($message, 100, 'yellow');
       $logMessages[] = $message;
       $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     if ($result === FALSE) {
       try {
-        $this->showMessage($this->t('Generating Menus.'), 'info');
+        $this->yell($this->t('Generating Menus.'), 100, 'blue');
         $entity_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
         if (!empty($entity_data)) {
           $menus_storage = $this->helper->getAllEntities('menu');
@@ -98,17 +99,17 @@ class Menu extends BaseEntityGenerate {
         }
         else {
           $no_data_message = $this->t('There is no data for the Menu entity in your DST sheet.');
-          $this->showMessage($no_data_message, 'warning');
+          $this->say($no_data_message);
           $logMessages[] = $no_data_message;
         }
-        $this->showMessage($this->t('Finished generating Menus.'), 'info');
+        $this->yell($this->t('Finished generating Menus.'), 100, 'blue');
         $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       catch (\Exception $exception) {
         $exception_message = $this->t('Exception occurred @exception', [
           '@exception' => $exception,
         ]);
-        $this->showMessage($exception_message, 'error');
+        $this->yell($exception_message);
         $logMessages[] = $exception_message;
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }

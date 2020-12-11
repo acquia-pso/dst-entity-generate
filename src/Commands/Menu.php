@@ -3,19 +3,17 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drush\Commands\DrushCommands;
 
 /**
  * Class provides functionality of Menus generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Menu extends DrushCommands {
-  use StringTranslationTrait;
+class Menu extends BaseEntityGenerate {
   /**
    * Google Sheet Api service definition.
    *
@@ -33,17 +31,14 @@ class Menu extends DrushCommands {
   /**
    * DstCommands constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
-   *   Google Sheet Api service definition.
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   GoogleSheetApi service class object.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   General Api service definition.
    *   LoggerChannelFactory service definition.
    */
-  public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi) {
-    parent::__construct();
-    $this->googleSheetApi = $googleSheetApi;
-    $this->generalApi = $generalApi;
+  public function __construct(GoogleSheetApi $sheet, GeneralApi $generalApi) {
+    parent::__construct($sheet, $generalApi);
   }
 
   /**
@@ -55,7 +50,7 @@ class Menu extends DrushCommands {
    */
   public function generateMenus() {
     $result = FALSE;
-    $skipEntitySync = $this->generalApi->skipEntitySync(DstegConstants::MENUS);
+    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::MENUS);
     $logMessages = [];
     if ($skipEntitySync) {
       $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
@@ -70,7 +65,7 @@ class Menu extends DrushCommands {
         $this->yell($this->t('Generating Menus.'), 100, 'blue');
         $entity_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
         if (!empty($entity_data)) {
-          $menus_storage = $this->generalApi->getAllEntities('menu');
+          $menus_storage = $this->helper->getAllEntities('menu');
           foreach ($entity_data as $menu) {
             // Create menus only if it is in Wait and implement state.
             if ($menu['x'] === 'w') {
@@ -119,7 +114,7 @@ class Menu extends DrushCommands {
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
-    $this->generalApi->logMessage($logMessages);
+    $this->helper->logMessage($logMessages);
     return $result;
   }
 

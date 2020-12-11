@@ -6,22 +6,19 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drush\Commands\DrushCommands;
 
 /**
  * Class provides functionality of Content types generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Bundle extends DrushCommands {
-
-  use StringTranslationTrait;
+class Bundle extends BaseEntityGenerate {
 
   /**
    * Entity Type manager service.
@@ -29,13 +26,6 @@ class Bundle extends DrushCommands {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-
-  /**
-   * Google sheet service.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $sheet;
 
   /**
    * Config array.
@@ -50,13 +40,6 @@ class Bundle extends DrushCommands {
    * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
    */
   protected $displayRepository;
-
-  /**
-   * Helper class for entity generation.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $helper;
 
   /**
    * DstegBundle constructor.
@@ -77,12 +60,11 @@ class Bundle extends DrushCommands {
                               ConfigFactoryInterface $configFactory,
                               EntityDisplayRepositoryInterface $displayRepository,
                               GeneralApi $generalApi) {
-    $this->sheet = $sheet;
+    parent::__construct($sheet, $generalApi);
     $this->entityTypeManager = $entityTypeManager;
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
       ->get('sync_entities');
     $this->displayRepository = $displayRepository;
-    $this->helper = $generalApi;
   }
 
   /**

@@ -7,12 +7,11 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drush\Commands\DrushCommands;
 use Drupal\dst_entity_generate\DstegConstants;
 
 /**
@@ -20,9 +19,7 @@ use Drupal\dst_entity_generate\DstegConstants;
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Vocabulary extends DrushCommands {
-
-  use StringTranslationTrait;
+class Vocabulary extends BaseEntityGenerate {
 
   /**
    * The EntityType Manager.
@@ -30,13 +27,6 @@ class Vocabulary extends DrushCommands {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-
-  /**
-   * GoogleSheetApi service class object.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $sheet;
 
   /**
    * Logger service definition.
@@ -60,13 +50,6 @@ class Vocabulary extends DrushCommands {
   protected $configFactory;
 
   /**
-   * Helper class for entity generation.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $helper;
-
-  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -83,13 +66,11 @@ class Vocabulary extends DrushCommands {
    *   The helper service for DSTEG.
    */
   public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, KeyValueFactoryInterface $key_value, ConfigFactoryInterface $config_factory, GeneralApi $generalApi) {
-    parent::__construct();
-    $this->sheet = $sheet;
+    parent::__construct($sheet, $generalApi);
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->debugMode = $key_value->get('dst_entity_generate_storage')->get('debug_mode');
     $this->configFactory = $config_factory;
-    $this->helper = $generalApi;
   }
 
   /**

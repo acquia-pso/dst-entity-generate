@@ -152,32 +152,32 @@ class Bundle extends BaseEntityGenerate {
       }
 
       if (!empty($fields_data)) {
-        foreach ($fields_data as $fields) {
+        foreach ($fields_data as $field) {
           $bundleVal = '';
-          $bundle = $fields['bundle'];
+          $bundle = $field['bundle'];
           $bundle_name = substr($bundle, 0, -15);
           if (array_key_exists($bundle_name, $bundleArr)) {
             $bundleVal = $bundleArr[$bundle_name];
           }
 
           // Skip fields which are not part of content type.
-          if (!str_contains($fields['bundle'], 'Content type')) {
+          if (!str_contains($field['bundle'], 'Content type')) {
             continue;
           }
 
           if (isset($bundleVal)) {
-            if ($fields['x'] === 'w') {
+            if ($field['x'] === 'w') {
               try {
                 $entity_type_id = 'node_type';
                 $entity_type = 'node';
-                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
+                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
 
                 // Skip if field is present.
                 if (!empty($drupal_field)) {
                   $this->logger->notice($this->t(
-                    'The field @field is present in @ctype skipping.',
+                    'The field @field is present in @ctype. Skipping.',
                     [
-                      '@field' => $fields['machine_name'],
+                      '@field' => $field['machine_name'],
                       '@ctype' => $bundleVal,
                     ]
                   ));
@@ -185,12 +185,12 @@ class Bundle extends BaseEntityGenerate {
                 }
 
                 // Create field storage.
-                $result = $this->helper->fieldStorageHandler($fields, $entity_type);
+                $result = $this->helper->fieldStorageHandler($field, $entity_type);
                 switch ($result) {
                   case 2:
                     continue 2;
                 }
-                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
+                $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->logger->error($this->t('Error creating fields : @exception', [

@@ -21,5 +21,33 @@ final class DstegConstants {
   const IMAGE_EFFECTS = 'Image effects';
   const OVERVIEW = 'Overview';
   const SKIP_ENTITY_MESSAGE = 'Skipping: @entity entity sync is disabled.';
+  /**
+   * Variable FIELD_TYPES is used to hold meta data about field types.
+   *
+   * Array constructed with below patter:
+   * '<Human readable field type>' = [
+   *   'type' => '<field_machine_name>',
+   *   'module_dependency' => '<required_module_machine_name>',
+   * ]
+   */
+  const FIELD_TYPES = [
+    'Text (plain)' => [
+      'type' => 'string',
+    ],
+    'Text (formatted, long)' => [
+      'type' => 'text_long',
+    ],
+    'Date' => [
+      'type' => 'datetime',
+    ],
+    'Date range' => [
+      'type' => 'daterange',
+      'module_dependency' => 'datetime_range',
+    ],
+    'Link' => [
+      'type' => 'link',
+      'module_dependency' => 'link',
+    ],
+  ];
 
 }

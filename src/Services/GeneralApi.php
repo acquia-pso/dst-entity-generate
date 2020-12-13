@@ -11,6 +11,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\dst_entity_generate\DstegConstants;
 
 /**
  * Class GoogleSheetApi to connect with Google Sheets.
@@ -138,7 +139,7 @@ class GeneralApi {
    * @param string $entity_type
    *   Entity type.
    */
-  public function createFieldStorage(array $field, string $entity_type): void {
+  public function createFieldStorage(array $field, string $entity_type) {
     $cardinality = $field['vals.'];
     if ($cardinality === '*') {
       $cardinality = -1;
@@ -170,7 +171,7 @@ class GeneralApi {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function addField(string $bundle_machine_name, array $field_data, string $entity_type_id, string $entity_type): void {
+  public function addField(string $bundle_machine_name, array $field_data, string $entity_type_id, string $entity_type) {
     $entity_types_storage = $this->entityTypeManager->getStorage($entity_type_id);
     $bundle = $entity_types_storage->load($bundle_machine_name);
     if ($bundle != NULL) {
@@ -220,7 +221,7 @@ class GeneralApi {
   /**
    * Helper function to handle field storage.
    *
-   * @param array $fields
+   * @param array $field
    *   Field data from Google sheet.
    * @param string $entity_type
    *   Entity type.
@@ -228,67 +229,43 @@ class GeneralApi {
    * @return int
    *   Returns integer based on unmet dependency.
    */
-  public function fieldStorageHandler(array $fields, string $entity_type) {
+  public function fieldStorageHandler(array $field, string $entity_type) {
     $skip_iterations = 0;
-    $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
+    $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
     if (empty($field_storage)) {
-      // Create field storage.
-      switch ($fields['field_type']) {
-        case 'Text (plain)':
-          $fields['drupal_field_type'] = 'string';
-          $this->createFieldStorage($fields, $entity_type);
-          break;
-
-        case 'Text (formatted, long)':
-          $fields['drupal_field_type'] = 'text_long';
-          $this->createFieldStorage($fields, $entity_type);
-          break;
-
-        case 'Date':
-          $fields['drupal_field_type'] = 'datetime';
-          $this->createFieldStorage($fields, $entity_type);
-          break;
-
-        case 'Date range':
-          if ($this->isModuleEnabled('datetime_range')) {
-            $fields['drupal_field_type'] = 'daterange';
-            $this->createFieldStorage($fields, $entity_type);
-          }
-          else {
+      $field_types = DstegConstants::FIELD_TYPES;
+      if (array_key_exists($field['field_type'], $field_types)) {
+        $field_meta = $field_types[$field['field_type']];
+        if (array_key_exists('module_dependency', $field_meta) && isset($field_meta['module_dependency'])) {
+          if (!$this->isModuleEnabled($field_meta['module_dependency'])) {
             $this->logger->notice($this->t(
-              'The date range module is not installed. Skipping @field field generation.',
-              ['@field' => $fields['machine_name']]
+              'The @module module is not installed. Skipping @field field generation.',
+              [
+                '@module' => $field_meta['module_dependency'],
+                '@field' => $field['machine_name'],
+              ]
             ));
             $skip_iterations = 2;
           }
-          break;
-
-        case 'Link':
-          if ($this->isModuleEnabled('link')) {
-            $fields['drupal_field_type'] = 'link';
-            $this->createFieldStorage($fields, $entity_type);
-          }
-          else {
-            $this->logger->notice($this->t(
-              'The link module is not installed. Skipping @field field generation.',
-              ['@field' => $fields['machine_name']]
-            ));
-            $skip_iterations = 2;
-          }
-          break;
-
-        default:
-          $this->logger->notice($this->t(
-            'Support for generating field of type @ftype is currently not supported.',
-            ['@ftype' => $fields['field_type']]
-          ));
-          $skip_iterations = 2;
+        }
+        if ($skip_iterations === 0) {
+          $field['drupal_field_type'] = $field_meta['type'];
+          $this->createFieldStorage($field, $entity_type);
+        }
       }
-    }
-    if ($skip_iterations === 0) {
-      $this->logger->notice($this->t('Field storage created for @field',
-        ['@field' => $fields['machine_name']]
-      ));
+      else {
+        $this->logger->notice($this->t(
+          'Support for generating field of type @ftype is currently not supported.',
+          ['@ftype' => $field['field_type']]
+        ));
+        $skip_iterations = 2;
+      }
+
+      if ($skip_iterations === 0) {
+        $this->logger->notice($this->t('Field storage created for @field',
+          ['@field' => $field['machine_name']]
+        ));
+      }
     }
     return $skip_iterations;
   }

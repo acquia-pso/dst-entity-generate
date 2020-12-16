@@ -95,7 +95,7 @@ class GoogleSheetApiSetting extends ConfigFormBase {
       '#type' => 'textarea',
       '#title' => $this->t('Access Token'),
       '#required' => TRUE,
-      '#description' => $this->t('Add json of access token.'),
+      '#description' => $this->t("Add json of access token. Use drush command 'drush dst:get:access_token' and follow the instructions to get access token."),
       '#default_value' => (isset($store) && !empty($store->get('access_token'))) ? $store->get('access_token') : '',
     ];
 

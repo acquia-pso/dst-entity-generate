@@ -11,7 +11,6 @@ use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\dst_entity_generate\DstegConstants;
 
 /**
@@ -158,88 +157,35 @@ class Vocabulary extends BaseEntityGenerate {
         }
       }
       if (!empty($fields_data)) {
-        foreach ($fields_data as $fields) {
-          $bundle = $fields['bundle'];
+        foreach ($fields_data as $field) {
+          $bundle = $field['bundle'];
           $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
           if (array_key_exists($bundle_name, $bundleArr)) {
             $bundleVal = $bundleArr[$bundle_name];
           }
           if (isset($bundleVal)) {
-            if ($fields['x'] === 'w') {
+            if ($field['x'] === 'w') {
               try {
                 $entity_type_id = 'taxonomy_vocabulary';
                 $entity_type = 'taxonomy_term';
-                $field = FieldConfig::loadByName($entity_type, $bundleVal, $fields['machine_name']);
+                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
 
                 // Skip field if present.
-                if (!empty($field)) {
+                if (!empty($drupal_field)) {
                   $this->logger->notice($this->t(
-                    'The field @field is present in @vocab skipping.',
+                    'The field @field is present in @vocab. Skipping.',
                     [
-                      '@field' => $fields['machine_name'],
+                      '@field' => $field['machine_name'],
                       '@vocab' => $bundleVal,
                     ]
                   ));
                   continue;
                 }
-                // Check if field storage is present.
-                $field_storage = FieldStorageConfig::loadByName($entity_type, $fields['machine_name']);
-                if (empty($field_storage)) {
-                  // Create field storage.
-                  switch ($fields['field_type']) {
-                    case 'Text (plain)':
-                      $fields['drupal_field_type'] = 'string';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Text (formatted, long)':
-                      $fields['drupal_field_type'] = 'text_long';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Date':
-                      $fields['drupal_field_type'] = 'datetime';
-                      $this->helper->createFieldStorage($fields, $entity_type);
-                      break;
-
-                    case 'Date range':
-                      if ($this->helper->isModuleEnabled('datetime_range')) {
-                        $fields['drupal_field_type'] = 'daterange';
-                        $this->helper->createFieldStorage($fields, $entity_type);
-                      }
-                      else {
-                        $this->logger->notice($this->t('The date range module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    case 'Link':
-                      if ($this->helper->isModuleEnabled('link')) {
-                        $fields['drupal_field_type'] = 'link';
-                        $this->helper->createFieldStorage($fields, $entity_type);
-                      }
-                      else {
-                        $this->logger->notice($this->t('The link module is not installed. Skipping @field field generation.',
-                          ['@field' => $fields['machine_name']]
-                        ));
-                        continue 2;
-                      }
-                      break;
-
-                    default:
-                      $this->logger->notice($this->t('Support for generating field of type @ftype is currently not supported.',
-                        ['@ftype' => $fields['field_type']]));
-                      continue 2;
-                  }
-
-                  $this->logger->notice($this->t('Field storage created for @field',
-                    ['@field' => $fields['machine_name']]
-                  ));
+                // Create field storage.
+                $result = $this->helper->fieldStorageHandler($field, $entity_type);
+                if ($result) {
+                  $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
                 }
-
-                $this->helper->addField($bundleVal, $fields, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->yell($this->t('Error creating fields : @exception', [

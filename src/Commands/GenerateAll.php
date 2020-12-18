@@ -83,6 +83,10 @@ class GenerateAll extends BaseEntityGenerate {
    *   DstegImageStyle command definition.
    * @param Vocabulary $dstegVocabulary
    *   Vocabulary command definition.
+   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
+   *   GoogleSheetApi service class object.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
   public function __construct(TranslationInterface $stringTranslation,
                               Bundle $dstegBundle,
@@ -91,8 +95,10 @@ class GenerateAll extends BaseEntityGenerate {
                               ImageEffect $dstegImageEffect,
                               Workflow $dstegWorkflows,
                               ImageStyle $dstegImageStyle,
-                              Vocabulary $dstegVocabulary) {
-    parent::__construct();
+                              Vocabulary $dstegVocabulary,
+                              GoogleSheetApi $sheet,
+                              GeneralApi $generalApi) {
+    parent::__construct($sheet, $generalApi);
     $this->stringTranslation = $stringTranslation;
     $this->dstegBundle = $dstegBundle;
     $this->dstegMenus = $dstegMenus;

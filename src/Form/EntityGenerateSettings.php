@@ -2,7 +2,6 @@
 
 namespace Drupal\dst_entity_generate\Form;
 
-use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -45,13 +44,6 @@ final class EntityGenerateSettings extends ConfigFormBase {
   protected $googleSheetApi;
 
   /**
-   * The transliteration helper.
-   *
-   * @var \Drupal\Component\Transliteration\TransliterationInterface
-   */
-  protected $transliteration;
-
-  /**
    * Constructs a DstEntityGenerateSettings object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -60,17 +52,13 @@ final class EntityGenerateSettings extends ConfigFormBase {
    *   The Key Value Factory definition.
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $google_sheet_api
    *   The GoogleSheetApi definition.
-   * @param \Drupal\Component\Transliteration\TransliterationInterface $transliteration
-   *   The transliteration helper.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager,
                               KeyValueFactoryInterface $key_value_factory,
-                              GoogleSheetApi $google_sheet_api,
-                              TransliterationInterface $transliteration) {
+                              GoogleSheetApi $google_sheet_api) {
     $this->entityTypeManager = $entity_type_manager;
     $this->keyValue = $key_value_factory;
     $this->googleSheetApi = $google_sheet_api;
-    $this->transliteration = $transliteration;
   }
 
   /**
@@ -80,8 +68,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('keyvalue'),
-      $container->get('dst_entity_generate.google_sheet_api'),
-      $container->get('transliteration')
+      $container->get('dst_entity_generate.google_sheet_api')
     );
   }
 

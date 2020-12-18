@@ -226,8 +226,8 @@ class GeneralApi {
    * @param string $entity_type
    *   Entity type.
    *
-   * @return int
-   *   Returns integer based on unmet dependency.
+   * @return boolean
+   *   Returns boolean based on unmet dependency.
    */
   public function fieldStorageHandler(array $field, string $entity_type) {
     if (empty($field)) {

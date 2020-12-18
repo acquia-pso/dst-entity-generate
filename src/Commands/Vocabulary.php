@@ -168,10 +168,10 @@ class Vocabulary extends BaseEntityGenerate {
               try {
                 $entity_type_id = 'taxonomy_vocabulary';
                 $entity_type = 'taxonomy_term';
-                $field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
+                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
 
                 // Skip field if present.
-                if (!empty($field)) {
+                if (!empty($drupal_field)) {
                   $this->logger->notice($this->t(
                     'The field @field is present in @vocab. Skipping.',
                     [
@@ -183,11 +183,9 @@ class Vocabulary extends BaseEntityGenerate {
                 }
                 // Create field storage.
                 $result = $this->helper->fieldStorageHandler($field, $entity_type);
-                switch ($result) {
-                  case 2:
-                    continue 2;
+                if ($result) {
+                  $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
                 }
-                $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
               }
               catch (\Exception $exception) {
                 $this->yell($this->t('Error creating fields : @exception', [

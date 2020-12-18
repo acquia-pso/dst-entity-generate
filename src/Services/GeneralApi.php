@@ -230,44 +230,38 @@ class GeneralApi {
    *   Returns integer based on unmet dependency.
    */
   public function fieldStorageHandler(array $field, string $entity_type) {
-    $skip_iterations = 0;
-    $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
-    if (empty($field_storage)) {
-      $field_types = DstegConstants::FIELD_TYPES;
-      if (array_key_exists($field['field_type'], $field_types)) {
-        $field_meta = $field_types[$field['field_type']];
-        if (array_key_exists('module_dependency', $field_meta) && isset($field_meta['module_dependency'])) {
-          if (!$this->isModuleEnabled($field_meta['module_dependency'])) {
-            $this->logger->notice($this->t(
-              'The @module module is not installed. Skipping @field field generation.',
-              [
-                '@module' => $field_meta['module_dependency'],
-                '@field' => $field['machine_name'],
-              ]
-            ));
-            $skip_iterations = 2;
-          }
-        }
-        if ($skip_iterations === 0) {
-          $field['drupal_field_type'] = $field_meta['type'];
-          $this->createFieldStorage($field, $entity_type);
-        }
-      }
-      else {
-        $this->logger->notice($this->t(
-          'Support for generating field of type @ftype is currently not supported.',
-          ['@ftype' => $field['field_type']]
-        ));
-        $skip_iterations = 2;
-      }
-
-      if ($skip_iterations === 0) {
-        $this->logger->notice($this->t('Field storage created for @field',
-          ['@field' => $field['machine_name']]
-        ));
-      }
+    if (empty($field)) {
+      return FALSE;
     }
-    return $skip_iterations;
+    $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
+    if (!empty($field_storage)) {
+      return FALSE;
+    }
+    $field_types = DstegConstants::FIELD_TYPES;
+    if (!array_key_exists($field['field_type'], $field_types)) {
+      $this->logger->notice($this->t(
+        'Support for generating field of type @ftype is currently not supported.',
+        ['@ftype' => $field['field_type']]
+      ));
+      return FALSE;
+    }
+    $field_meta = $field_types[$field['field_type']];
+    if (array_key_exists('module_dependency', $field_meta) && isset($field_meta['module_dependency']) && !$this->isModuleEnabled($field_meta['module_dependency'])) {
+      $this->logger->notice($this->t(
+        'The @module module is not installed. Skipping @field field generation.',
+        [
+          '@module' => $field_meta['module_dependency'],
+          '@field' => $field['machine_name'],
+        ]
+      ));
+      return FALSE;
+    }
+    $field['drupal_field_type'] = $field_meta['type'];
+    $this->createFieldStorage($field, $entity_type);
+    $this->logger->notice($this->t('Field storage created for @field',
+      ['@field' => $field['machine_name']]
+    ));
+    return TRUE;
   }
 
 }

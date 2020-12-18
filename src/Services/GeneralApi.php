@@ -246,7 +246,7 @@ class GeneralApi {
       return FALSE;
     }
     $field_meta = $field_types[$field['field_type']];
-    if (array_key_exists('module_dependency', $field_meta) && isset($field_meta['module_dependency']) && !$this->isModuleEnabled($field_meta['module_dependency'])) {
+    if (array_key_exists('module_dependency', $field_meta) && !empty($field_meta['module_dependency']) && !$this->isModuleEnabled($field_meta['module_dependency'])) {
       $this->logger->notice($this->t(
         'The @module module is not installed. Skipping @field field generation.',
         [

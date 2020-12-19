@@ -14,19 +14,6 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class UserRole extends BaseEntityGenerate {
-  /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
-
-  /**
-   * GeneralApi service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
 
   /**
    * DstCommands constructor.
@@ -54,13 +41,9 @@ class UserRole extends BaseEntityGenerate {
       $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::USER_ROLES);
       $logMessages = [];
       if ($skipEntitySync) {
-        $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
-          ['@entity' => DstegConstants::USER_ROLES]);
-        $this->yell($message, 100, 'yellow');
-        $logMessages[] = $message;
-        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+        $result = $this->displaySkipMessage(DstegConstants::CONTENT_TYPES);
       }
-      elseif (!$result) {
+      if ($result === FALSE) {
         $this->yell($this->t('Generating user roles.'), 100, 'blue');
         $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
         if (!empty($user_role_data)) {
@@ -106,11 +89,7 @@ class UserRole extends BaseEntityGenerate {
       }
     }
     catch (\Exception $exception) {
-      $exception_message = $this->t('Exception occurred @exception', [
-        '@exception' => $exception,
-      ]);
-      $this->yell($exception_message);
-      $logMessages[] = $exception_message;
+      $this->displayAndLogException($exception, DstegConstants::USER_ROLES);
       $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
 

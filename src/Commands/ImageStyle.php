@@ -3,7 +3,6 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
@@ -17,12 +16,6 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class ImageStyle extends BaseEntityGenerate {
-  /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
 
   /**
    * Logger service definition.
@@ -39,13 +32,6 @@ class ImageStyle extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
-   * Config array.
-   *
-   * @var array
-   */
-  protected $syncEntities;
-
-  /**
    * DstCommands constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
@@ -54,19 +40,15 @@ class ImageStyle extends BaseEntityGenerate {
    *   LoggerChannelFactory service definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The EntityType Manager.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Config factory service.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   General Api service definition.
    */
   public function __construct(GoogleSheetApi $sheet,
                               LoggerChannelFactoryInterface $loggerChannelFactory,
                               EntityTypeManagerInterface $entityTypeManager,
-                              ConfigFactoryInterface $configFactory,
                               GeneralApi $generalApi) {
     parent::__construct($sheet, $generalApi);
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
-    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
     $this->entityTypeManager = $entityTypeManager;
   }
 
@@ -78,13 +60,16 @@ class ImageStyle extends BaseEntityGenerate {
    * @usage drush dst:generate:imagestyle
    */
   public function generateImageStyle() {
-    $imageStyleSync = $this->syncEntities['images_styles'];
-    if ($imageStyleSync['All'] === 'All') {
+    $result = FALSE;
+    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::IMAGE_STYLES);
+    if ($skipEntitySync) {
+      $result = $this->displaySkipMessage(DstegConstants::IMAGE_STYLES);
+    }
+    if ($result === FALSE) {
       try {
         $this->say($this->t('Generating Drupal Image Style.'));
         $imageStyle_data = $this->sheet->getData(DstegConstants::IMAGE_STYLES);
         if (!empty($imageStyle_data)) {
-
           // Call all the methods to generate the Drupal image style.
           foreach ($imageStyle_data as $imageStyle) {
             // Create image style only if it is in Wait and implement state.
@@ -96,9 +81,7 @@ class ImageStyle extends BaseEntityGenerate {
                   'name' => $imageStyle['machine_name'],
                   'label' => $imageStyle['style_name'],
                 ]);
-
                 $style->save();
-
                 if ($style === 1) {
                   $message = $this->t('New image style @imagestyle created.', [
                     '@imagestyle' => $imageStyle['machine_name'],
@@ -106,7 +89,6 @@ class ImageStyle extends BaseEntityGenerate {
                   $this->say($message);
                   $this->logger->info($message);
                 }
-
               }
               else {
                 $imageStyle_exist = $this->t('Image style @imagestyle already present.', [
@@ -116,25 +98,16 @@ class ImageStyle extends BaseEntityGenerate {
                 $this->logger->info($imageStyle_exist);
               }
             }
-
           }
         }
-
-        return CommandResult::exitCode(self::EXIT_SUCCESS);
+        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       catch (\Exception $exception) {
-        $this->yell($this->t('Exception occurred @exception', [
-          '@exception' => $exception,
-        ]));
-        $this->logger->error('Exception occurred @exception', [
-          '@exception' => $exception,
-        ]);
-        return CommandResult::exitCode(self::EXIT_FAILURE);
+        $this->displayAndLogException($exception, DstegConstants::IMAGE_STYLES);
+        $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }
-    else {
-      $this->yell('Image Style sync is disabled, Skipping.');
-    }
+    return $result;
   }
 
 }

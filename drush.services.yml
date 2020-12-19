@@ -28,7 +28,6 @@ services:
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@entity_type.manager'
-      - '@config.factory'
       - '@entity_display.repository'
       - '@dst_entity_generate.general_api'
   dst_entity_generate.commands.user_roles:
@@ -59,7 +58,6 @@ services:
       - '@dst_entity_generate.google_sheet_api'
       - '@logger.factory'
       - '@entity_type.manager'
-      - '@config.factory'
       - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
@@ -71,6 +69,4 @@ services:
       - '@dst_entity_generate.google_sheet_api'
       - '@entity_type.manager'
       - '@logger.factory'
-      - '@keyvalue'
-      - '@config.factory'
       - '@dst_entity_generate.general_api'

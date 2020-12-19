@@ -142,7 +142,7 @@ class GenerateAll extends BaseEntityGenerate {
     $this->dstegVocabulary->generateVocabularies();
 
     // Call all the methods to generate the Drupal entities.
-    $this->yell($this->t('Congratulations. All the Drupal entities are generated automatically.'));
+    $this->yell($this->t('Congratulations. Sync enabled entities are generated successfully.'));
 
     return CommandResult::exitCode(self::EXIT_SUCCESS);
   }

@@ -14,19 +14,6 @@ use Drupal\dst_entity_generate\Services\GeneralApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class Menu extends BaseEntityGenerate {
-  /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
-
-  /**
-   * DSTEG General service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
 
   /**
    * DstCommands constructor.
@@ -53,17 +40,12 @@ class Menu extends BaseEntityGenerate {
     $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::MENUS);
     $logMessages = [];
     if ($skipEntitySync) {
-      $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
-      ['@entity' => DstegConstants::MENUS]);
-      // @todo yell() and say() needs to be part of the `logMessage() method`.
-      $this->yell($message, 100, 'yellow');
-      $logMessages[] = $message;
-      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+      $result = $this->displaySkipMessage(DstegConstants::MENUS);
     }
     if ($result === FALSE) {
       try {
         $this->yell($this->t('Generating Menus.'), 100, 'blue');
-        $entity_data = $this->googleSheetApi->getData(DstegConstants::MENUS);
+        $entity_data = $this->sheet->getData(DstegConstants::MENUS);
         if (!empty($entity_data)) {
           $menus_storage = $this->helper->getAllEntities('menu');
           foreach ($entity_data as $menu) {
@@ -106,11 +88,7 @@ class Menu extends BaseEntityGenerate {
         $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       catch (\Exception $exception) {
-        $exception_message = $this->t('Exception occurred @exception', [
-          '@exception' => $exception,
-        ]);
-        $this->yell($exception_message);
-        $logMessages[] = $exception_message;
+        $this->displayAndLogException($exception, DstegConstants::MENUS);
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }

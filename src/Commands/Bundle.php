@@ -3,7 +3,6 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
@@ -27,13 +26,6 @@ class Bundle extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
-   * Config array.
-   *
-   * @var array
-   */
-  protected $syncEntities;
-
-  /**
    * Entity display mode repository.
    *
    * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
@@ -47,8 +39,6 @@ class Bundle extends BaseEntityGenerate {
    *   Google sheet.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Config factory service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
@@ -56,13 +46,10 @@ class Bundle extends BaseEntityGenerate {
    */
   public function __construct(GoogleSheetApi $sheet,
                               EntityTypeManagerInterface $entityTypeManager,
-                              ConfigFactoryInterface $configFactory,
                               EntityDisplayRepositoryInterface $displayRepository,
                               GeneralApi $generalApi) {
     parent::__construct($sheet, $generalApi);
     $this->entityTypeManager = $entityTypeManager;
-    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')
-      ->get('sync_entities');
     $this->displayRepository = $displayRepository;
   }
 
@@ -74,10 +61,12 @@ class Bundle extends BaseEntityGenerate {
    * @usage drush dst:generate:bundles
    */
   public function generateBundle() {
-    $command_result = self::EXIT_SUCCESS;
-
-    $create_ct = $this->syncEntities['bundles'];
-    if ($create_ct['All'] === 'All' || $create_ct['Content types'] === 'Content types') {
+    $result = FALSE;
+    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::CONTENT_TYPES);
+    if ($skipEntitySync) {
+      $result = $this->displaySkipMessage(DstegConstants::CONTENT_TYPES);
+    }
+    if ($result === FALSE) {
       $this->say($this->t('Generating Drupal Content types.'));
 
       // Call all the methods to generate the Drupal entities.
@@ -115,96 +104,82 @@ class Bundle extends BaseEntityGenerate {
           }
 
           // Generate fields now.
-          $command_result = $this->generateFields();
+          $result = $this->generateFields();
         }
         catch (\Exception $exception) {
-          $this->yell($this->t('Error creating content type : @exception', [
-            '@exception' => $exception,
-          ]));
-          $command_result = self::EXIT_FAILURE;
+          $this->displayAndLogException($exception, DstegConstants::CONTENT_TYPES);
+          $result = self::EXIT_FAILURE;
         }
       }
     }
-    else {
-      $this->yell('Content type sync is disabled, Skipping.');
-    }
-
-    return CommandResult::exitCode($command_result);
+    return CommandResult::exitCode($result);
   }
 
   /**
    * Helper function to generate fields.
    */
   public function generateFields() {
-    $command_result = TRUE;
+    $result = TRUE;
 
-    $create_fields = $this->syncEntities['fields'];
-    if ($create_fields['All'] === 'All') {
-      $this->logger->notice($this->t('Generating Drupal Fields.'));
-      // Call all the methods to generate the Drupal entities.
-      $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
+    $this->logger->notice($this->t('Generating Drupal Fields.'));
+    // Call all the methods to generate the Drupal entities.
+    $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
 
-      $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
-      foreach ($bundles_data as $bundle) {
-        if ($bundle['type'] === 'Content type') {
-          $bundleArr[$bundle['name']] = $bundle['machine_name'];
-        }
+    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
+    foreach ($bundles_data as $bundle) {
+      if ($bundle['type'] === 'Content type') {
+        $bundleArr[$bundle['name']] = $bundle['machine_name'];
       }
+    }
 
-      if (!empty($fields_data)) {
-        foreach ($fields_data as $field) {
-          $bundleVal = '';
-          $bundle = $field['bundle'];
-          $bundle_name = substr($bundle, 0, -15);
-          if (array_key_exists($bundle_name, $bundleArr)) {
-            $bundleVal = $bundleArr[$bundle_name];
-          }
+    if (!empty($fields_data)) {
+      foreach ($fields_data as $field) {
+        $bundleVal = '';
+        $bundle = $field['bundle'];
+        $bundle_name = substr($bundle, 0, -15);
+        if (array_key_exists($bundle_name, $bundleArr)) {
+          $bundleVal = $bundleArr[$bundle_name];
+        }
 
-          // Skip fields which are not part of content type.
-          if (!str_contains($field['bundle'], 'Content type')) {
-            continue;
-          }
+        // Skip fields which are not part of content type.
+        if (!str_contains($field['bundle'], 'Content type')) {
+          continue;
+        }
 
-          if (isset($bundleVal)) {
-            if ($field['x'] === 'w') {
-              try {
-                $entity_type_id = 'node_type';
-                $entity_type = 'node';
-                $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
+        if (isset($bundleVal)) {
+          if ($field['x'] === 'w') {
+            try {
+              $entity_type_id = 'node_type';
+              $entity_type = 'node';
+              $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
 
-                // Skip if field is present.
-                if (!empty($drupal_field)) {
-                  $this->logger->notice($this->t(
-                    'The field @field is present in @ctype. Skipping.',
-                    [
-                      '@field' => $field['machine_name'],
-                      '@ctype' => $bundleVal,
-                    ]
-                  ));
-                  continue;
-                }
-
-                // Create field storage.
-                $result = $this->helper->fieldStorageHandler($field, $entity_type);
-                if ($result) {
-                  $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
-                }
+              // Skip if field is present.
+              if (!empty($drupal_field)) {
+                $this->logger->notice($this->t(
+                  'The field @field is present in @ctype. Skipping.',
+                  [
+                    '@field' => $field['machine_name'],
+                    '@ctype' => $bundleVal,
+                  ]
+                ));
+                continue;
               }
-              catch (\Exception $exception) {
-                $this->logger->error($this->t('Error creating fields : @exception', [
-                  '@exception' => $exception,
-                ]));
-                $command_result = FALSE;
+
+              // Create field storage.
+              $result = $this->helper->fieldStorageHandler($field, $entity_type);
+              if ($result) {
+                $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
               }
+            }
+            catch (\Exception $exception) {
+              $this->displayAndLogException($exception, DstegConstants::FIELDS);
+              $result = FALSE;
             }
           }
         }
       }
     }
-    else {
-      $this->logger->notice('Fields sync is disabled, Skipping.');
-    }
-    return $command_result;
+    return $result;
   }
 
 }

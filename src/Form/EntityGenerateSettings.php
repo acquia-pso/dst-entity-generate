@@ -5,7 +5,6 @@ namespace Drupal\dst_entity_generate\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,13 +29,6 @@ final class EntityGenerateSettings extends ConfigFormBase {
   protected $entityTypeManager;
 
   /**
-   * KeyValue store interface.
-   *
-   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
-   */
-  protected $keyValue;
-
-  /**
    * GoogleSheetApi definition.
    *
    * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
@@ -48,16 +40,12 @@ final class EntityGenerateSettings extends ConfigFormBase {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity_type_manager.
-   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value_factory
-   *   The Key Value Factory definition.
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $google_sheet_api
    *   The GoogleSheetApi definition.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager,
-                              KeyValueFactoryInterface $key_value_factory,
                               GoogleSheetApi $google_sheet_api) {
     $this->entityTypeManager = $entity_type_manager;
-    $this->keyValue = $key_value_factory;
     $this->googleSheetApi = $google_sheet_api;
   }
 
@@ -67,7 +55,6 @@ final class EntityGenerateSettings extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('keyvalue'),
       $container->get('dst_entity_generate.google_sheet_api')
     );
   }

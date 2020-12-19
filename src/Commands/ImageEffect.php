@@ -32,7 +32,6 @@ class ImageEffect extends BaseEntityGenerate {
    *   General Api service definition.
    * @param \Drupal\image\ImageEffectManager $effect_manager
    *   The image effect manager.
-   *   LoggerChannelFactory service definition.
    */
   public function __construct(GoogleSheetApi $sheet,
                               GeneralApi $generalApi,
@@ -53,12 +52,7 @@ class ImageEffect extends BaseEntityGenerate {
     $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::IMAGE_EFFECTS);
     $logMessages = [];
     if ($skipEntitySync) {
-      $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
-      ['@entity' => DstegConstants::IMAGE_EFFECTS]);
-      // @todo yell() and say() needs to be part of the `logMessage() method`.
-      $this->yell($message, 100, 'yellow');
-      $logMessages[] = $message;
-      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+      $result = $this->displaySkipMessage(DstegConstants::IMAGE_EFFECTS);
     }
     if ($result === FALSE) {
       try {
@@ -136,7 +130,7 @@ class ImageEffect extends BaseEntityGenerate {
           }
         }
         else {
-          $no_data_message = $this->t('There is no data for the Menu entity in your DST sheet.');
+          $no_data_message = $this->t('There is no data for the Image effect entity in your DST sheet.');
           $this->say($no_data_message);
           $logMessages[] = $no_data_message;
         }
@@ -144,11 +138,7 @@ class ImageEffect extends BaseEntityGenerate {
         $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       catch (\Exception $exception) {
-        $exception_message = $this->t('Exception occurred @exception.', [
-          '@exception' => $exception->getMessage(),
-        ]);
-        $this->yell($exception_message);
-        $logMessages[] = $exception_message;
+        $this->displayAndLogException($exception, DstegConstants::IMAGE_EFFECTS);
         $result = CommandResult::exitCode(self::EXIT_FAILURE);
       }
     }

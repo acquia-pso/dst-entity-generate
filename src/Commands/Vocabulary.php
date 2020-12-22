@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
@@ -43,9 +44,15 @@ class Vocabulary extends BaseEntityGenerate {
    *   LoggerChannelFactory service definition.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(GoogleSheetApi $sheet, EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $loggerChannelFactory, GeneralApi $generalApi) {
-    parent::__construct($sheet, $generalApi);
+  public function __construct(GoogleSheetApi $sheet,
+                              EntityTypeManagerInterface $entityTypeManager,
+                              LoggerChannelFactoryInterface $loggerChannelFactory,
+                              GeneralApi $generalApi,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($sheet, $generalApi, $configFactory);
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
   }
@@ -59,49 +66,43 @@ class Vocabulary extends BaseEntityGenerate {
    */
   public function generateVocabularies() {
     $result = FALSE;
-    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::VOCABULARIES);
-    if ($skipEntitySync) {
-      $result = $this->displaySkipMessage(DstegConstants::VOCABULARIES);
-    }
-    if ($result === FALSE) {
-      try {
-        $this->say($this->t('Generating Drupal Vocabularies.'));
-        $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
-        foreach ($bundles as $bundle) {
-          if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
-            $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
-            $vocabularies = $vocab_storage->loadMultiple();
-            if (!isset($vocabularies[$bundle['machine_name']])) {
-              $description = isset($bundle['description']) ? $bundle['description'] : $bundle['name'] . ' vocabulary.';
-              $status = $vocab_storage->create([
-                'vid' => $bundle['machine_name'],
-                'description' => $description,
-                'name' => $bundle['name'],
-              ])->save();
-              if ($status === 1) {
-                $success_message = $this->t('Vocabulary @vocab is created.', [
-                  '@vocab' => $bundle['name'],
-                ]);
-                $this->say($success_message);
-                $this->logger->info($success_message);
-              }
-            }
-            else {
-              $present_message = $this->t('Vocabulary @vocab is already present.', [
+    try {
+      $this->say($this->t('Generating Drupal Vocabularies.'));
+      $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
+      foreach ($bundles as $bundle) {
+        if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
+          $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
+          $vocabularies = $vocab_storage->loadMultiple();
+          if (!isset($vocabularies[$bundle['machine_name']])) {
+            $description = isset($bundle['description']) ? $bundle['description'] : $bundle['name'] . ' vocabulary.';
+            $status = $vocab_storage->create([
+              'vid' => $bundle['machine_name'],
+              'description' => $description,
+              'name' => $bundle['name'],
+            ])->save();
+            if ($status === 1) {
+              $success_message = $this->t('Vocabulary @vocab is created.', [
                 '@vocab' => $bundle['name'],
               ]);
-              $this->say($present_message);
-              $this->logger->info($present_message);
+              $this->say($success_message);
+              $this->logger->info($success_message);
             }
           }
+          else {
+            $present_message = $this->t('Vocabulary @vocab is already present.', [
+              '@vocab' => $bundle['name'],
+            ]);
+            $this->say($present_message);
+            $this->logger->info($present_message);
+          }
         }
-        // Generate fields now.
-        $result = $this->generateFields();
       }
-      catch (\Exception $exception) {
-        $this->displayAndLogException($exception, DstegConstants::VOCABULARIES);
-        $result = self::EXIT_FAILURE;
-      }
+      // Generate fields now.
+      $result = $this->generateFields();
+    }
+    catch (\Exception $exception) {
+      $this->displayAndLogException($exception, DstegConstants::VOCABULARIES);
+      $result = self::EXIT_FAILURE;
     }
 
     return CommandResult::exitCode($result);
@@ -111,7 +112,7 @@ class Vocabulary extends BaseEntityGenerate {
    * Helper function to generate fields.
    */
   public function generateFields() {
-    $command_result = self::EXIT_SUCCESS;
+    $result = self::EXIT_SUCCESS;
 
     $this->logger->notice($this->t('Generating Drupal Fields.'));
     // Call all the methods to generate the Drupal entities.
@@ -156,13 +157,13 @@ class Vocabulary extends BaseEntityGenerate {
             }
             catch (\Exception $exception) {
               $this->displayAndLogException($exception, DstegConstants::FIELDS);
-              $command_result = self::EXIT_FAILURE;
+              $result = self::EXIT_FAILURE;
             }
           }
         }
       }
     }
-    return CommandResult::exitCode($command_result);
+    return CommandResult::exitCode($result);
   }
 
 }

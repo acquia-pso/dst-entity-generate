@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
@@ -42,12 +43,15 @@ class ImageStyle extends BaseEntityGenerate {
    *   The EntityType Manager.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   General Api service definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
   public function __construct(GoogleSheetApi $sheet,
                               LoggerChannelFactoryInterface $loggerChannelFactory,
                               EntityTypeManagerInterface $entityTypeManager,
-                              GeneralApi $generalApi) {
-    parent::__construct($sheet, $generalApi);
+                              GeneralApi $generalApi,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($sheet, $generalApi, $configFactory);
     $this->logger = $loggerChannelFactory->get('dst_entity_generate');
     $this->entityTypeManager = $entityTypeManager;
   }
@@ -61,51 +65,45 @@ class ImageStyle extends BaseEntityGenerate {
    */
   public function generateImageStyle() {
     $result = FALSE;
-    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::IMAGE_STYLES);
-    if ($skipEntitySync) {
-      $result = $this->displaySkipMessage(DstegConstants::IMAGE_STYLES);
-    }
-    if ($result === FALSE) {
-      try {
-        $this->say($this->t('Generating Drupal Image Style.'));
-        $imageStyle_data = $this->sheet->getData(DstegConstants::IMAGE_STYLES);
-        if (!empty($imageStyle_data)) {
-          // Call all the methods to generate the Drupal image style.
-          foreach ($imageStyle_data as $imageStyle) {
-            // Create image style only if it is in Wait and implement state.
-            if ($imageStyle['x'] === 'w') {
-              $sized_image = $this->entityTypeManager->getStorage('image_style')->load($imageStyle['machine_name']);
-              if ($sized_image === NULL || empty($sized_image)) {
-                // Create image style.
-                $style = $this->entityTypeManager->getStorage('image_style')->create([
-                  'name' => $imageStyle['machine_name'],
-                  'label' => $imageStyle['style_name'],
-                ]);
-                $style->save();
-                if ($style === 1) {
-                  $message = $this->t('New image style @imagestyle created.', [
-                    '@imagestyle' => $imageStyle['machine_name'],
-                  ]);
-                  $this->say($message);
-                  $this->logger->info($message);
-                }
-              }
-              else {
-                $imageStyle_exist = $this->t('Image style @imagestyle already present.', [
+    try {
+      $this->say($this->t('Generating Drupal Image Style.'));
+      $imageStyle_data = $this->sheet->getData(DstegConstants::IMAGE_STYLES);
+      if (!empty($imageStyle_data)) {
+        // Call all the methods to generate the Drupal image style.
+        foreach ($imageStyle_data as $imageStyle) {
+          // Create image style only if it is in Wait and implement state.
+          if ($imageStyle['x'] === 'w') {
+            $sized_image = $this->entityTypeManager->getStorage('image_style')->load($imageStyle['machine_name']);
+            if ($sized_image === NULL || empty($sized_image)) {
+              // Create image style.
+              $style = $this->entityTypeManager->getStorage('image_style')->create([
+                'name' => $imageStyle['machine_name'],
+                'label' => $imageStyle['style_name'],
+              ]);
+              $style->save();
+              if ($style === 1) {
+                $message = $this->t('New image style @imagestyle created.', [
                   '@imagestyle' => $imageStyle['machine_name'],
                 ]);
-                $this->say($imageStyle_exist);
-                $this->logger->info($imageStyle_exist);
+                $this->say($message);
+                $this->logger->info($message);
               }
+            }
+            else {
+              $imageStyle_exist = $this->t('Image style @imagestyle already present.', [
+                '@imagestyle' => $imageStyle['machine_name'],
+              ]);
+              $this->say($imageStyle_exist);
+              $this->logger->info($imageStyle_exist);
             }
           }
         }
-        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
-      catch (\Exception $exception) {
-        $this->displayAndLogException($exception, DstegConstants::IMAGE_STYLES);
-        $result = CommandResult::exitCode(self::EXIT_FAILURE);
-      }
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+    }
+    catch (\Exception $exception) {
+      $this->displayAndLogException($exception, DstegConstants::IMAGE_STYLES);
+      $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
     return $result;
   }

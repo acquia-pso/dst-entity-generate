@@ -2,7 +2,8 @@
 
 namespace Drupal\dst_entity_generate;
 
-use Consolidation\AnnotatedCommand\CommandResult;
+use Consolidation\AnnotatedCommand\CommandData;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
@@ -30,23 +31,34 @@ abstract class BaseEntityGenerate extends DrushCommands {
   protected $helper;
 
   /**
+   * Sync configuration array.
+   *
+   * @var array|mixed|null
+   */
+  private $syncEntities;
+
+  /**
    * BaseEntityGenerate constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
    *   GoogleSheetApi service class object.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
-  public function __construct(GoogleSheetApi $sheet, GeneralApi $generalApi) {
+  public function __construct(GoogleSheetApi $sheet, GeneralApi $generalApi, ConfigFactoryInterface $configFactory) {
     parent::__construct();
     $this->sheet = $sheet;
     $this->helper = $generalApi;
+    $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
   }
 
   /**
    * Validate hook for commands.
    *
    * @hook validate
+   * @throws \Exception
    */
   public function validateGoogleSheetCreds() {
     $keyValueStorage = \Drupal::service('keyvalue');
@@ -63,21 +75,48 @@ abstract class BaseEntityGenerate extends DrushCommands {
   }
 
   /**
-   * Helper function to display skip message and exit command.
+   * Validate whether sync is enabled or not.
    *
-   * @param string $entity
-   *   Entity that is not sync enabled.
-   *
-   * @return \Consolidation\AnnotatedCommand\CommandResult
-   *   Command exit code.
+   * @hook validate
+   * @throws \Exception
    */
-  public function displaySkipMessage(string $entity) {
-    $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
-      ['@entity' => $entity]
-    );
-    // @todo yell() and say() needs to be part of the `logMessage() method`.
-    $this->yell($message, 100, 'yellow');
-    return CommandResult::exitCode(self::EXIT_SUCCESS);
+  public function validateEntitySync(CommandData $commandData) {
+    $entity_type = '';
+    $command = $commandData->annotationData()->get('command');
+    switch ($command) {
+      case 'dst:generate:bundles':
+        $entity_type = DstegConstants::CONTENT_TYPES;
+        break;
+
+      case 'dst:generate:vocabs':
+        $entity_type = DstegConstants::VOCABULARIES;
+        break;
+
+      case 'dst:generate:image-effects':
+        $entity_type = DstegConstants::IMAGE_EFFECTS;
+        break;
+
+      case 'dst:generate:menus':
+        $entity_type = DstegConstants::MENUS;
+        break;
+
+      case 'dst:generate:user-roles':
+        $entity_type = DstegConstants::USER_ROLES;
+        break;
+
+      case 'dst:generate:workflow':
+        $entity_type = DstegConstants::WORKFLOWS;
+        break;
+    }
+    if (!empty($entity_type)) {
+      $skipEntitySync = $this->helper->skipEntitySync($entity_type);
+      if ($skipEntitySync) {
+        $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
+          ['@entity' => $entity_type]
+        );
+        throw new \Exception($message);
+      }
+    }
   }
 
   /**

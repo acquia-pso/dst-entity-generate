@@ -12,6 +12,7 @@ services:
     - '@dst_entity_generate.commands.vocabulary'
     - '@dst_entity_generate.google_sheet_api'
     - '@dst_entity_generate.general_api'
+    - '@config.factory'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.menus:
@@ -19,6 +20,7 @@ services:
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.bundle:
@@ -30,11 +32,13 @@ services:
       - '@entity_type.manager'
       - '@entity_display.repository'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'
   dst_entity_generate.commands.user_roles:
     class: Drupal\dst_entity_generate\Commands\UserRole
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.image_effect:
@@ -45,11 +49,13 @@ services:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
       - '@plugin.manager.image.effect'
+      - '@config.factory'
   dst_entity_generate.commands.workflow:
     class: Drupal\dst_entity_generate\Commands\Workflow
     arguments:
       - '@dst_entity_generate.google_sheet_api'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.image_style:
@@ -59,6 +65,7 @@ services:
       - '@logger.factory'
       - '@entity_type.manager'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.vocabulary:
@@ -70,3 +77,4 @@ services:
       - '@entity_type.manager'
       - '@logger.factory'
       - '@dst_entity_generate.general_api'
+      - '@config.factory'

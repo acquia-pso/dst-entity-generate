@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
@@ -32,11 +33,14 @@ class ImageEffect extends BaseEntityGenerate {
    *   General Api service definition.
    * @param \Drupal\image\ImageEffectManager $effect_manager
    *   The image effect manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
   public function __construct(GoogleSheetApi $sheet,
                               GeneralApi $generalApi,
-                              ImageEffectManager $effect_manager) {
-    parent::__construct($sheet, $generalApi);
+                              ImageEffectManager $effect_manager,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($sheet, $generalApi, $configFactory);
     $this->effectManager = $effect_manager;
   }
 
@@ -49,98 +53,92 @@ class ImageEffect extends BaseEntityGenerate {
    */
   public function generateImageEffects() {
     $result = FALSE;
-    $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::IMAGE_EFFECTS);
     $logMessages = [];
-    if ($skipEntitySync) {
-      $result = $this->displaySkipMessage(DstegConstants::IMAGE_EFFECTS);
-    }
-    if ($result === FALSE) {
-      try {
-        $this->yell($this->t('Generating Image Effects.'), 100, 'blue');
-        $entity_data = $this->sheet->getData(DstegConstants::IMAGE_EFFECTS);
-        if (!empty($entity_data)) {
-          // Get all existing image effect plugin definitions.
-          $image_effect_definitions = $this->effectManager->getDefinitions();
-          // Get all existing image styles.
-          $image_styles = $this->helper->getAllEntities('image_style', 'all');
-          $any_matching_style = FALSE;
-          foreach ($entity_data as $image_effect) {
-            if ($image_effect['x'] === 'w') {
-              foreach ($image_styles as $image_style) {
-                if ($image_style->label() === $image_effect['image_style']) {
-                  $any_matching_style = TRUE;
-                  $any_matched_definition = FALSE;
-                  foreach ($image_effect_definitions as $image_effect_definition) {
-                    if ($image_effect_definition['label']->__toString() === $image_effect['effect']) {
-                      $any_matched_definition = TRUE;
-                      $settings = $this->getConfigurationsFromSummery($image_effect['summary']);
-                      if (!empty($settings)) {
-                        $configuration = [
-                          'uuid' => NULL,
-                          'id' => $image_effect_definition['id'],
-                          'weight' => 0,
-                          'data' => $settings,
-                        ];
-                        $effect = $this->effectManager->createInstance($configuration['id'], $configuration);
+    try {
+      $this->yell($this->t('Generating Image Effects.'), 100, 'blue');
+      $entity_data = $this->sheet->getData(DstegConstants::IMAGE_EFFECTS);
+      if (!empty($entity_data)) {
+        // Get all existing image effect plugin definitions.
+        $image_effect_definitions = $this->effectManager->getDefinitions();
+        // Get all existing image styles.
+        $image_styles = $this->helper->getAllEntities('image_style', 'all');
+        $any_matching_style = FALSE;
+        foreach ($entity_data as $image_effect) {
+          if ($image_effect['x'] === 'w') {
+            foreach ($image_styles as $image_style) {
+              if ($image_style->label() === $image_effect['image_style']) {
+                $any_matching_style = TRUE;
+                $any_matched_definition = FALSE;
+                foreach ($image_effect_definitions as $image_effect_definition) {
+                  if ($image_effect_definition['label']->__toString() === $image_effect['effect']) {
+                    $any_matched_definition = TRUE;
+                    $settings = $this->getConfigurationsFromSummery($image_effect['summary']);
+                    if (!empty($settings)) {
+                      $configuration = [
+                        'uuid' => NULL,
+                        'id' => $image_effect_definition['id'],
+                        'weight' => 0,
+                        'data' => $settings,
+                      ];
+                      $effect = $this->effectManager->createInstance($configuration['id'], $configuration);
 
-                        $image_style->addImageEffect($effect->getConfiguration());
-                        $is_saved = $image_style->save();
-                        if ($is_saved === 2) {
-                          $success_message = $this->t('Image effect @effect created in @style', [
-                            '@effect' => $image_effect['effect'],
-                            '@style' => $image_effect['image_style'],
-                          ]);
-                          $this->say($success_message);
-                          $logMessages[] = $success_message;
-                        }
-                        else {
-                          $skip_message = $this->t('Skipping: Image effect @effect in @style', [
-                            '@effect' => $image_effect['effect'],
-                            '@style' => $image_effect['image_style'],
-                          ]);
-                          $this->say($skip_message);
-                          $logMessages[] = $skip_message;
-                        }
-                      }
-                      else {
-                        $incomplete_requirement_message = $this->t('Please provide Image effect settings in Summery to create @effect effect in @style.', [
+                      $image_style->addImageEffect($effect->getConfiguration());
+                      $is_saved = $image_style->save();
+                      if ($is_saved === 2) {
+                        $success_message = $this->t('Image effect @effect created in @style', [
                           '@effect' => $image_effect['effect'],
                           '@style' => $image_effect['image_style'],
                         ]);
-                        $this->say($incomplete_requirement_message);
-                        $logMessages[] = $incomplete_requirement_message;
+                        $this->say($success_message);
+                        $logMessages[] = $success_message;
+                      }
+                      else {
+                        $skip_message = $this->t('Skipping: Image effect @effect in @style', [
+                          '@effect' => $image_effect['effect'],
+                          '@style' => $image_effect['image_style'],
+                        ]);
+                        $this->say($skip_message);
+                        $logMessages[] = $skip_message;
                       }
                     }
+                    else {
+                      $incomplete_requirement_message = $this->t('Please provide Image effect settings in Summery to create @effect effect in @style.', [
+                        '@effect' => $image_effect['effect'],
+                        '@style' => $image_effect['image_style'],
+                      ]);
+                      $this->say($incomplete_requirement_message);
+                      $logMessages[] = $incomplete_requirement_message;
+                    }
                   }
-                  if ($any_matched_definition === FALSE) {
-                    $no_match_message = $this->t('Skipping: No new matching Image effects found for the Image Style @style', [
-                      '@style' => $image_effect['image_style'],
-                    ]);
-                    $this->say($no_match_message);
-                    $logMessages[] = $no_match_message;
-                  }
+                }
+                if ($any_matched_definition === FALSE) {
+                  $no_match_message = $this->t('Skipping: No new matching Image effects found for the Image Style @style', [
+                    '@style' => $image_effect['image_style'],
+                  ]);
+                  $this->say($no_match_message);
+                  $logMessages[] = $no_match_message;
                 }
               }
             }
           }
-          if ($any_matching_style === FALSE) {
-            $no_style_match_message = $this->t('Skipping: There are no Image effects matching to any Image styles. Try running Image styles command first, i.e. drush dst:generate:imagestyle');
-            $this->say($no_style_match_message);
-            $logMessages[] = $no_style_match_message;
-          }
         }
-        else {
-          $no_data_message = $this->t('There is no data for the Image effect entity in your DST sheet.');
-          $this->say($no_data_message);
-          $logMessages[] = $no_data_message;
+        if ($any_matching_style === FALSE) {
+          $no_style_match_message = $this->t('Skipping: There are no Image effects matching to any Image styles. Try running Image styles command first, i.e. drush dst:generate:imagestyle');
+          $this->say($no_style_match_message);
+          $logMessages[] = $no_style_match_message;
         }
-        $this->yell($this->t('Finished generating Image Effects.'), 100, 'blue');
-        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
-      catch (\Exception $exception) {
-        $this->displayAndLogException($exception, DstegConstants::IMAGE_EFFECTS);
-        $result = CommandResult::exitCode(self::EXIT_FAILURE);
+      else {
+        $no_data_message = $this->t('There is no data for the Image effect entity in your DST sheet.');
+        $this->say($no_data_message);
+        $logMessages[] = $no_data_message;
       }
+      $this->yell($this->t('Finished generating Image Effects.'), 100, 'blue');
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+    }
+    catch (\Exception $exception) {
+      $this->displayAndLogException($exception, DstegConstants::IMAGE_EFFECTS);
+      $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
     $this->helper->logMessage($logMessages);
     return $result;

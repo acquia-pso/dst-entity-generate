@@ -126,39 +126,40 @@ class Vocabulary extends BaseEntityGenerate {
     }
     if (!empty($fields_data)) {
       foreach ($fields_data as $field) {
+        if ($field['x'] !== 'w') {
+          continue;
+        }
         $bundle = $field['bundle'];
         $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
         if (array_key_exists($bundle_name, $bundleArr)) {
           $bundleVal = $bundleArr[$bundle_name];
         }
         if (isset($bundleVal)) {
-          if ($field['x'] === 'w') {
-            try {
-              $entity_type_id = 'taxonomy_vocabulary';
-              $entity_type = 'taxonomy_term';
-              $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
+          try {
+            $entity_type_id = 'taxonomy_vocabulary';
+            $entity_type = 'taxonomy_term';
+            $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
 
-              // Skip field if present.
-              if (!empty($drupal_field)) {
-                $this->logger->notice($this->t(
-                  'The field @field is present in @vocab. Skipping.',
-                  [
-                    '@field' => $field['machine_name'],
-                    '@vocab' => $bundleVal,
-                  ]
-                ));
-                continue;
-              }
-              // Create field storage.
-              $result = $this->helper->fieldStorageHandler($field, $entity_type);
-              if ($result) {
-                $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
-              }
+            // Skip field if present.
+            if (!empty($drupal_field)) {
+              $this->logger->notice($this->t(
+                'The field @field is present in @vocab. Skipping.',
+                [
+                  '@field' => $field['machine_name'],
+                  '@vocab' => $bundleVal,
+                ]
+              ));
+              continue;
             }
-            catch (\Exception $exception) {
-              $this->displayAndLogException($exception, DstegConstants::FIELDS);
-              $result = self::EXIT_FAILURE;
+            // Create field storage.
+            $result = $this->helper->fieldStorageHandler($field, $entity_type);
+            if ($result) {
+              $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
             }
+          }
+          catch (\Exception $exception) {
+            $this->displayAndLogException($exception, DstegConstants::FIELDS);
+            $result = self::EXIT_FAILURE;
           }
         }
       }

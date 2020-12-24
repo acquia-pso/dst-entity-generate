@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\Services\GeneralApi;
@@ -87,6 +88,8 @@ class GenerateAll extends BaseEntityGenerate {
    *   GoogleSheetApi service class object.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
   public function __construct(TranslationInterface $stringTranslation,
                               Bundle $dstegBundle,
@@ -97,8 +100,9 @@ class GenerateAll extends BaseEntityGenerate {
                               ImageStyle $dstegImageStyle,
                               Vocabulary $dstegVocabulary,
                               GoogleSheetApi $sheet,
-                              GeneralApi $generalApi) {
-    parent::__construct($sheet, $generalApi);
+                              GeneralApi $generalApi,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($sheet, $generalApi, $configFactory);
     $this->stringTranslation = $stringTranslation;
     $this->dstegBundle = $dstegBundle;
     $this->dstegMenus = $dstegMenus;
@@ -142,7 +146,7 @@ class GenerateAll extends BaseEntityGenerate {
     $this->dstegVocabulary->generateVocabularies();
 
     // Call all the methods to generate the Drupal entities.
-    $this->yell($this->t('Congratulations. All the Drupal entities are generated automatically.'));
+    $this->yell($this->t('Congratulations. The entities which are enabled for sync are generated successfully.'));
 
     return CommandResult::exitCode(self::EXIT_SUCCESS);
   }

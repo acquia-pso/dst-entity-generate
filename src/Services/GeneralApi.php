@@ -4,7 +4,6 @@ namespace Drupal\dst_entity_generate\Services;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -34,13 +33,6 @@ class GeneralApi {
   protected $configFactory;
 
   /**
-   * Private variable to check debug mode.
-   *
-   * @var mixed
-   */
-  private $debugMode;
-
-  /**
    * Entity type manager service definition.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -62,10 +54,27 @@ class GeneralApi {
   protected $moduleHandler;
 
   /**
+   * Sync configuration array.
+   *
+   * @var array|mixed|null
+   */
+  private $syncEntities;
+
+  /**
    * Constructs a new GoogleSpreadsheetAccess object.
+   *
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   LoggerChannelFactory service definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The EntityType Manager.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
+   *   Display mode repository.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler.
    */
   public function __construct(LoggerChannelFactoryInterface $logger_factory,
-                              KeyValueFactoryInterface $key_value,
                               ConfigFactoryInterface $configFactory,
                               EntityTypeManagerInterface $entityTypeManager,
                               EntityDisplayRepositoryInterface $displayRepository,
@@ -73,8 +82,6 @@ class GeneralApi {
 
     $this->logger = $logger_factory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
-    $this->entityGenerateStorage = $key_value->get('dst_entity_generate_storage');
-    $this->debugMode = $this->entityGenerateStorage->get('debug_mode');
     $this->entityTypeManager = $entityTypeManager;
     $this->displayRepository = $displayRepository;
     $this->moduleHandler = $moduleHandler;
@@ -92,7 +99,7 @@ class GeneralApi {
   public function skipEntitySync(string $entity) {
     $skipEntitySync = FALSE;
     $entity = strtolower(str_replace(" ", "_", $entity));
-    if (!empty($this->syncEntities) && $this->syncEntities[$entity]['All'] !== 'All') {
+    if ($this->syncEntities && array_key_exists($entity, $this->syncEntities) && empty($this->syncEntities[$entity])) {
       $skipEntitySync = TRUE;
     }
     return $skipEntitySync;
@@ -105,9 +112,7 @@ class GeneralApi {
    *   Message which needs to be logged.
    */
   public function logMessage(array $message) {
-    if ($this->debugMode) {
-      $this->logger->debug(implode("<br />", $message));
-    }
+    $this->logger->debug(implode("<br />", $message));
   }
 
   /**
@@ -226,7 +231,7 @@ class GeneralApi {
    * @param string $entity_type
    *   Entity type.
    *
-   * @return boolean
+   * @return bool
    *   Returns boolean based on unmet dependency.
    */
   public function fieldStorageHandler(array $field, string $entity_type) {

@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
@@ -16,51 +17,19 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 class Workflow extends BaseEntityGenerate {
 
   /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
-
-  /**
-   * Logger service definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
-
-  /**
-   * KeyValue service definition.
-   *
-   * @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface
-   */
-  protected $keyValue;
-
-  /**
-   * ConfigFactory service definition.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
-   * GeneralApi service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
-
-  /**
    * DstEntityGenerate constructor.
    *
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
    *   Google Sheet Api service definition.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   GeneralApi service definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi) {
-    parent::__construct($googleSheetApi, $generalApi);
+                              GeneralApi $generalApi,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($googleSheetApi, $generalApi, $configFactory);
   }
 
   /**
@@ -71,24 +40,17 @@ class Workflow extends BaseEntityGenerate {
    * @usage drush dst:generate:workflow
    */
   public function generateWorkflows() {
+    $result = FALSE;
     $workflow_enabled = $this->helper->isModuleEnabled('workflows');
     $content_moderation_enabled = $this->helper->isModuleEnabled('content_moderation');
-
-    try {
-      $is_import_workflow = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOWS));
-      $is_import_workflow_states = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOW_STATES));
-      $is_import_workflow_transitions = (!$this->helper->skipEntitySync(DstegConstants::WORKFLOW_TRANSITIONS));
-
-      if (!$workflow_enabled) {
-        $this->showMessageOnCli($this->t('Please install workflows module.'));
-      }
-      elseif (!$content_moderation_enabled) {
-        $this->showMessageOnCli($this->t('Please install content moderation module.'));
-      }
-      elseif (!$is_import_workflow) {
-        $this->showMessageOnCli($this->t('Please enable Workflow All in General Configurations.'));
-      }
-      else {
+    if (!$workflow_enabled) {
+      $this->showMessageOnCli($this->t('Please install workflows module.'));
+    }
+    elseif (!$content_moderation_enabled) {
+      $this->showMessageOnCli($this->t('Please install content moderation module.'));
+    }
+    else {
+      try {
         $default_weight = 0;
         $this->yell($this->t('Generating Workflows.'), 100, 'blue');
         $workflow_storage = $this->helper->getAllEntities('workflow');
@@ -114,68 +76,63 @@ class Workflow extends BaseEntityGenerate {
           $workflow_config['type_settings']['states'] = [];
           $workflow_config['type_settings']['transitions'] = [];
 
-          if ($is_import_workflow_states) {
-            // Add only non implemented work flow states.
-            foreach ($workflow_states as $workflow_state) {
-              if ($workflow_state['x'] === 'w' && $workflow_state['workflow'] === $wf_label) {
-                $workflow_config['type_settings']['states'][$workflow_state['machine_name']] = [
-                  'label' => $workflow_state['label'],
+          // Add only non implemented work flow states.
+          foreach ($workflow_states as $workflow_state) {
+            if ($workflow_state['x'] === 'w' && $workflow_state['workflow'] === $wf_label) {
+              $workflow_config['type_settings']['states'][$workflow_state['machine_name']] = [
+                'label' => $workflow_state['label'],
+                'weight' => $default_weight,
+              ];
+              $workflow_state_map[$workflow_state['machine_name']] = $workflow_state['label'];
+              $this->say($this->t('State @wf_state created successfully for workflow @workflow', [
+                '@wf_state' => $workflow_state['label'],
+                '@workflow' => $wf_label,
+              ]));
+            }
+          }
+
+          // Add only non implemented work flow transitions.
+          foreach ($workflow_transitions as $workflow_transition) {
+            if ($workflow_transition['x'] === 'w' && $workflow_transition['workflow'] === $wf_label) {
+              // Create transition from the array.
+              $workflow_transition_from[$workflow_transition['machine_name']][] = array_search(
+                $workflow_transition['from_state'],
+                $workflow_state_map
+              );
+              $workflow_transition_to = array_search($workflow_transition['to_state'], $workflow_state_map);
+              if (empty($workflow_transition_from)) {
+                $this->showMessageOnCli($this->t('From states not present for workflow @workflow', [
+                  '@workflow' => $wf_label,
+                ]));
+                $this->showMessageOnCli($this->t('Transitions @wf_trans not created workflow @workflow', [
+                  '@wf_trans' => $workflow_transition['label'],
+                  '@workflow' => $wf_label,
+                ]));
+              }
+              elseif (empty($workflow_transition_to)) {
+                $this->showMessageOnCli($this->t('To state @to_state is not present for workflow @workflow', [
+                  '@to_state' => $workflow_transition['to_state'],
+                  '@workflow' => $wf_label,
+                ]));
+                $this->showMessageOnCli($this->t('Transitions @wf_trans not created for workflow @workflow', [
+                  '@wf_trans' => $workflow_transition['label'],
+                  '@workflow' => $wf_label,
+                ]));
+              }
+              else {
+                $workflow_config['type_settings']['transitions'][$workflow_transition['machine_name']] = [
+                  'label' => $workflow_transition['label'],
+                  'from' => $workflow_transition_from[$workflow_transition['machine_name']],
+                  'to' => $workflow_transition_to,
                   'weight' => $default_weight,
                 ];
-                $workflow_state_map[$workflow_state['machine_name']] = $workflow_state['label'];
-                $this->say($this->t('State @wf_state created successfully for workflow @workflow', [
-                  '@wf_state' => $workflow_state['label'],
+                $this->showMessageOnCli($this->t('Transitions @wf_trans created successfully for workflow @workflow', [
+                  '@wf_trans' => $workflow_transition['label'],
                   '@workflow' => $wf_label,
                 ]));
               }
             }
           }
-
-          if ($is_import_workflow_states && $is_import_workflow_transitions) {
-            // Add only non implemented work flow transitions.
-            foreach ($workflow_transitions as $workflow_transition) {
-              if ($workflow_transition['x'] === 'w' && $workflow_transition['workflow'] === $wf_label) {
-                // Create transition from the array.
-                $workflow_transition_from[$workflow_transition['machine_name']][] = array_search(
-                  $workflow_transition['from_state'],
-                  $workflow_state_map
-                );
-                $workflow_transition_to = array_search($workflow_transition['to_state'], $workflow_state_map);
-                if (empty($workflow_transition_from)) {
-                  $this->showMessageOnCli($this->t('From states not present for workflow @workflow', [
-                    '@workflow' => $wf_label,
-                  ]));
-                  $this->showMessageOnCli($this->t('Transitions @wf_trans not created workflow @workflow', [
-                    '@wf_trans' => $workflow_transition['label'],
-                    '@workflow' => $wf_label,
-                  ]));
-                }
-                elseif (empty($workflow_transition_to)) {
-                  $this->showMessageOnCli($this->t('To state @to_state is not present for workflow @workflow', [
-                    '@to_state' => $workflow_transition['to_state'],
-                    '@workflow' => $wf_label,
-                  ]));
-                  $this->showMessageOnCli($this->t('Transitions @wf_trans not created for workflow @workflow', [
-                    '@wf_trans' => $workflow_transition['label'],
-                    '@workflow' => $wf_label,
-                  ]));
-                }
-                else {
-                  $workflow_config['type_settings']['transitions'][$workflow_transition['machine_name']] = [
-                    'label' => $workflow_transition['label'],
-                    'from' => $workflow_transition_from[$workflow_transition['machine_name']],
-                    'to' => $workflow_transition_to,
-                    'weight' => $default_weight,
-                  ];
-                  $this->showMessageOnCli($this->t('Transitions @wf_trans created successfully for workflow @workflow', [
-                    '@wf_trans' => $workflow_transition['label'],
-                    '@workflow' => $wf_label,
-                  ]));
-                }
-              }
-            }
-          }
-
           $is_workflow_present = $workflow_storage->load($wf_machine_name);
           if (isset($is_workflow_present) || !empty($is_workflow_present)) {
             // Set states and transitions if workflow is present.
@@ -204,21 +161,15 @@ class Workflow extends BaseEntityGenerate {
             }
           }
         }
+        $this->yell($this->t('Finished generating workflows, states and transitions.'), 100, 'blue');
+        $result = self::EXIT_SUCCESS;
       }
-      $this->yell($this->t('Finished generating workflows, states and transitions.'), 100, 'blue');
-      $command_result = self::EXIT_SUCCESS;
+      catch (\Exception $exception) {
+        $this->displayAndLogException($exception, DstegConstants::WORKFLOWS);
+        $result = self::EXIT_FAILURE;
+      }
     }
-    catch (\Exception $exception) {
-      $this->say('Exception occurred while import.');
-      $this->yell($exception);
-      $this->helper->logMessage(['Exception occurred @exception', [
-        '@exception' => $exception,
-      ],
-      ]
-          );
-      $command_result = self::EXIT_FAILURE;
-    }
-    return CommandResult::exitCode($command_result);
+    return CommandResult::exitCode($result);
   }
 
   /**

@@ -3,6 +3,7 @@
 namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
@@ -14,19 +15,6 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
  * @package Drupal\dst_entity_generate\Commands
  */
 class UserRole extends BaseEntityGenerate {
-  /**
-   * Google Sheet Api service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GoogleSheetApi
-   */
-  protected $googleSheetApi;
-
-  /**
-   * GeneralApi service definition.
-   *
-   * @var \Drupal\dst_entity_generate\Services\GeneralApi
-   */
-  protected $generalApi;
 
   /**
    * DstCommands constructor.
@@ -35,10 +23,13 @@ class UserRole extends BaseEntityGenerate {
    *   Google Sheet Api service definition.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   GeneralApi service definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
    */
   public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi) {
-    parent::__construct($googleSheetApi, $generalApi);
+                              GeneralApi $generalApi,
+                              ConfigFactoryInterface $configFactory) {
+    parent::__construct($googleSheetApi, $generalApi, $configFactory);
   }
 
   /**
@@ -49,68 +40,54 @@ class UserRole extends BaseEntityGenerate {
    * @usage drush dst:generate:user-roles
    */
   public function generateUserRoles() {
+    $result = FALSE;
+    $logMessages = [];
     try {
-      $result = FALSE;
-      $skipEntitySync = $this->helper->skipEntitySync(DstegConstants::USER_ROLES);
-      $logMessages = [];
-      if ($skipEntitySync) {
-        $message = $this->t(DstegConstants::SKIP_ENTITY_MESSAGE,
-          ['@entity' => DstegConstants::USER_ROLES]);
-        $this->yell($message, 100, 'yellow');
-        $logMessages[] = $message;
-        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
-      }
-      elseif (!$result) {
-        $this->yell($this->t('Generating user roles.'), 100, 'blue');
-        $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
-        if (!empty($user_role_data)) {
-          $user_role_storage = $this->helper->getAllEntities('user_role');
-          foreach ($user_role_data as $user_role) {
-            // Create role only if it is in Wait and implement state.
-            if ($user_role['x'] === 'w') {
-              $is_role_present = $user_role_storage
-                ->load($user_role['machine_name']);
-              // Prevent exception if role is already present.
-              if (!isset($is_role_present) || empty($is_role_present)) {
-                $is_saved = $user_role_storage
-                  ->create([
-                    'id' => $user_role['machine_name'],
-                    'label' => $user_role['name'],
-                  ])
-                  ->save();
-                if ($is_saved === 1) {
-                  $success_message = $this->t('New role @role created.', [
-                    '@role' => $user_role['name'],
-                  ]);
-                  $this->say($success_message);
-                  $logMessages[] = $success_message;
-                }
-              }
-              else {
-                $present_message = $this->t('Role @role already present.', [
+      $this->yell($this->t('Generating user roles.'), 100, 'blue');
+      $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
+      if (!empty($user_role_data)) {
+        $user_role_storage = $this->helper->getAllEntities('user_role');
+        foreach ($user_role_data as $user_role) {
+          // Create role only if it is in Wait and implement state.
+          if ($user_role['x'] === 'w') {
+            $is_role_present = $user_role_storage
+              ->load($user_role['machine_name']);
+            // Prevent exception if role is already present.
+            if (!isset($is_role_present) || empty($is_role_present)) {
+              $is_saved = $user_role_storage
+                ->create([
+                  'id' => $user_role['machine_name'],
+                  'label' => $user_role['name'],
+                ])
+                ->save();
+              if ($is_saved === 1) {
+                $success_message = $this->t('New role @role created.', [
                   '@role' => $user_role['name'],
                 ]);
-                $this->say($present_message);
-                $logMessages[] = $present_message;
+                $this->say($success_message);
+                $logMessages[] = $success_message;
               }
+            }
+            else {
+              $present_message = $this->t('Role @role already present.', [
+                '@role' => $user_role['name'],
+              ]);
+              $this->say($present_message);
+              $logMessages[] = $present_message;
             }
           }
         }
-        else {
-          $no_data_message = $this->t('There is no data for the User role entity in your DST sheet.');
-          $this->say($no_data_message);
-          $logMessages[] = $no_data_message;
-        }
-        $this->yell($this->t('Finished generating User roles.'), 100, 'blue');
-        $result = CommandResult::exitCode(self::EXIT_SUCCESS);
       }
+      else {
+        $no_data_message = $this->t('There is no data for the User role entity in your DST sheet.');
+        $this->say($no_data_message);
+        $logMessages[] = $no_data_message;
+      }
+      $this->yell($this->t('Finished generating User roles.'), 100, 'blue');
+      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
     catch (\Exception $exception) {
-      $exception_message = $this->t('Exception occurred @exception', [
-        '@exception' => $exception,
-      ]);
-      $this->yell($exception_message);
-      $logMessages[] = $exception_message;
+      $this->displayAndLogException($exception, DstegConstants::USER_ROLES);
       $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
 

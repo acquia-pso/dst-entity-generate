@@ -9,7 +9,6 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Google Api Settings Form.
@@ -17,8 +16,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * @package Drupal\dst_entity_generate\Form
  */
 class GoogleSheetApiSetting extends FormBase {
-
-  use StringTranslationTrait;
 
   /**
    * Variable for steps.
@@ -106,7 +103,7 @@ class GoogleSheetApiSetting extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $store = $this->keyValue->get("dst_google_sheet_storage");
 
-    if ($this->step == 1) {
+    if ($this->step === 1) {
       $form['step'] = [
         '#type' => 'item',
         '#markup' => "<b>Step - 1</b>",
@@ -120,15 +117,6 @@ class GoogleSheetApiSetting extends FormBase {
         '#default_value' => (isset($store) && !empty($store->get('name'))) ? $store->get('name') : '',
       ];
 
-      $form['credentials_json_file'] = [
-        '#type' => 'managed_file',
-        '#title' => $this->t('Upload credentials.json File'),
-        '#required' => TRUE,
-        '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1.') . '</p>',
-        '#upload_validators' => ['file_validate_extensions' => ['json']],
-        '#upload_location' => 'private://',
-      ];
-
       $form['spreadsheet_id'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Google Sheet Id'),
@@ -139,16 +127,17 @@ class GoogleSheetApiSetting extends FormBase {
         '#default_value' => (isset($store) && !empty($store->get('spreadsheet_id'))) ? $store->get('spreadsheet_id') : '',
       ];
 
-      if (isset($store) && !empty($store->get('credentials'))) {
-        $form['credentials'] = [
-          '#type' => 'item',
-          '#title' => $this->t('Uploaded Credentials JSON'),
-          '#markup' => (isset($store) && !empty($store->get('credentials'))) ? $store->get('credentials') : '',
-        ];
-      }
+      $form['credentials_json_file'] = [
+        '#type' => 'managed_file',
+        '#title' => $this->t('Upload credentials.json File'),
+        '#required' => TRUE,
+        '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1.') . '</p>',
+        '#upload_validators' => ['file_validate_extensions' => ['json']],
+        '#upload_location' => 'private://',
+      ];
     }
 
-    if ($this->step == 2) {
+    if ($this->step === 2) {
 
       $form['step'] = [
         '#type' => 'item',
@@ -158,7 +147,7 @@ class GoogleSheetApiSetting extends FormBase {
       if (!empty($this->verificationLink)) {
         $form['verification_link'] = [
           '#type' => 'item',
-          '#markup' => $this->t("Authorization to access Google Spreadsheet needed. Open the following link in your browser and get the verification code:") . "<br>" . $this->verificationLink,
+          '#markup' => $this->t("Authorization to access Google Spreadsheet needed.  To get the verification code") . ' ' . $this->verificationLink . '.',
         ];
       }
 
@@ -185,52 +174,40 @@ class GoogleSheetApiSetting extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    $store = $this->keyValue->get("dst_google_sheet_storage");
-    if ($this->step < 2) {
-      if ($form_state->getValue('credentials_json_file') == NULL) {
-        $form_state->setErrorByName('credentials_json_file', $this->t('Invalid File.'));
-      }
-      else {
-        $credentials_json_file = $form_state->getValue('credentials_json_file');
-        $file = $this->entityTypeManager->getStorage('file')->load($credentials_json_file[0]);
-        $credential_data = trim(file_get_contents($file->getFileUri()));
-        if (empty($credential_data)) {
-          $form_state->setErrorByName('credentials_json_file', $this->t('Empty File.'));
-        }
-        else {
-          $store->set('credentials', $credential_data);
-          $store->set('name', $form_state->getValue('name'));
-          $store->set('spreadsheet_id', $form_state->getValue('spreadsheet_id'));
-        }
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $store = $this->keyValue->get("dst_google_sheet_storage");
     if ($this->step < 2) {
-      $credentials_json = $store->get('credentials');
-      $name = $store->get('name');
-      if (!empty($credentials_json) && !empty($name)) {
-        $msg = $this->getAccessToken($credentials_json, $name, 1);
+      $credentials_json_file = $form_state->getValue('credentials_json_file');
+      $file = $this->entityTypeManager->getStorage('file')->load($credentials_json_file[0]);
+      $credential_data = trim(file_get_contents($file->getFileUri()));
+      $name = trim($form_state->getValue('name'));
+      if (empty($credential_data)) {
+        $this->logger->get('dst_entity_generate')->error($this->t('Invalid credentials.json File. Please try again.'));
+      }
+      else {
+        $store->set('credentials', $credential_data);
+        $store->set('name', $name);
+        $store->set('spreadsheet_id', $form_state->getValue('spreadsheet_id'));
 
-        if ($msg['message_type'] == 'error') {
-          $this->messenger->addError($msg['message']);
-        }
-        else {
-          $this->verificationLink = $msg['message'];
-          $form_state->setRebuild();
-          $this->step++;
+        if (!empty($credential_data) && !empty($name)) {
+          $msg = $this->getAccessToken($credential_data, $name, 1);
+          if ($msg['message_type'] === 'error') {
+            $this->messenger->addError($msg['message']);
+          }
+          else {
+            $this->verificationLink = $msg['message'];
+            $form_state->setRebuild();
+            $this->step++;
+          }
         }
       }
     }
     else {
       $msg = $this->getAccessToken($store->get('credentials'), $store->get('name'), 2, $form_state->getValue('verification_code'));
       $this->messenger->addMessage($msg['message']);
+      // Redirection to General Tab.
+      $form_state->setRedirect('dst_entity_generate.settings');
+      return;
     }
   }
 
@@ -252,7 +229,7 @@ class GoogleSheetApiSetting extends FormBase {
         // Request authorization from the user.
         return [
           'message_type' => 'success',
-          'message' => "<a href='" . $browser_link . "' target='_blank'>" . $browser_link . "</a>",
+          'message' => "<a href='" . $browser_link . "' target='_blank'>" . $this->t('click here') . "</a>",
         ];
 
       }
@@ -262,7 +239,7 @@ class GoogleSheetApiSetting extends FormBase {
         $store->set('access_token', json_encode($access_token));
         return [
           'message_type' => 'success',
-          'message' => $this->t("The credentials has been saved successfully."),
+          'message' => $this->t("The credentials has been saved successfully. Please configure the following general settings."),
         ];
       }
     }
@@ -273,7 +250,7 @@ class GoogleSheetApiSetting extends FormBase {
       $this->logger->get('dst_entity_generate')->error($exception_message);
       return [
         'message_type' => 'error',
-        'message' => $this->t("Invalid credentials."),
+        'message' => $this->t("Invalid credentials.json File. Please try again."),
       ];
     }
   }

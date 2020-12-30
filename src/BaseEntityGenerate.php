@@ -154,7 +154,35 @@ abstract class BaseEntityGenerate extends DrushCommands {
       }
     }
 
-    return $filtered_data;
+    return $this->filterApprovedData($filtered_data);
+  }
+
+  /**
+   * Filter entity type data based on row status.
+   *
+   * @param array $data
+   *   Data fetched from google sheet.
+   *
+   * @return array|null
+   *   Approved data.
+   */
+  private function filterApprovedData(array $data) {
+    if (empty($data)) {
+      return;
+    }
+
+    $config = \Drupal::config('dst_entity_generate.settings');
+    $column_name = $config->get('column_name');
+    $column_value = $config->get('column_value');
+
+    $approved_data = [];
+
+    foreach ($data as $item) {
+      if ($item[$column_name] === $column_value) {
+        \array_push($approved_data, $item);
+      }
+    }
+    return $approved_data;
   }
 
   /**

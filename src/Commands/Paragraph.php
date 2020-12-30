@@ -27,7 +27,7 @@ class Paragraph extends BaseEntityGenerate {
    *
    * @var array
    */
-  protected $dependentModules = ['paragraphss'];
+  protected $dependentModules = ['paragraphs'];
 
   /**
    * Generate all the Drupal entities from Drupal Spec tool sheet.

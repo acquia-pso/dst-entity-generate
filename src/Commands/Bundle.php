@@ -23,7 +23,7 @@ class Bundle extends BaseEntityGenerate {
   /**
    * {@inheritDoc}
    */
-  protected $dstEntityMame = 'content_types';
+  protected $dstEntityName = 'content_types';
 
   /**
    * Array of all dependent modules.

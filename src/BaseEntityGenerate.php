@@ -24,7 +24,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    *
    * @var string
    */
-  protected $dstEntityMame = '';
+  protected $dstEntityName = '';
 
   /**
    * Array of all dependent modules.
@@ -78,8 +78,8 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   public function validateEntityForImport() {
     $enabled_entities = \Drupal::configFactory()->get('dst_entity_generate.settings')->get('sync_entities');
-    if ($enabled_entities[$this->dstEntityMame] !== $this->dstEntityMame) {
-      throw new \Exception("Entity $this->dstEntityMame is not enabled for import. Aborting...");
+    if ($enabled_entities[$this->dstEntityName] !== $this->dstEntityName) {
+      throw new \Exception("Entity $this->dstEntityName is not enabled for import. Aborting...");
     }
   }
 

@@ -21,7 +21,7 @@ class Paragraph extends BaseEntityGenerate {
   /**
    * {@inheritDoc}
    */
-  protected $dstEntityMame = 'paragraph_types';
+  protected $dstEntityName = 'paragraph_types';
 
   /**
    * Array of all dependent modules.

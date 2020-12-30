@@ -5,3 +5,9 @@ dst_entity_generate.settings:
     sync_entities:
       type: sequence
       label: 'Select Entities'
+    column_name:
+      type: string
+      label: 'Column Name'
+    column_value:
+      type: string
+      label: 'Column Value'

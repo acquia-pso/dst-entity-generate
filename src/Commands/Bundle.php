@@ -2,14 +2,10 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\field\Entity\FieldConfig;
 
 /**
@@ -18,6 +14,23 @@ use Drupal\field\Entity\FieldConfig;
  * @package Drupal\dst_entity_generate\Commands
  */
 class Bundle extends BaseEntityGenerate {
+
+  /**
+   * {@inheritDoc}
+   */
+  protected $entity = 'content_type';
+
+  /**
+   * {@inheritDoc}
+   */
+  protected $dstEntityName = 'content_types';
+
+  /**
+   * Array of all dependent modules.
+   *
+   * @var array
+   */
+  protected $dependentModules = ['node'];
 
   /**
    * Entity Type manager service.
@@ -36,23 +49,12 @@ class Bundle extends BaseEntityGenerate {
   /**
    * DstegBundle constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
-   *   Google sheet.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   The helper service for DSTEG.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
    */
-  public function __construct(GoogleSheetApi $sheet,
-                              EntityTypeManagerInterface $entityTypeManager,
-                              EntityDisplayRepositoryInterface $displayRepository,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($sheet, $generalApi, $configFactory);
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDisplayRepositoryInterface $displayRepository) {
     $this->entityTypeManager = $entityTypeManager;
     $this->displayRepository = $displayRepository;
   }
@@ -61,56 +63,58 @@ class Bundle extends BaseEntityGenerate {
    * Generate all the Drupal entities from Drupal Spec tool sheet.
    *
    * @command dst:generate:bundles
-   * @aliases dst:generate:dst:generate:bundles dst:b
+   * @aliases dst:bundles dst:b
    * @usage drush dst:generate:bundles
    */
   public function generateBundle() {
-    $result = FALSE;
-    $this->say($this->t('Generating Drupal Content types.'));
-
+    $this->io()->success('Generating Drupal Content types.');
     // Call all the methods to generate the Drupal entities.
-    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
+    $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
+    $node_storage = $this->entityTypeManager->getStorage('node_type');
+    $node_types = $this->getNodeTypeData($data);
 
-    if (!empty($bundles_data)) {
-      try {
-        $node_types_storage = $this->entityTypeManager->getStorage('node_type');
-        foreach ($bundles_data as $bundle) {
-          if ($bundle['type'] === 'Content type' && $bundle['x'] === 'w') {
-            $ct = $node_types_storage->load($bundle['machine_name']);
-            if ($ct === NULL) {
-              $result = $node_types_storage->create([
-                'type' => $bundle['machine_name'],
-                'name' => $bundle['name'],
-                'description' => empty($bundle['description']) ? $bundle['name'] . ' content type' : $bundle['description'],
-              ])->save();
-              if ($result === SAVED_NEW) {
-                $this->say($this->t('Content type @bundle is created.', ['@bundle' => $bundle['name']]));
-              }
-
-              // Create display modes for newly created content type.
-              // Assign widget settings for the default form mode.
-              $this->displayRepository->getFormDisplay('node', $bundle['machine_name'])
-                ->save();
-
-              // Assign display settings for the display view modes.
-              $this->displayRepository->getViewDisplay('node', $bundle['machine_name'])
-                ->save();
-            }
-            else {
-              $this->say($this->t('Content type @bundle is already present, skipping.', ['@bundle' => $bundle['name']]));
-            }
-          }
-        }
-
-        // Generate fields now.
-        $result = $this->generateFields();
+    foreach ($node_types as $node_type) {
+      $type = $node_type['type'];
+      if (!\is_null($node_storage->load($type))) {
+        $this->io()->warning("Node Type $type Already exists. Skipping creation...");
+        continue;
       }
-      catch (\Exception $exception) {
-        $this->displayAndLogException($exception, DstegConstants::CONTENT_TYPES);
-        $result = self::EXIT_FAILURE;
+      $status = $node_storage->create($node_type)->save();
+      if ($status === SAVED_NEW) {
+        $this->io()->success("Node Type $type is successfully created...");
       }
+
+      // Create display modes for newly created content type.
+      // Assign widget settings for the default form mode.
+      $this->displayRepository->getFormDisplay('node', $type)->save();
+
+      // Assign display settings for the display view modes.
+      $this->displayRepository->getViewDisplay('node', $type)->save();
     }
-    return CommandResult::exitCode($result);
+
+    // Here comes field generation code.
+  }
+
+  /**
+   * Get data needed for Node type entity.
+   *
+   * @param array $data
+   *   Array of Data.
+   *
+   * @return array|null
+   *   Node compliant data.
+   */
+  private function getNodeTypeData(array $data) {
+    $node_types = [];
+    foreach ($data as $item) {
+      $node = [];
+      $node['name'] = $item['name'];
+      $node['type'] = $item['machine_name'];
+      $node['description'] = $item['description'];
+      \array_push($node_types, $node);
+    }
+    return $node_types;
+
   }
 
   /**

@@ -88,7 +88,8 @@ final class EntityGenerateSettings extends ConfigFormBase {
         '#type' => 'textfield',
         '#title' => $this->t('Column Name'),
         '#description' => $this->t('Name of the column in DST sheet which will be used to identify whether the row needs to be synced or not. For e.g. "X"'),
-        '#default_value' => !empty($config->get('column_name')) ? $config->get('column_name') : 'X',
+        '#default_value' => !empty($config->get('column_name')) ? $config->get('column_name') : 'x',
+        '#required' => TRUE,
         '#size' => 30,
       ];
       $form['column_value'] = [
@@ -97,6 +98,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
         '#description' => $this->t('Value of the column in DST sheet which will be used to identify that the row is ready to sync. For e.g. "w"'),
         '#default_value' => !empty($config->get('column_value')) ? $config->get('column_value') : 'w',
         '#size' => 30,
+        '#required' => TRUE,
       ];
     }
 

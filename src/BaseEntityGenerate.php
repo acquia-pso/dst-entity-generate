@@ -17,7 +17,21 @@ abstract class BaseEntityGenerate extends DrushCommands {
    *
    * @var string
    */
-  protected $entity;
+  protected $entity = '';
+
+  /**
+   * Name of the entity from DST overview sheet.
+   *
+   * @var string
+   */
+  protected $dstEntityMame = '';
+
+  /**
+   * Array of all dependent modules.
+   *
+   * @var array
+   */
+  protected $dependentModules = [];
 
   /**
    * Validate hook for commands.
@@ -64,8 +78,33 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   public function validateEntityForImport() {
     $enabled_entities = \Drupal::configFactory()->get('dst_entity_generate.settings')->get('sync_entities');
-    if ($enabled_entities[$this->entity] !== $this->entity) {
+    if ($enabled_entities[$this->dstEntityMame] !== $this->dstEntityMame) {
       throw new \Exception("Entity $this->entity is not enabled for import. Aborting..");
+    }
+  }
+
+  /**
+   * Validates if given modules are enabled or not.
+   *
+   * @hook validate
+   * @throws \Exception
+   */
+  public function validateModulesStatus() {
+    if (empty($this->dependentModules)) {
+      return;
+    }
+
+    $moduleHandler = \Drupal::moduleHandler();
+    $disabledModules = [];
+    foreach ($this->dependentModules as $module) {
+      if (!$moduleHandler->moduleExists($module)) {
+        \array_push($disabledModules, $module);
+      }
+    }
+
+    if (!empty($disabledModules)) {
+      $disabledModules = \implode(',', $disabledModules);
+      throw new \Exception("Please enable $disabledModules to continue with this operation. Aborting..!");
     }
   }
 
@@ -83,7 +122,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
     $cache_api = \Drupal::cache();
 
     if (!empty($cache_api->get($cache_key))) {
-      $data = $cache_api->get($cache_key);
+      $data = $cache_api->get($cache_key)->data;
     }
     else {
       $google_sheet_api = \Drupal::service('dst_entity_generate.google_sheet_api');
@@ -94,14 +133,41 @@ abstract class BaseEntityGenerate extends DrushCommands {
     return $this->filterEntityTypeSpecificData($data);
   }
 
-  private function filterEntityTypeSpecificData($data) {
+  /**
+   * Get entity specific data from retrieved google sheet data.
+   *
+   * @param array $data
+   *   Retrieved data.
+   *
+   * @return array|null
+   *   Filtered data or empty.
+   */
+  private function filterEntityTypeSpecificData(array $data) {
     if ($this->entity === '') {
       return $data;
     }
 
+    $filtered_data = [];
     foreach ($data as $item) {
-      if ()
+      if ($this->converToMachineName($item['type']) === $this->entity) {
+        \array_push($filtered_data, $item);
+      }
     }
+
+    return $filtered_data;
+  }
+
+  /**
+   * Convert a string to machine name.
+   *
+   * @param string $name
+   *   Human readable name to covert into machine name.
+   *
+   * @return string
+   *   Machine readable name.
+   */
+  private function converToMachineName($name) {
+    return strtolower(str_replace(" ", "_", $name));
   }
 
 }

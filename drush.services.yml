@@ -80,7 +80,5 @@ services:
       - '@config.factory'
   dst_entity_generate.commands.paragraph:
     class: Drupal\dst_entity_generate\Commands\Paragraph
-    arguments:
-      - '@module_handler'
     tags:
       - { name: drush.command }

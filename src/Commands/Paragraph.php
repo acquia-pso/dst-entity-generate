@@ -2,7 +2,6 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 
@@ -16,25 +15,19 @@ class Paragraph extends BaseEntityGenerate {
   /**
    * {@inheritDoc}
    */
-  protected $entity = 'paragraph_types';
+  protected $entity = 'paragraph_type';
 
   /**
-   * Module handler for module related operations.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   * {@inheritDoc}
    */
-  private $moduleHandler;
+  protected $dstEntityMame = 'paragraph_types';
 
   /**
-   * Constructor function.
+   * Array of all dependent modules.
    *
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module Handler.
+   * @var array
    */
-  public function __construct(ModuleHandlerInterface $moduleHandler) {
-    $this->moduleHandler = $moduleHandler;
-
-  }
+  protected $dependentModules = ['paragraphss'];
 
   /**
    * Generate all the Drupal entities from Drupal Spec tool sheet.
@@ -45,19 +38,7 @@ class Paragraph extends BaseEntityGenerate {
   public function generateParagraph() {
     $this->say($this->t('Generating Drupal Paragraphs.'));
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
-  }
-
-  /**
-   * Validate hook for all validations.
-   *
-   * @hook validate dst:generate:paragraphs
-   * @throws \Exception
-   */
-  public function validate() {
-    // Check if paragrpah module exists and enabled.
-    if (!$this->moduleHandler->moduleExists('paragraphs')) {
-      throw new \Exception("Paragraph module is not enabled. Please enable to generate paragraph types.");
-    }
+    \var_dump($data);
   }
 
 }

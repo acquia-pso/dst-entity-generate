@@ -149,6 +149,10 @@ abstract class BaseEntityGenerate extends DrushCommands {
 
     $filtered_data = [];
     foreach ($data as $item) {
+      if (!isset($item['type'])) {
+        throw new \Exception("Type column is require to identify the type of entity. Please make sure you are using correct Drupal Spec Tool sheet. Aborting...");
+      }
+
       if ($this->converToMachineName($item['type']) === $this->entity) {
         \array_push($filtered_data, $item);
       }
@@ -178,6 +182,9 @@ abstract class BaseEntityGenerate extends DrushCommands {
     $approved_data = [];
 
     foreach ($data as $item) {
+      if (!isset($item[$column_name])) {
+        throw new \Exception("Please provide correct column name. $column_name doesn't exists. Aborting...");
+      }
       if ($item[$column_name] === $column_value) {
         \array_push($approved_data, $item);
       }

@@ -30,6 +30,7 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@entity_display.repository'
+      - '@dst_entity_generate.general_api'
   dst_entity_generate.commands.user_roles:
     class: Drupal\dst_entity_generate\Commands\UserRole
     arguments:

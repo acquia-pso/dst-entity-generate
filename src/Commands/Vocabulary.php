@@ -66,11 +66,12 @@ class Vocabulary extends BaseEntityGenerate {
    */
   public function generateVocabularies() {
     $result = FALSE;
+    $bundle_type = 'Vocabulary';
     try {
       $this->say($this->t('Generating Drupal Vocabularies.'));
       $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
       foreach ($bundles as $bundle) {
-        if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
+        if ($bundle['type'] === $bundle_type && $bundle['x'] === 'w') {
           $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
           $vocabularies = $vocab_storage->loadMultiple();
           if (!isset($vocabularies[$bundle['machine_name']])) {
@@ -98,7 +99,7 @@ class Vocabulary extends BaseEntityGenerate {
         }
       }
       // Generate fields now.
-      $result = $this->generateFields();
+      $result = $this->generateEntityFields($bundle_type);
     }
     catch (\Exception $exception) {
       $this->displayAndLogException($exception, DstegConstants::VOCABULARIES);

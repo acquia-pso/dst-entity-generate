@@ -132,5 +132,5 @@ class Bundle extends BaseEntityGenerate {
     return $node_types;
 
   }
-
+  
 }

@@ -2,14 +2,9 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
  * Class provides functionality of Image styles generation from DST sheet.
@@ -19,11 +14,16 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 class ImageStyle extends BaseEntityGenerate {
 
   /**
-   * Logger service definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * {@inheritDoc}
    */
-  protected $logger;
+  protected $dstEntityName = 'image_styles';
+
+  /**
+   * Array of all dependent modules.
+   *
+   * @var array
+   */
+  protected $dependentModules = ['image'];
 
   /**
    * The EntityType Manager.
@@ -35,24 +35,10 @@ class ImageStyle extends BaseEntityGenerate {
   /**
    * DstCommands constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
-   *   GoogleSheetApi service class object.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
-   *   LoggerChannelFactory service definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The EntityType Manager.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   General Api service definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
    */
-  public function __construct(GoogleSheetApi $sheet,
-                              LoggerChannelFactoryInterface $loggerChannelFactory,
-                              EntityTypeManagerInterface $entityTypeManager,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($sheet, $generalApi, $configFactory);
-    $this->logger = $loggerChannelFactory->get('dst_entity_generate');
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
   }
 
@@ -60,52 +46,46 @@ class ImageStyle extends BaseEntityGenerate {
    * Generate the Drupal image style from Drupal Spec tool sheet.
    *
    * @command dst:generate:imagestyle
-   * @aliases dst:generate:dst:generate:imagestyle dst:f
+   * @aliases dst:imagestyle dst:is
    * @usage drush dst:generate:imagestyle
    */
   public function generateImageStyle() {
-    $result = FALSE;
-    try {
-      $this->say($this->t('Generating Drupal Image Style.'));
-      $imageStyle_data = $this->sheet->getData(DstegConstants::IMAGE_STYLES);
-      if (!empty($imageStyle_data)) {
-        // Call all the methods to generate the Drupal image style.
-        foreach ($imageStyle_data as $imageStyle) {
-          // Create image style only if it is in Wait and implement state.
-          if ($imageStyle['x'] === 'w') {
-            $sized_image = $this->entityTypeManager->getStorage('image_style')->load($imageStyle['machine_name']);
-            if ($sized_image === NULL || empty($sized_image)) {
-              // Create image style.
-              $style = $this->entityTypeManager->getStorage('image_style')->create([
-                'name' => $imageStyle['machine_name'],
-                'label' => $imageStyle['style_name'],
-              ]);
-              $style->save();
-              if ($style === 1) {
-                $message = $this->t('New image style @imagestyle created.', [
-                  '@imagestyle' => $imageStyle['machine_name'],
-                ]);
-                $this->say($message);
-                $this->logger->info($message);
-              }
-            }
-            else {
-              $imageStyle_exist = $this->t('Image style @imagestyle already present.', [
-                '@imagestyle' => $imageStyle['machine_name'],
-              ]);
-              $this->say($imageStyle_exist);
-              $this->logger->info($imageStyle_exist);
-            }
-          }
-        }
+    $this->io()->success('Generating Drupal Image Style...');
+    $data = $this->getDataFromSheet(DstegConstants::IMAGE_STYLES);
+    $image_styles = $this->getImageStyleData($data);
+    $image_style_storage = $this->entityTypeManager->getStorage('image_style');
+
+    foreach ($image_styles as $image_style) {
+      $name = $image_style['name'];
+      if (!\is_null($image_style_storage->load($name))) {
+        $this->io()->error("Image style $name already exists. Skipping creation...");
+        continue;
       }
-      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
+      $status = $image_style_storage->create($image_style)->save();
+      if ($status === SAVED_NEW) {
+        $this->io()->success("Image Style $name is successfully created...");
+      }
     }
-    catch (\Exception $exception) {
-      $this->displayAndLogException($exception, DstegConstants::IMAGE_STYLES);
-      $result = CommandResult::exitCode(self::EXIT_FAILURE);
+  }
+
+  /**
+   * Get data needed for Image Style entity.
+   *
+   * @param array $data
+   *   Array of Data.
+   *
+   * @return array|null
+   *   Image style compliant data.
+   */
+  private function getImageStyleData(array $data) {
+    $image_styles = [];
+    foreach ($data as $item) {
+      $image_style = [];
+      $image_style['label'] = $item['style_name'];
+      $image_style['name'] = $item['machine_name'];
+      \array_push($image_styles, $image_style);
     }
-    return $result;
+    return $image_styles;
   }
 
 }

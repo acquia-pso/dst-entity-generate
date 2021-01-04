@@ -67,7 +67,7 @@ class Vocabulary extends BaseEntityGenerate {
     $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
     $vocabularies = $vocab_storage->loadMultiple();
     foreach ($vocab_types as $vocab) {
-      $vocab_name  = $vocab['vid'];
+      $vocab_name = $vocab['vid'];
       $vocan_url_alias = $vocab['url_alias_pattern'];
       $type = $vocab['type'];
       if ($vocabularies[$vocab['vid']]) {

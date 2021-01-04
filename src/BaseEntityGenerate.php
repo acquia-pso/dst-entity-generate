@@ -217,7 +217,8 @@ abstract class BaseEntityGenerate extends DrushCommands {
     $patternStatus = FALSE;
     if (isset($alias)) {
       $patternStatus = TRUE;
-      $pattern = \Drupal::entityTypeManager()->getStorage('pathauto_pattern')->load($bundle . '_pattern');
+      $pattern_id = $bundle . '_pattern';
+      $pattern = \Drupal::entityTypeManager()->getStorage('pathauto_pattern')->load($pattern_id);
       if ($pattern) {
         $this->io()->warning($this->t('Alias for @bundle is already present, skipping.', ['@bundle' => $bundle]));
         return FALSE;

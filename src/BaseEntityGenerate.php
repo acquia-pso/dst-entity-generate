@@ -215,6 +215,11 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   public function generatePathautoPattern($bundle, $alias, $entity) {
     $patternStatus = FALSE;
+    $moduleHandler = \Drupal::moduleHandler();
+    if (!$moduleHandler->moduleExists('pathauto')) {
+      $this->io()->warning($this->t('Please install  pathauto module.'));
+      return FALSE;
+    }
     if (isset($alias)) {
       $patternStatus = TRUE;
       $pattern_id = $bundle . '_pattern';
@@ -241,6 +246,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
         ]);
 
         $pattern->save();
+        $this->io()->warning($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
       }
     }
     else {

@@ -115,7 +115,7 @@ class GoogleSheetApi {
    *   0 indexed and the rows/columns start at 0 based on the *range* not the
    *   whole sheet.
    */
-  public function getData($range) {
+  public function getData(string $range) {
     $sheet_values = $logMessages = [];
     try {
       if (!empty($this->googleSheetService)) {

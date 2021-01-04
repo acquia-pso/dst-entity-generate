@@ -166,8 +166,8 @@ class Bundle extends BaseEntityGenerate {
               }
 
               // Create field storage.
-              $result = $this->helper->fieldStorageHandler($field, $entity_type);
-              if ($result) {
+              $field = $this->helper->fieldStorageHandler($field, $entity_type);
+              if ($field) {
                 $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
               }
             }

@@ -152,12 +152,16 @@ class GeneralApi {
     elseif ($cardinality === '-') {
       $cardinality = 1;
     }
-    FieldStorageConfig::create([
+    $field_configs = [
       'field_name' => $field['machine_name'],
       'entity_type' => $entity_type,
       'type' => $field['drupal_field_type'],
       'cardinality' => $cardinality,
-    ])->save();
+    ];
+    if (array_key_exists('settings', $field) && !empty($field['settings'])) {
+      $field_configs['settings'] = $field['settings'];
+    }
+    FieldStorageConfig::create($field_configs)->save();
   }
 
   /**
@@ -183,13 +187,17 @@ class GeneralApi {
 
       $required = $field_data['req'] === 'y';
       // Create field instance.
-      FieldConfig::create([
+      $field_configs = [
         'field_name' => $field_data['machine_name'],
         'entity_type' => $entity_type,
         'bundle' => $bundle_machine_name,
         'label' => $field_data['field_label'],
         'required' => $required,
-      ])->save();
+      ];
+      if (array_key_exists('handler_settings', $field_data['settings'])) {
+        $field_configs['settings'] = $field_data['settings']['handler_settings'];
+      }
+      FieldConfig::create($field_configs)->save();
 
       // Set form display for new field.
       $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
@@ -231,7 +239,7 @@ class GeneralApi {
    * @param string $entity_type
    *   Entity type.
    *
-   * @return bool
+   * @return mixed
    *   Returns boolean based on unmet dependency.
    */
   public function fieldStorageHandler(array $field, string $entity_type) {
@@ -251,22 +259,90 @@ class GeneralApi {
       return FALSE;
     }
     $field_meta = $field_types[$field['field_type']];
-    if (array_key_exists('module_dependency', $field_meta) && !empty($field_meta['module_dependency']) && !$this->isModuleEnabled($field_meta['module_dependency'])) {
-      $this->logger->notice($this->t(
-        'The @module module is not installed. Skipping @field field generation.',
-        [
-          '@module' => $field_meta['module_dependency'],
-          '@field' => $field['machine_name'],
-        ]
-      ));
-      return FALSE;
+    if (array_key_exists('dependencies', $field_meta) && !empty($field_meta['dependencies'])) {
+      $dependencies = $field_meta['dependencies'];
+      foreach ($dependencies as $dependency_type => $dependency) {
+        foreach ($dependency as $dependency_key => $dependency_value) {
+          switch ($dependency_key) {
+            case 'module':
+              if (!$this->isModuleEnabled($dependency_value)) {
+                $this->logger->notice($this->t(
+                  'The @module module is not installed. Skipping @field field generation.',
+                  [
+                    '@module' => $dependency_value,
+                    '@field' => $field['machine_name'],
+                  ]
+                ));
+                return FALSE;
+              }
+              break;
+            case 'settings':
+              foreach ($dependency_value as $setting_key => $setting_value) {
+                switch ($setting_value) {
+                  case 'allowed_values':
+                    $settings = array_map('trim',explode(',', $field['settings/notes']));
+                    $field['settings']['allowed_values'] = array_combine($settings, $settings);
+                    break;
+                  case 'target_type':
+                    $temp = explode(' (', rtrim($field['ref._bundle'], ')'));
+                    $target_bundle = $temp[0];
+                    $target_bundle_type = $temp[1];
+                    $entity_type_mapping = DstegConstants::ENTITY_TYPE_MAPPING;
+                    if (!array_key_exists($target_bundle_type, $entity_type_mapping)) {
+                      $this->logger->notice($this->t(
+                        'The @target_bundle_type is not supported entity type. Skipping @field field generation.',
+                        [
+                          '@target_bundle_type' => $target_bundle_type,
+                          '@field' => $field['machine_name'],
+                        ]
+                      ));
+                      return FALSE;
+                    }
+                    $entity_type_storage = $this->entityTypeManager->getStorage($entity_type_mapping[$target_bundle_type]['entity_type_id']);
+                    if (empty($entity_type_storage)) {
+                      $this->logger->notice($this->t(
+                        'The @target_bundle_type is invalid or not exist. Skipping @field field generation.',
+                        [
+                          '@target_bundle_type' => $target_bundle_type,
+                          '@field' => $field['machine_name'],
+                        ]
+                      ));
+                      return FALSE;
+                    }
+                    $entity_storage = $entity_type_storage->loadByProperties(['name' => $target_bundle]);
+                    if (empty($entity_storage)) {
+                      $this->logger->notice($this->t(
+                        'The @target_bundle is not exist. Skipping @field field generation.',
+                        [
+                          '@target_bundle' => $target_bundle,
+                          '@field' => $field['machine_name'],
+                        ]
+                      ));
+                      return FALSE;
+                    }
+                    $field['settings']['target_type'] = $entity_type_mapping[$target_bundle_type]['entity_type'];
+                    $field['settings']['handler_settings'] = [
+                      'handler' => 'default',
+                      'handler_settings' => [
+                        'target_bundles' => [
+                          reset($entity_storage)->id(),
+                        ],
+                      ],
+                    ];
+                    break;
+                }
+              }
+              break;
+          }
+        }
+      }
     }
     $field['drupal_field_type'] = $field_meta['type'];
     $this->createFieldStorage($field, $entity_type);
     $this->logger->notice($this->t('Field storage created for @field',
       ['@field' => $field['machine_name']]
     ));
-    return TRUE;
+    return $field;
   }
 
 }

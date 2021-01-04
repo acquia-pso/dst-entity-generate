@@ -61,19 +61,24 @@ class Vocabulary extends BaseEntityGenerate {
   public function generateVocabularies() {
     $this->io()->success('Generating Drupal Vocabularies.');
     // Call all the methods to generate the Drupal entities.
+    $entity = 'taxonomy_term';
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $vocab_types = $this->getVocabTypeData($data);
     $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
     $vocabularies = $vocab_storage->loadMultiple();
     foreach ($vocab_types as $vocab) {
+      $vocab_name  = $vocab['vid'];
+      $vocan_url_alias = $vocab['url_alias_pattern'];
       $type = $vocab['type'];
       if ($vocabularies[$vocab['vid']]) {
         $this->io()->warning("Vocabulary $vocab Already exists. Skipping creation...");
+        $this->generatePathautoPattern($vocab_name, $vocan_url_alias, $entity);
         continue;
       }
       $status = $vocab_storage->create($vocab)->save();
       if ($status === SAVED_NEW) {
         $this->io()->success("Vocabulary $type is successfully created...");
+        $this->generatePathautoPattern($vocab_name, $vocan_url_alias, $entity);
       }
     }
 
@@ -110,6 +115,7 @@ class Vocabulary extends BaseEntityGenerate {
       $vocabs['vid'] = $item['machine_name'];
       $vocabs['description'] = $description;
       $vocabs['name'] = $item['name'];
+      $vocabs['url_alias_pattern'] = $item['url_alias_pattern'];
 
       \array_push($vocab_types, $vocabs);
     }

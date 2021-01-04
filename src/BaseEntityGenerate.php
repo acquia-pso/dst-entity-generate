@@ -219,7 +219,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
     $patternStatus = FALSE;
     $moduleHandler = \Drupal::moduleHandler();
     if (!$moduleHandler->moduleExists('pathauto')) {
-      $this->io()->warning($this->t('Please install  pathauto module.'));
+      $this->io()->warning($this->t('Please install pathauto module.'));
       return FALSE;
     }
     if (isset($alias)) {

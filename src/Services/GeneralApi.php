@@ -269,4 +269,87 @@ class GeneralApi {
     return TRUE;
   }
 
+  /**
+   * Helper function to generate fields.
+   *
+   * @param string $bundle_type
+   *   Bundle type, ie. Content type.
+   * @param array $fields_data
+   *   The field data to be created.
+   * @param array $bundles_data
+   *   The bundle data to create fields.
+   *
+   * @return mixed
+   *   Can return the command output or FALSE.
+   */
+  public function generateEntityFields(string $bundle_type, array $fields_data, array $bundles_data) {
+
+    $result = TRUE;
+    $this->logger->notice($this->t('Generating all Drupal Entities Fields.'));
+
+    foreach ($fields_data as $field) {
+      $bundleVal = '';
+      $bundle = $field['bundle'];
+      $field_machine_name = $field['machine_name'];
+      $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
+      if (array_key_exists($bundle_name, $bundles_data)) {
+        $bundleVal = $bundles_data[$bundle_name];
+      }
+      if (isset($bundleVal)) {
+        try {
+          switch ($bundle_type) {
+            case 'Content type':
+              $entity_type_id = 'node_type';
+              $entity_type = 'node';
+              break;
+
+            case 'Vocabulary':
+              $entity_type_id = 'taxonomy_vocabulary';
+              $entity_type = 'taxonomy_term';
+              break;
+          }
+          $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field_machine_name);
+
+          // Skip if field is present.
+          if (!empty($drupal_field)) {
+            $this->logger->notice($this->t(
+              'The field @field is present in @ctype. Skipping.',
+              [
+                '@field' => $field['machine_name'],
+                '@ctype' => $bundleVal,
+              ]
+            ));
+            continue;
+          }
+
+          // Create field storage.
+          $result = $this->fieldStorageHandler($field, $entity_type);
+          $result = $this->fieldStorageHandler($field, $entity_type);
+          if ($result) {
+            $this->addField($bundleVal, $field, $entity_type_id, $entity_type);
+          }
+        }
+        catch (\Exception $exception) {
+          $message = $this->t('Exception occurred while generating @entity: @exception', [
+            '@exception' => $exception->getMessage(),
+            '@entity' => DstegConstants::FIELDS,
+          ]);
+          $this->yell($message);
+          $this->logger->error($message);
+          $result = FALSE;
+        }
+      }
+      else {
+        $this->logger->notice($this->t(
+          'The field @field in @ctype is mis-configured. Skipping.',
+          [
+            '@field' => $field['machine_name'],
+            '@ctype' => $bundleVal,
+          ]
+        ));
+      }
+    }
+    return $result;
+  }
+
 }

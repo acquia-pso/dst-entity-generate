@@ -2,15 +2,10 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
-use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\dst_entity_generate\DstegConstants;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
  * Class provides functionality of Vocabularies generation from DST sheet.
@@ -20,41 +15,40 @@ use Drupal\dst_entity_generate\DstegConstants;
 class Vocabulary extends BaseEntityGenerate {
 
   /**
-   * The EntityType Manager.
+   * {@inheritDoc}
+   */
+  protected $entity = 'vocabulary';
+
+  /**
+   * {@inheritDoc}
+   */
+  protected $dstEntityName = 'vocabularies';
+
+  /**
+   * Array of all dependent modules.
+   *
+   * @var array
+   */
+  protected $dependentModules = ['taxonomy'];
+
+  /**
+   * Entity Type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
-   * Logger service definition.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
-
-  /**
    * DstegBundle constructor.
    *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
-   *   GoogleSheetApi service class object.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The EntityType Manager.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
-   *   LoggerChannelFactory service definition.
+   *   Entity Type manager.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
    *   The helper service for DSTEG.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
    */
-  public function __construct(GoogleSheetApi $sheet,
-                              EntityTypeManagerInterface $entityTypeManager,
-                              LoggerChannelFactoryInterface $loggerChannelFactory,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($sheet, $generalApi, $configFactory);
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, GeneralApi $generalApi) {
     $this->entityTypeManager = $entityTypeManager;
-    $this->logger = $loggerChannelFactory->get('dst_entity_generate');
+    $this->helper = $generalApi;
   }
 
   /**
@@ -65,106 +59,62 @@ class Vocabulary extends BaseEntityGenerate {
    * @usage drush dst:generate:vocabs
    */
   public function generateVocabularies() {
-    $result = FALSE;
-    try {
-      $this->say($this->t('Generating Drupal Vocabularies.'));
-      $bundles = $this->sheet->getData(DstegConstants::BUNDLES);
-      foreach ($bundles as $bundle) {
-        if ($bundle['type'] === 'Vocabulary' && $bundle['x'] === 'w') {
-          $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
-          $vocabularies = $vocab_storage->loadMultiple();
-          if (!isset($vocabularies[$bundle['machine_name']])) {
-            $description = isset($bundle['description']) ? $bundle['description'] : $bundle['name'] . ' vocabulary.';
-            $status = $vocab_storage->create([
-              'vid' => $bundle['machine_name'],
-              'description' => $description,
-              'name' => $bundle['name'],
-            ])->save();
-            if ($status === 1) {
-              $success_message = $this->t('Vocabulary @vocab is created.', [
-                '@vocab' => $bundle['name'],
-              ]);
-              $this->say($success_message);
-              $this->logger->info($success_message);
-            }
-          }
-          else {
-            $present_message = $this->t('Vocabulary @vocab is already present.', [
-              '@vocab' => $bundle['name'],
-            ]);
-            $this->say($present_message);
-            $this->logger->info($present_message);
-          }
-        }
+    $this->io()->success('Generating Drupal Vocabularies.');
+    // Call all the methods to generate the Drupal entities.
+    $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
+    $vocab_types = $this->getVocabTypeData($data);
+    $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
+    $vocabularies = $vocab_storage->loadMultiple();
+    foreach ($vocab_types as $vocab) {
+      $type = $vocab['type'];
+      if ($vocabularies[$vocab['vid']]) {
+        $this->io()->warning("Vocabulary $vocab Already exists. Skipping creation...");
+        continue;
       }
-      // Generate fields now.
-      $result = $this->generateFields();
-    }
-    catch (\Exception $exception) {
-      $this->displayAndLogException($exception, DstegConstants::VOCABULARIES);
-      $result = self::EXIT_FAILURE;
+      $status = $vocab_storage->create($vocab)->save();
+      if ($status === SAVED_NEW) {
+        $this->io()->success("Vocabulary $type is successfully created...");
+      }
     }
 
-    return CommandResult::exitCode($result);
+    // Here goes the fields creation.
+    $bundle_type = 'Vocabulary';
+    $fields_data = $bundles_data = [];
+    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS);
+    if (empty($fields_data)) {
+      $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
+      return self::EXIT_SUCCESS;
+    }
+    foreach ($data as $bundle) {
+      if ($bundle['type'] === $bundle_type) {
+        $bundles_data[$bundle['name']] = $bundle['machine_name'];
+      }
+    }
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
   }
 
   /**
-   * Helper function to generate fields.
+   * Get data needed for Vocabulary type entity.
+   *
+   * @param array $data
+   *   Array of Vocabularies.
+   *
+   * @return array|null
+   *   Vocabulary compliant data.
    */
-  public function generateFields() {
-    $result = self::EXIT_SUCCESS;
+  private function getVocabTypeData(array $data) {
+    $vocab_types = [];
+    foreach ($data as $item) {
+      $vocabs = [];
+      $description = isset($item['description']) ? $item['description'] : $item['name'] . ' vocabulary.';
+      $vocabs['vid'] = $item['machine_name'];
+      $vocabs['description'] = $description;
+      $vocabs['name'] = $item['name'];
 
-    $this->logger->notice($this->t('Generating Drupal Fields.'));
-    // Call all the methods to generate the Drupal entities.
-    $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
-    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
-    $bundleArr = [];
-    foreach ($bundles_data as $bundle) {
-      if ($bundle['type'] === 'Vocabulary') {
-        $bundleArr[$bundle['name']] = $bundle['machine_name'];
-      }
+      \array_push($vocab_types, $vocabs);
     }
-    if (!empty($fields_data)) {
-      foreach ($fields_data as $field) {
-        if ($field['x'] !== 'w') {
-          continue;
-        }
-        $bundle = $field['bundle'];
-        $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
-        if (array_key_exists($bundle_name, $bundleArr)) {
-          $bundleVal = $bundleArr[$bundle_name];
-        }
-        if (isset($bundleVal)) {
-          try {
-            $entity_type_id = 'taxonomy_vocabulary';
-            $entity_type = 'taxonomy_term';
-            $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
+    return $vocab_types;
 
-            // Skip field if present.
-            if (!empty($drupal_field)) {
-              $this->logger->notice($this->t(
-                'The field @field is present in @vocab. Skipping.',
-                [
-                  '@field' => $field['machine_name'],
-                  '@vocab' => $bundleVal,
-                ]
-              ));
-              continue;
-            }
-            // Create field storage.
-            $result = $this->helper->fieldStorageHandler($field, $entity_type);
-            if ($result) {
-              $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
-            }
-          }
-          catch (\Exception $exception) {
-            $this->displayAndLogException($exception, DstegConstants::FIELDS);
-            $result = self::EXIT_FAILURE;
-          }
-        }
-      }
-    }
-    return CommandResult::exitCode($result);
   }
 
 }

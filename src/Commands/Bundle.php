@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\field\Entity\FieldConfig;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
  * Class provides functionality of Content types generation from DST sheet.
@@ -53,10 +53,13 @@ class Bundle extends BaseEntityGenerate {
    *   Entity Type manager.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
    *   Display mode repository.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDisplayRepositoryInterface $displayRepository) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDisplayRepositoryInterface $displayRepository, GeneralApi $generalApi) {
     $this->entityTypeManager = $entityTypeManager;
     $this->displayRepository = $displayRepository;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -92,7 +95,20 @@ class Bundle extends BaseEntityGenerate {
       $this->displayRepository->getViewDisplay('node', $type)->save();
     }
 
-    // Here comes field generation code.
+    // Generate fields now.
+    $bundle_type = 'Content type';
+    $fields_data = $bundles_data = [];
+    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS);
+    if (empty($fields_data)) {
+      $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
+      return self::EXIT_SUCCESS;
+    }
+    foreach ($data as $bundle) {
+      if ($bundle['type'] === $bundle_type) {
+        $bundles_data[$bundle['name']] = $bundle['machine_name'];
+      }
+    }
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
   }
 
   /**
@@ -115,75 +131,6 @@ class Bundle extends BaseEntityGenerate {
     }
     return $node_types;
 
-  }
-
-  /**
-   * Helper function to generate fields.
-   */
-  public function generateFields() {
-    $result = TRUE;
-
-    $this->logger->notice($this->t('Generating Drupal Fields.'));
-    // Call all the methods to generate the Drupal entities.
-    $fields_data = $this->sheet->getData(DstegConstants::FIELDS);
-    if (empty($fields_data)) {
-      return $result;
-    }
-
-    $bundles_data = $this->sheet->getData(DstegConstants::BUNDLES);
-    foreach ($bundles_data as $bundle) {
-      if (strtolower($bundle['type']) === strtolower('Content type')) {
-        $bundleArr[$bundle['name']] = $bundle['machine_name'];
-      }
-    }
-
-    foreach ($fields_data as $field) {
-      if ($field['x'] !== 'w') {
-        continue;
-      }
-      $bundleVal = '';
-      $bundle = $field['bundle'];
-      $bundle_name = substr($bundle, 0, -15);
-      if (array_key_exists($bundle_name, $bundleArr)) {
-        $bundleVal = $bundleArr[$bundle_name];
-      }
-
-      // Skip fields which are not part of content type.
-      if (!str_contains($field['bundle'], 'Content type')) {
-        continue;
-      }
-
-      if (isset($bundleVal)) {
-        try {
-          $entity_type_id = 'node_type';
-          $entity_type = 'node';
-          $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field['machine_name']);
-
-          // Skip if field is present.
-          if (!empty($drupal_field)) {
-            $this->logger->notice($this->t(
-              'The field @field is present in @ctype. Skipping.',
-              [
-                '@field' => $field['machine_name'],
-                '@ctype' => $bundleVal,
-              ]
-            ));
-            continue;
-          }
-
-          // Create field storage.
-          $result = $this->helper->fieldStorageHandler($field, $entity_type);
-          if ($result) {
-            $this->helper->addField($bundleVal, $field, $entity_type_id, $entity_type);
-          }
-        }
-        catch (\Exception $exception) {
-          $this->displayAndLogException($exception, DstegConstants::FIELDS);
-          $result = FALSE;
-        }
-      }
-    }
-    return $result;
   }
 
 }

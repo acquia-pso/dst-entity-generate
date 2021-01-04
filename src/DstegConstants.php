@@ -37,8 +37,26 @@ final class DstegConstants {
     'Text (plain)' => [
       'type' => 'string',
     ],
+    'Text (plain, long)' => [
+      'type' => 'string_long',
+    ],
+    'Text (formatted)' => [
+      'type' => 'text',
+    ],
     'Text (formatted, long)' => [
       'type' => 'text_long',
+    ],
+    'Text (formatted, long, with summary)' => [
+      'type' => 'text_with_summary',
+    ],
+    'Boolean' => [
+      'type' => 'boolean',
+    ],
+    'Image' => [
+      'type' => 'image',
+    ],
+    'List (float)' => [
+      'type' => 'list_float',
     ],
     'Date' => [
       'type' => 'datetime',

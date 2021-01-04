@@ -37,6 +37,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * Validate hook for commands.
    *
    * @hook validate
+   *
    * @throws \Exception
    */
   public function validateGoogleSheetCreds() {
@@ -74,6 +75,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * Validates if given entity is enabled for import or not.
    *
    * @hook pre-validate
+   *
    * @throws \Exception
    */
   public function validateEntityForImport() {
@@ -87,6 +89,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * Validates if given modules are enabled or not.
    *
    * @hook validate
+   *
    * @throws \Exception
    */
   public function validateModulesStatus() {
@@ -149,14 +152,16 @@ abstract class BaseEntityGenerate extends DrushCommands {
 
     $filtered_data = [];
     foreach ($data as $item) {
-      if (!isset($item['type'])) {
-        throw new \Exception("Type column is require to identify the type of entity. Please make sure you are using correct Drupal Spec Tool sheet. Aborting...");
-      }
+      // @todo Have to refactor below commented code to work for all the tabs other then the `bundles`.
+      // if (!isset($item['type'])) {
+      //   throw new \Exception("Type column is require to identify the type of entity. Please make sure you are using correct Drupal Spec Tool sheet. Aborting...");
+      // }
 
       if ($this->converToMachineName($item['type']) === $this->entity) {
         \array_push($filtered_data, $item);
       }
     }
+    $filtered_data = $filtered_data ?: $data;
 
     return $this->filterApprovedData($filtered_data);
   }

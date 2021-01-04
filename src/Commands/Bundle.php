@@ -94,7 +94,7 @@ class Bundle extends BaseEntityGenerate {
       // Assign display settings for the display view modes.
       $this->displayRepository->getViewDisplay('node', $type)->save();
     }
-
+    
     // Generate fields now.
     $bundle_type = 'Content type';
     $fields_data = $bundles_data = [];
@@ -109,6 +109,17 @@ class Bundle extends BaseEntityGenerate {
       }
     }
     $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+
+    foreach ($node_types as $node_type) {
+      $type = $node_type['type'];
+      $entity = 'node';
+      $url_alias_pattern = $node_type['url_alias_pattern'];
+      // Generate aliases.
+      $this->generatePathautoPattern($type, $url_alias_pattern, $entity);
+    }
+
+    // Here comes field generation code.
+
   }
 
   /**
@@ -127,10 +138,12 @@ class Bundle extends BaseEntityGenerate {
       $node['name'] = $item['name'];
       $node['type'] = $item['machine_name'];
       $node['description'] = $item['description'];
+      $node['entity'] = $item['type'];
+      $node['url_alias_pattern'] = $item['url_alias_pattern'];
       \array_push($node_types, $node);
     }
     return $node_types;
 
   }
-  
+
 }

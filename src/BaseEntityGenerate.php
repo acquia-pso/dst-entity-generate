@@ -210,4 +210,42 @@ abstract class BaseEntityGenerate extends DrushCommands {
     return strtolower(str_replace(" ", "_", $name));
   }
 
+  /**
+   * Helper function to generate pathauto pattern.
+   */
+  public function generatePathautoPattern($bundle, $alias, $entity) {
+    $patternStatus = FALSE;
+    if (isset($alias)) {
+      $patternStatus = TRUE;
+      $pattern = \Drupal::entityTypeManager()->getStorage('pathauto_pattern')->load($bundle . '_pattern');
+      if ($pattern) {
+        $this->io()->warning($this->t('Alias for @bundle is already present, skipping.', ['@bundle' => $bundle]));
+        return FALSE;
+      }
+
+      if ($patternStatus) {
+        $pattern = $this->entityTypeManager->getStorage('pathauto_pattern')->create([
+          'id' => $bundle . '_pattern',
+          'label' => $bundle . ' pattern',
+          'type' => 'canonical_entities:' . $entity,
+          'pattern' => $alias,
+          'weight' => -5,
+        ]);
+
+        // Add the bundle condition.
+        $pattern->addSelectionCondition([
+          'id' => 'entity_bundle:' . $entity,
+          'bundles' => [$bundle => $bundle],
+          'negate' => FALSE,
+        ]);
+
+        $pattern->save();
+      }
+    }
+    else {
+      $this->io()->warning($this->t('Alias for @bundle is not available, skipping.', ['@bundle' => $bundle]));
+      return FALSE;
+    }
+  }
+
 }

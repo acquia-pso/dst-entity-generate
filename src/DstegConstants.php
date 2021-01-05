@@ -57,17 +57,62 @@ final class DstegConstants {
     ],
     'List (float)' => [
       'type' => 'list_float',
+      'dependencies' => [
+        'required' => [
+          'settings' => [
+            'allowed_values',
+          ],
+        ],
+      ],
     ],
     'Date' => [
       'type' => 'datetime',
     ],
     'Date range' => [
       'type' => 'daterange',
-      'module_dependency' => 'datetime_range',
+      'dependencies' => [
+        'required' => [
+          'module' => 'datetime_range',
+        ],
+      ],
     ],
     'Link' => [
       'type' => 'link',
-      'module_dependency' => 'link',
+      'dependencies' => [
+        'required' => [
+          'module' => 'link',
+        ],
+      ],
+    ],
+    'Email' => [
+      'type' => 'email',
+    ],
+    'Entity reference' => [
+      'type' => 'entity_reference',
+      'dependencies' => [
+        'required' => [
+          'settings' => [
+            'target_type',
+          ],
+        ],
+        'optional' => [
+          'settings' => [
+            'handler_settings' => [
+              'target_bundles',
+            ],
+          ],
+        ],
+      ],
+    ],
+  ];
+  const ENTITY_TYPE_MAPPING = [
+    'Vocabulary' => [
+      'entity_type_id' => 'taxonomy_vocabulary',
+      'entity_type' => 'taxonomy_term',
+    ],
+    'Content type' => [
+      'entity_type_id' => 'node_type',
+      'entity_type' => 'node',
     ],
   ];
 

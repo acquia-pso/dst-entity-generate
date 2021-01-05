@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
+use Drupal\Component\Plugin\PluginManagerInterface;
 
 /**
  * Class provides functionality of Content types generation from DST sheet.
@@ -49,17 +50,17 @@ class Media extends BaseEntityGenerate {
   /**
    * DstegBundle constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   Entity Type manager.
-   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity field manager service.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository
    *   Display mode repository.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $general_api
    *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDisplayRepositoryInterface $displayRepository, GeneralApi $generalApi) {
-    $this->entityTypeManager = $entityTypeManager;
-    $this->displayRepository = $displayRepository;
-    $this->helper = $generalApi;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityDisplayRepositoryInterface $display_repository, GeneralApi $general_api) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->displayRepository = $display_repository;
+    $this->helper = $general_api;
   }
 
   /**
@@ -82,7 +83,9 @@ class Media extends BaseEntityGenerate {
         $this->io()->warning("media Type $type Already exists. Skipping creation...");
         continue;
       }
+
       $status = $media_storage->create($media_type)->save();
+
       if ($status === SAVED_NEW) {
         $this->io()->success("media Type $type is successfully created...");
       }
@@ -93,6 +96,39 @@ class Media extends BaseEntityGenerate {
 
       // Assign display settings for the display view modes.
       $this->displayRepository->getViewDisplay('media', $type)->save();
+      /** @var \Drupal\media\MediaTypeInterface $media_type_obj */
+      $media_type_obj = reset($media_storage->loadByProperties(['id'=>$type]));
+      // If the media source is using a source field, ensure it's
+      // properly created.
+      $source = $media_type_obj->getSource();
+      $source_field = $source->getSourceFieldDefinition($media_type_obj);
+      if (!$source_field) {
+        $source_field = $source->createSourceField($media_type_obj);
+        /** @var \Drupal\field\FieldStorageConfigInterface $storage */
+        $storage = $source_field->getFieldStorageDefinition();
+        if ($storage->isNew()) {
+          $storage->save();
+        }
+        $source_field->save();
+
+        // Add the new field to the default form and view displays for this
+        // media type.
+        if ($source_field->isDisplayConfigurable('form')) {
+          $display = $this->displayRepository->getFormDisplay('media', $media_type_obj->id());
+          $source->prepareFormDisplay($media_type_obj, $display);
+          $display->save();
+        }
+        if ($source_field->isDisplayConfigurable('view')) {
+          $display = $this->displayRepository->getViewDisplay('media', $media_type_obj->id());
+
+          // Remove all default components.
+          foreach (array_keys($display->getComponents()) as $name) {
+            $display->removeComponent($name);
+          }
+          $source->prepareViewDisplay($media_type_obj, $display);
+          $display->save();
+        }
+      }
     }
   }
 
@@ -112,6 +148,7 @@ class Media extends BaseEntityGenerate {
       $media['label'] = $item['name'];
       $media['id'] = $item['machine_name'];
       $media['source'] = 'image';
+      $media['source_configuration']['source_field'] = 'field_media_image';
       $media['description'] = $item['description'];
       \array_push($media_types, $media);
     }

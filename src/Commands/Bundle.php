@@ -78,13 +78,17 @@ class Bundle extends BaseEntityGenerate {
 
     foreach ($node_types as $node_type) {
       $type = $node_type['type'];
+      $entity = 'node';
+      $url_alias_pattern = $node_type['url_alias_pattern'];
       if (!\is_null($node_storage->load($type))) {
         $this->io()->warning("Node Type $type Already exists. Skipping creation...");
+        $this->generatePathautoPattern($type, $url_alias_pattern, $entity);
         continue;
       }
       $status = $node_storage->create($node_type)->save();
       if ($status === SAVED_NEW) {
         $this->io()->success("Node Type $type is successfully created...");
+        $this->generatePathautoPattern($type, $url_alias_pattern, $entity);
       }
 
       // Create display modes for newly created content type.
@@ -109,6 +113,7 @@ class Bundle extends BaseEntityGenerate {
       }
     }
     $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+
   }
 
   /**
@@ -127,6 +132,7 @@ class Bundle extends BaseEntityGenerate {
       $node['name'] = $item['name'];
       $node['type'] = $item['machine_name'];
       $node['description'] = $item['description'];
+      $node['url_alias_pattern'] = $item['url_alias_pattern'];
       \array_push($node_types, $node);
     }
     return $node_types;

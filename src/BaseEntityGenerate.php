@@ -154,9 +154,11 @@ abstract class BaseEntityGenerate extends DrushCommands {
     foreach ($data as $item) {
       // @todo Have to refactor below commented code to work for all the tabs other then the `bundles`.
       // if (!isset($item['type'])) {
-      //   throw new \Exception("Type column is require to identify the type of entity. Please make sure you are using correct Drupal Spec Tool sheet. Aborting...");
+      // throw new \Exception("Type column is require to identify
+      // the type of entity.
+      // Please make sure you are using correct Drupal Spec Tool sheet.
+      // Aborting...");
       // }
-
       if ($this->converToMachineName($item['type']) === $this->entity) {
         \array_push($filtered_data, $item);
       }
@@ -208,6 +210,50 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   private function converToMachineName($name) {
     return strtolower(str_replace(" ", "_", $name));
+  }
+
+  /**
+   * Helper function to generate pathauto pattern.
+   */
+  public function generatePathautoPattern($bundle, $alias, $entity) {
+    $patternStatus = FALSE;
+    $moduleHandler = \Drupal::moduleHandler();
+    if (!$moduleHandler->moduleExists('pathauto')) {
+      $this->io()->warning($this->t('Please install pathauto module.'));
+      return FALSE;
+    }
+    if (isset($alias)) {
+      $patternStatus = TRUE;
+      $pattern_id = $bundle . '_pattern';
+      $pattern = $this->entityTypeManager->getStorage('pathauto_pattern')->load($pattern_id);
+      if ($pattern) {
+        $this->io()->warning($this->t('Alias for @bundle is already present, skipping.', ['@bundle' => $bundle]));
+        return FALSE;
+      }
+
+      if ($patternStatus) {
+        $pattern = $this->entityTypeManager->getStorage('pathauto_pattern')->create([
+          'id' => $pattern_id,
+          'label' => $bundle . ' pattern',
+          'type' => 'canonical_entities:' . $entity,
+          'pattern' => $alias,
+          'weight' => -5,
+        ]);
+
+        // Add the bundle condition.
+        $pattern->addSelectionCondition([
+          'id' => 'entity_bundle:' . $entity,
+          'bundles' => [$bundle => $bundle],
+          'negate' => FALSE,
+        ]);
+
+        $pattern->save();
+        $this->io()->warning($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
+      }
+    }
+    else {
+      $this->io()->warning($this->t('Alias for @bundle is not available, skipping.', ['@bundle' => $bundle]));
+    }
   }
 
 }

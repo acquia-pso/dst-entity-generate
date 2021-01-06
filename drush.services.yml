@@ -21,7 +21,6 @@ services:
       - { name: drush.command }
     arguments:
       - '@entity_type.manager'
-      - '@dst_entity_generate.general_api'
   dst_entity_generate.commands.bundle:
     class: Drupal\dst_entity_generate\Commands\Bundle
     tags:

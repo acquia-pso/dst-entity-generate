@@ -112,6 +112,8 @@ final class DstegConstants {
           'module' => 'color_field',
         ],
       ],
+    'File' => [
+      'type' => 'file',
     ],
   ];
   const ENTITY_TYPE_MAPPING = [

@@ -48,18 +48,28 @@ class Media extends BaseEntityGenerate {
   protected $displayRepository;
 
   /**
+   * Media source plugin manager.
+   *
+   * @var \Drupal\Component\Plugin\PluginManagerInterface
+   */
+  protected $sourceManager;
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   Entity field manager service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository
    *   Display mode repository.
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $source_manager
+   *   Media source plugin manager.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $general_api
    *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityDisplayRepositoryInterface $display_repository, GeneralApi $general_api) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityDisplayRepositoryInterface $display_repository, PluginManagerInterface $source_manager, GeneralApi $general_api) {
     $this->entityTypeManager = $entity_type_manager;
     $this->displayRepository = $display_repository;
+    $this->sourceManager = $source_manager;
     $this->helper = $general_api;
   }
 
@@ -97,7 +107,7 @@ class Media extends BaseEntityGenerate {
       // Assign display settings for the display view modes.
       $this->displayRepository->getViewDisplay('media', $type)->save();
       /** @var \Drupal\media\MediaTypeInterface $media_type_obj */
-      $media_type_obj = reset($media_storage->loadByProperties(['id'=>$type]));
+      $media_type_obj = reset($media_storage->loadByProperties(['id' => $type]));
       // If the media source is using a source field, ensure it's
       // properly created.
       $source = $media_type_obj->getSource();
@@ -143,17 +153,40 @@ class Media extends BaseEntityGenerate {
    */
   private function getMediaTypeData(array $data) {
     $media_types = [];
+    $source_options = $this->getAvailableMediaSourceOptions();
     foreach ($data as $item) {
+      $media_name = $item['name'];
+      if (!isset($item['settings/notes']) || empty($item['settings/notes'])) {
+        $this->io()->error("Cannot create \"$media_name\" media without proper source. Please define source in \"settings/notes\" column of the sheet.");
+        continue;
+      }
+
+      $source_option = $item['settings/notes'];
+      if (!\in_array($source_option, $source_options)) {
+        $implode_source_options = \implode(',', $source_options);
+        $this->io()->error("Source - \"$source_option\" is not a valid source. Please use one of the source from in \"$implode_source_options\" options. Skipping creation of \"$media_name\"...");
+        continue;
+      }
       $media = [];
-      $media['label'] = $item['name'];
+      $media['label'] = $media_name;
       $media['id'] = $item['machine_name'];
-      $media['source'] = 'image';
+      $media['source'] = \array_search($source_option, $source_options);
       $media['source_configuration']['source_field'] = 'field_media_image';
       $media['description'] = $item['description'];
       \array_push($media_types, $media);
     }
     return $media_types;
 
+  }
+
+  private function getAvailableMediaSourceOptions() {
+    $plugins = $this->sourceManager->getDefinitions();
+    $options = [];
+    foreach ($plugins as $plugin_id => $definition) {
+      $options[$plugin_id] = $definition['label'];
+    }
+
+    return $options;
   }
 
 }

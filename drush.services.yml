@@ -78,6 +78,7 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@entity_display.repository'
+      - '@plugin.manager.media.source'
       - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }

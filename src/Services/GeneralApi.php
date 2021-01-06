@@ -310,7 +310,7 @@ class GeneralApi {
               $entity_type = 'taxonomy_term';
               break;
 
-            case 'media_type':
+            case 'Media type':
               $entity_type_id = 'media_type';
               $entity_type = 'media';
               break;

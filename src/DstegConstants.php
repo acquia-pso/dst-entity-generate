@@ -88,6 +88,14 @@ final class DstegConstants {
     'Email' => [
       'type' => 'email',
     ],
+    'Telephone number' => [
+      'type' => 'telephone',
+      'dependencies' => [
+        'required' => [
+          'module' => 'telephone',
+        ],
+      ],
+    ],
     'Entity reference' => [
       'type' => 'entity_reference',
       'dependencies' => [
@@ -102,6 +110,78 @@ final class DstegConstants {
               'target_bundles',
             ],
           ],
+        ],
+      ],
+    ],
+    'Fieldset' => [
+      'type' => 'field_group',
+      'format_type' => 'fieldset',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Details' => [
+      'type' => 'field_group',
+      'format_type' => 'details',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Details sidebar' => [
+      'type' => 'field_group',
+      'format_type' => 'details_sidebar',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'HTML element' => [
+      'type' => 'field_group',
+      'format_type' => 'html_element',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Tab' => [
+      'type' => 'field_group',
+      'format_type' => 'tab',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Tabs' => [
+      'type' => 'field_group',
+      'format_type' => 'tabs',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Accordion' => [
+      'type' => 'field_group',
+      'format_type' => 'accordion',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
+        ],
+      ],
+    ],
+    'Accordion Item' => [
+      'type' => 'field_group',
+      'format_type' => 'accordion_item',
+      'dependencies' => [
+        'required' => [
+          'module' => 'field_group',
         ],
       ],
     ],

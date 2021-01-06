@@ -197,14 +197,35 @@ class GeneralApi {
       if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
-      FieldConfig::create($field_configs)->save();
-      // Set form display for new field.
-      $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
-        ->setComponent($field_data['machine_name'],
-          ['region' => 'content']
-        )
-        ->save();
+      if ($field_data['type'] === 'field_group') {
+        $field_settings = [
+          'children' => [],
+          'format_type' => $field_data['format_type'],
+          'label' => $field_data['field_label'],
+          'region' => 'content',
+          'weight' => 0,
+          'parent_name' => '',
+          'format_settings' => [
+            'id' => '',
+            'classes' => '',
+            'description' => '',
+            'required_fields' => $required,
+          ],
+        ];
+        $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
+          ->setThirdPartySetting('field_group', $field_data['machine_name'], $field_settings)
+          ->save();
+      }
+      else {
 
+        FieldConfig::create($field_configs)->save();
+        // Set form display for new field.
+        $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
+          ->setComponent($field_data['machine_name'],
+            ['region' => 'content']
+          )
+          ->save();
+      }
       $this->logger->notice($this->t('@field field is created in bundle "@bundle"',
         [
           '@field' => $field_data['machine_name'],
@@ -261,12 +282,16 @@ class GeneralApi {
     if (array_key_exists('dependencies', $field_meta) && !empty($field_meta['dependencies'])) {
       $field = $this->fieldDependencyCheck($field_meta, $field);
     }
-    if ($field) {
+    if ($field && $field_meta['type'] !== 'field_group') {
       $field['drupal_field_type'] = $field_meta['type'];
       $this->createFieldStorage($field, $entity_type);
       $this->logger->notice($this->t('Field storage created for @field',
         ['@field' => $field['machine_name']]
       ));
+    }
+    elseif ($field_meta['type'] === 'field_group') {
+      $field['format_type'] = $field_meta['format_type'];
+      $field['type'] = $field_meta['type'];
     }
     return $field;
   }

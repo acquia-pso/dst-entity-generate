@@ -105,6 +105,9 @@ final class DstegConstants {
         ],
       ],
     ],
+    'File' => [
+      'type' => 'file',
+    ],
   ];
   const ENTITY_TYPE_MAPPING = [
     'Vocabulary' => [

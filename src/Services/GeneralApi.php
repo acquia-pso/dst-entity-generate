@@ -314,6 +314,11 @@ class GeneralApi {
               $entity_type_id = 'media_type';
               $entity_type = 'media';
               break;
+
+            case 'Paragraph Types':
+              $entity_type_id = 'paragraphs_type';
+              $entity_type = 'paragraph';
+              break;
           }
           $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field_machine_name);
 
@@ -424,7 +429,7 @@ class GeneralApi {
                   $entity_storage = $entity_type_storage->loadByProperties(['name' => $target_bundle]);
                   if (empty($entity_storage)) {
                     $this->logger->notice($this->t(
-                      'The @target_bundle is not exist. Skipping @field field generation.',
+                      'The @target_bundle does not exist. Skipping @field field generation.',
                       [
                         '@target_bundle' => $target_bundle,
                         '@field' => $field['machine_name'],

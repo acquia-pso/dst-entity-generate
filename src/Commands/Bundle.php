@@ -102,7 +102,7 @@ class Bundle extends BaseEntityGenerate {
     // Generate fields now.
     $bundle_type = 'Content type';
     $fields_data = $bundles_data = [];
-    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS);
+    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
     $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
     if (empty($fields_data)) {
       $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");

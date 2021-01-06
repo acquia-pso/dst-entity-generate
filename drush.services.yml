@@ -71,6 +71,7 @@ services:
     class: Drupal\dst_entity_generate\Commands\Paragraph
     arguments:
       - '@entity_type.manager'
+      - '@dst_entity_generate.general_api'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.media:

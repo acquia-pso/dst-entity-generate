@@ -90,14 +90,14 @@ class Media extends BaseEntityGenerate {
     foreach ($media_types as $media_type) {
       $type = $media_type['id'];
       if (!\is_null($media_storage->load($type))) {
-        $this->io()->warning("media Type $type Already exists. Skipping creation...");
+        $this->io()->warning("Media Type $type Already exists. Skipping creation...");
         continue;
       }
 
       $status = $media_storage->create($media_type)->save();
 
       if ($status === SAVED_NEW) {
-        $this->io()->success("media Type $type is successfully created...");
+        $this->io()->success("Media Type $type is successfully created...");
       }
 
       // Create display modes for newly created content type.

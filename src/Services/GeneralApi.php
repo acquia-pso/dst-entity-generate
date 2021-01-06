@@ -194,7 +194,7 @@ class GeneralApi {
         'label' => $field_data['field_label'],
         'required' => $required,
       ];
-      if (array_key_exists('handler_settings', $field_data['settings'])) {
+      if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
       FieldConfig::create($field_configs)->save();
@@ -308,6 +308,11 @@ class GeneralApi {
             case 'Vocabulary':
               $entity_type_id = 'taxonomy_vocabulary';
               $entity_type = 'taxonomy_term';
+              break;
+
+            case 'Media type':
+              $entity_type_id = 'media_type';
+              $entity_type = 'media';
               break;
           }
           $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field_machine_name);

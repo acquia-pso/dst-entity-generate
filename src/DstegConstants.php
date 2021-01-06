@@ -14,6 +14,7 @@ final class DstegConstants {
   const CONTENT_TYPES = 'Content types';
   const VOCABULARIES = 'Vocabularies';
   const PARAGRAPHS = 'Paragraph Types';
+  const MEDIA_TYPES = 'Media Types';
   const FIELDS = 'Fields';
   const MENUS = 'Menus';
   const USER_ROLES = 'User roles';

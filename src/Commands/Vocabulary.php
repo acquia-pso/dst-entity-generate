@@ -71,7 +71,7 @@ class Vocabulary extends BaseEntityGenerate {
       $vocan_url_alias = $vocab['url_alias_pattern'];
       $type = $vocab['type'];
       if ($vocabularies[$vocab['vid']]) {
-        $this->io()->warning("Vocabulary $vocab Already exists. Skipping creation...");
+        $this->io()->warning("Vocabulary $vocab_name Already exists. Skipping creation...");
         $this->generatePathautoPattern($vocab_name, $vocan_url_alias, $entity);
         continue;
       }
@@ -86,14 +86,13 @@ class Vocabulary extends BaseEntityGenerate {
     $bundle_type = 'Vocabulary';
     $fields_data = $bundles_data = [];
     $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS);
+    $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
     if (empty($fields_data)) {
       $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
       return self::EXIT_SUCCESS;
     }
-    foreach ($data as $bundle) {
-      if ($bundle['type'] === $bundle_type) {
-        $bundles_data[$bundle['name']] = $bundle['machine_name'];
-      }
+    foreach ($vocab_types as $bundle) {
+      $bundles_data[$bundle['name']] = $bundle['vid'];
     }
     $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
   }

@@ -73,3 +73,12 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: drush.command }
+  dst_entity_generate.commands.media:
+    class: Drupal\dst_entity_generate\Commands\Media
+    arguments:
+      - '@entity_type.manager'
+      - '@entity_display.repository'
+      - '@plugin.manager.media.source'
+      - '@dst_entity_generate.general_api'
+    tags:
+      - { name: drush.command }

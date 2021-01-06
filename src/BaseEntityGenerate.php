@@ -133,6 +133,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
       // Store cached data for 6 hours.
       $cache_api->set($cache_key, $data, microtime(TRUE) + 21600);
     }
+
     return $this->filterEntityTypeSpecificData($data);
   }
 
@@ -141,11 +142,13 @@ abstract class BaseEntityGenerate extends DrushCommands {
    *
    * @param array $data
    *   Retrieved data.
+   * @param string $key
+   *   Key of the DST sheet to filter the data.
    *
    * @return array|null
    *   Filtered data or empty.
    */
-  private function filterEntityTypeSpecificData(array $data) {
+  protected function filterEntityTypeSpecificData(array $data, string $key = 'type') {
     if ($this->entity === '') {
       return $data;
     }
@@ -159,7 +162,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
       // Please make sure you are using correct Drupal Spec Tool sheet.
       // Aborting...");
       // }
-      if ($this->converToMachineName($item['type']) === $this->entity) {
+      if (strpos($this->converToMachineName($item[$key]), $this->entity) !== FALSE) {
         \array_push($filtered_data, $item);
       }
     }
@@ -248,7 +251,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
         ]);
 
         $pattern->save();
-        $this->io()->warning($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
+        $this->io()->success($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
       }
     }
     else {

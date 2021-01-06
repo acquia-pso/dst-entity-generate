@@ -39,7 +39,7 @@ class Vocabulary extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
-   * DstegBundle constructor.
+   * DstegVocabulary constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.

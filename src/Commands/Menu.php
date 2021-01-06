@@ -2,11 +2,9 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
@@ -17,19 +15,35 @@ use Drupal\dst_entity_generate\Services\GeneralApi;
 class Menu extends BaseEntityGenerate {
 
   /**
-   * DstCommands constructor.
-   *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
-   *   GoogleSheetApi service class object.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   General Api service definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * {@inheritDoc}
    */
-  public function __construct(GoogleSheetApi $sheet,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($sheet, $generalApi, $configFactory);
+  protected $dstEntityName = 'menus';
+
+  /**
+   * Array of all dependent modules.
+   *
+   * @var array
+   */
+  protected $dependentModules = ['menu_ui'];
+
+  /**
+   * Entity Type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * DstegMenu constructor.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity Type manager.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
+   */
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, GeneralApi $generalApi) {
+    $this->entityTypeManager = $entityTypeManager;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -40,58 +54,51 @@ class Menu extends BaseEntityGenerate {
    * @usage drush dst:generate:menus
    */
   public function generateMenus() {
-    $result = FALSE;
-    $logMessages = [];
-    try {
-      $this->yell($this->t('Generating Menus.'), 100, 'blue');
-      $entity_data = $this->sheet->getData(DstegConstants::MENUS);
-      if (!empty($entity_data)) {
-        $menus_storage = $this->helper->getAllEntities('menu');
-        foreach ($entity_data as $menu) {
-          // Create menus only if it is in Wait and implement state.
-          if ($menu['x'] === 'w') {
-            $is_menu_present = $menus_storage
-              ->load($menu['machine_name']);
-            // Prevent exception if menu is already present.
-            if (!isset($is_menu_present) || empty($is_menu_present)) {
-              $is_saved = $menus_storage->create([
-                'id' => $menu['machine_name'],
-                'label' => $menu['title'],
-                'description' => $menu['description'],
-              ])->save();
-              if ($is_saved === 1) {
-                $success_message = $this->t('New menu @menu created.', [
-                  '@menu' => $menu['title'],
-                ]);
-                $this->say($success_message);
-                $logMessages[] = $success_message;
-              }
-            }
-            else {
-              $present_message = $this->t('Skipping, Menu @menu already exists.', [
-                '@menu' => $menu['title'],
-              ]);
-              $this->say($present_message);
-              $logMessages[] = $present_message;
-            }
-          }
-
+    $this->io()->success('Generating Drupal Menus.');
+    $entity_data = $this->getDataFromSheet(DstegConstants::MENUS);
+    if (!empty($entity_data)) {
+      $menus_data = $this->getMenuData($entity_data);
+      $menu_storage = $this->entityTypeManager->getStorage('menu');
+      $menus = $menu_storage->loadMultiple();
+      foreach ($menus_data as $menu) {
+        $menu_name = $menu['label'];
+        if ($menus[$menu['id']]) {
+          $this->io()->warning("Menu $menu_name Already exists. Skipping creation...");
+          continue;
+        }
+        $status = $menu_storage->create($menu)->save();
+        if ($status === SAVED_NEW) {
+          $this->io()->success("Menu $menu_name is successfully created...");
         }
       }
-      else {
-        $no_data_message = $this->t('There is no data for the Menu entity in your DST sheet.');
-        $this->say($no_data_message);
-        $logMessages[] = $no_data_message;
-      }
-      $this->yell($this->t('Finished generating Menus.'), 100, 'blue');
-      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
-    catch (\Exception $exception) {
-      $this->displayAndLogException($exception, DstegConstants::MENUS);
-      $result = CommandResult::exitCode(self::EXIT_FAILURE);
+    else {
+      $this->io()->warning('There is no data for the Menu entity in your DST sheet.');
     }
-    $this->helper->logMessage($logMessages);
-    return $result;
+  }
+
+  /**
+   * Get data needed for Menu entity.
+   *
+   * @param array $data
+   *   Array of Menus.
+   *
+   * @return array|null
+   *   Menus compliant data.
+   */
+  private function getMenuData(array $data) {
+    $menu_types = [];
+    foreach ($data as $item) {
+      $menu = [];
+      $description = isset($item['description']) ? $item['description'] : $item['name'] . ' menu.';
+      $menu['id'] = $item['machine_name'];
+      $menu['label'] = $item['title'];
+      $menu['description'] = $description;
+
+      \array_push($menu_types, $menu);
+    }
+    return $menu_types;
+
   }
 
 }

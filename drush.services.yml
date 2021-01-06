@@ -17,12 +17,11 @@ services:
       - { name: drush.command }
   dst_entity_generate.commands.menus:
     class: Drupal\dst_entity_generate\Commands\Menu
-    arguments:
-      - '@dst_entity_generate.google_sheet_api'
-      - '@dst_entity_generate.general_api'
-      - '@config.factory'
     tags:
       - { name: drush.command }
+    arguments:
+      - '@entity_type.manager'
+      - '@dst_entity_generate.general_api'
   dst_entity_generate.commands.bundle:
     class: Drupal\dst_entity_generate\Commands\Bundle
     tags:

@@ -105,6 +105,14 @@ final class DstegConstants {
         ],
       ],
     ],
+    'Color' => [
+      'type' => 'color_field_type',
+      'dependencies' => [
+        'required' => [
+          'module' => 'color_field',
+        ],
+      ],
+    ],
   ];
   const ENTITY_TYPE_MAPPING = [
     'Vocabulary' => [

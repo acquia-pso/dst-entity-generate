@@ -5,7 +5,6 @@ namespace Drupal\dst_entity_generate\Commands;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
  * Class provides functionality of Menus generation from DST sheet.
@@ -38,12 +37,9 @@ class Menu extends BaseEntityGenerate {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, GeneralApi $generalApi) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
-    $this->helper = $generalApi;
   }
 
   /**

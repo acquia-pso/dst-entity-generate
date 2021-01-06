@@ -251,7 +251,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
         ]);
 
         $pattern->save();
-        $this->io()->warning($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
+        $this->io()->success($this->t('Alias for @bundle is created.', ['@bundle' => $bundle]));
       }
     }
     else {

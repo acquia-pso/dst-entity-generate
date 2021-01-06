@@ -5,6 +5,7 @@ namespace Drupal\dst_entity_generate\Commands;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 
 /**
  * Class provides functionality of Content types generation from DST sheet.
@@ -42,9 +43,12 @@ class Paragraph extends BaseEntityGenerate {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, GeneralApi $generalApi) {
     $this->entityTypeManager = $entityTypeManager;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -69,6 +73,22 @@ class Paragraph extends BaseEntityGenerate {
         $this->io()->success("Paragraph Type $id is successfully created...");
       }
     }
+
+    // Generate fields now.
+    $bundle_type = DstegConstants::PARAGRAPHS;
+    $fields_data = $bundles_data = [];
+    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
+    $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
+
+    if (empty($fields_data)) {
+      $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
+      return self::EXIT_SUCCESS;
+    }
+    foreach ($paragraph_types as $paragraph_type) {
+      $bundles_data[$paragraph_type['label']] = $paragraph_type['id'];
+    }
+
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
   }
 
   /**

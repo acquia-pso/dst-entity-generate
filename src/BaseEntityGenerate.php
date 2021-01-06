@@ -116,11 +116,13 @@ abstract class BaseEntityGenerate extends DrushCommands {
    *
    * @param string $sheet
    *   Sheet tab name.
+   * @param bool $filter
+   *   Boolean indicating whether data needs to be further filtered or not.
    *
    * @return array
    *   Data.
    */
-  protected function getDataFromSheet(string $sheet) {
+  protected function getDataFromSheet(string $sheet, $filter = TRUE) {
     $cache_key = 'dst_sheet_data.' . \strtolower($sheet);
     $cache_api = \Drupal::cache();
 
@@ -134,7 +136,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
       $cache_api->set($cache_key, $data, microtime(TRUE) + 21600);
     }
 
-    return $this->filterEntityTypeSpecificData($data);
+    return ($filter) ? $this->filterEntityTypeSpecificData($data) : $this->filterApprovedData($data);
   }
 
   /**
@@ -150,7 +152,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   protected function filterEntityTypeSpecificData(array $data, string $key = 'type') {
     if ($this->entity === '') {
-      return $data;
+      return $this->filterApprovedData($data);
     }
 
     $filtered_data = [];
@@ -166,7 +168,6 @@ abstract class BaseEntityGenerate extends DrushCommands {
         \array_push($filtered_data, $item);
       }
     }
-    $filtered_data = $filtered_data ?: $data;
 
     return $this->filterApprovedData($filtered_data);
   }

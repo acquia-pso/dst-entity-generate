@@ -115,6 +115,14 @@ final class DstegConstants {
       'entity_type_id' => 'node_type',
       'entity_type' => 'node',
     ],
+    'Paragraph type' => [
+      'entity_type_id' => 'paragraphs_type',
+      'entity_type' => 'paragraph',
+    ],
+    'Media type' => [
+      'entity_type_id' => 'media_type',
+      'entity_type' => 'media',
+    ],
   ];
 
 }

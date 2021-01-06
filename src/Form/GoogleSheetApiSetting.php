@@ -133,7 +133,7 @@ class GoogleSheetApiSetting extends FormBase {
         '#required' => TRUE,
         '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1.') . '</p>',
         '#upload_validators' => ['file_validate_extensions' => ['json']],
-        '#upload_location' => 'private://',
+        '#upload_location' => 'private://google_credentials',
       ];
     }
 

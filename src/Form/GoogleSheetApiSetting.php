@@ -131,9 +131,10 @@ class GoogleSheetApiSetting extends FormBase {
         '#type' => 'managed_file',
         '#title' => $this->t('Upload credentials.json File'),
         '#required' => TRUE,
-        '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1.') . '</p>',
+        '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1 and follow the following steps.') . '</p><p>' . $this->t('Enter new project name -> Configure your OAuth client: Desktop App -> Finally click on Create button') . '</p>',
         '#upload_validators' => ['file_validate_extensions' => ['json']],
         '#upload_location' => 'private://google_credentials',
+        '#default_value' => (isset($store) && !empty($store->get('credentials_json_file'))) ? $store->get('credentials_json_file') : '',
       ];
     }
 
@@ -188,6 +189,7 @@ class GoogleSheetApiSetting extends FormBase {
         $store->set('credentials', $credential_data);
         $store->set('name', $name);
         $store->set('spreadsheet_id', $form_state->getValue('spreadsheet_id'));
+        $store->set('credentials_json_file', $credentials_json_file);
 
         if (!empty($credential_data) && !empty($name)) {
           $msg = $this->getAccessToken($credential_data, $name, 1);

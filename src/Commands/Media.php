@@ -139,21 +139,22 @@ class Media extends BaseEntityGenerate {
           $display->save();
         }
       }
-
-      // Generate fields now.
-      $bundle_type = 'Media type';
-      $fields_data = $bundles_data = [];
-      $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
-      $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
-      if (empty($fields_data)) {
-        $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
-        return self::EXIT_SUCCESS;
-      }
-      foreach ($media_types as $media_type) {
-        $bundles_data[$media_type['label']] = $media_type['id'];
-      }
-      $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
     }
+
+    // Generate fields now.
+    $bundle_type = 'Media type';
+    $fields_data = $bundles_data = [];
+    $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
+    $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
+    if (empty($fields_data)) {
+      $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $bundle_type.");
+      return self::EXIT_SUCCESS;
+    }
+    foreach ($media_types as $media_type) {
+      $bundles_data[$media_type['label']] = $media_type['id'];
+    }
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+
   }
 
   /**

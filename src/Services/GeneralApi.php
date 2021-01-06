@@ -197,7 +197,7 @@ class GeneralApi {
       if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
-      if ($field_data['type'] === 'field_group') {
+      if ($field_data['type'] === 'field_group' && $this->isModuleEnabled('field_group')) {
         $field_settings = [
           'children' => [],
           'format_type' => $field_data['format_type'],
@@ -215,9 +215,14 @@ class GeneralApi {
         $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
           ->setThirdPartySetting('field_group', $field_data['machine_name'], $field_settings)
           ->save();
+        $this->logger->notice($this->t('@field field group is created in bundle "@bundle"',
+          [
+            '@field' => $field_data['machine_name'],
+            '@bundle' => $bundle->label(),
+          ]
+        ));
       }
-      else {
-
+      elseif ($field_data['type'] !== 'field_group') {
         FieldConfig::create($field_configs)->save();
         // Set form display for new field.
         $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
@@ -225,13 +230,13 @@ class GeneralApi {
             ['region' => 'content']
           )
           ->save();
+        $this->logger->notice($this->t('@field field is created in bundle "@bundle"',
+          [
+            '@field' => $field_data['machine_name'],
+            '@bundle' => $bundle->label(),
+          ]
+        ));
       }
-      $this->logger->notice($this->t('@field field is created in bundle "@bundle"',
-        [
-          '@field' => $field_data['machine_name'],
-          '@bundle' => $bundle->label(),
-        ]
-      ));
     }
     else {
       $this->logger->notice($this->t('The @bundle bundle does not exists.', ['@bundle' => $bundle_machine_name]));

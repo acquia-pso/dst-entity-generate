@@ -194,7 +194,7 @@ class GeneralApi {
         'label' => $field_data['field_label'],
         'required' => $required,
       ];
-      if (array_key_exists('handler_settings', $field_data['settings'])) {
+      if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
       FieldConfig::create($field_configs)->save();

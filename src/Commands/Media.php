@@ -139,6 +139,20 @@ class Media extends BaseEntityGenerate {
           $display->save();
         }
       }
+
+      // Generate fields now.
+      $fields_data = $bundles_data = [];
+      $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS);
+      if (empty($fields_data)) {
+        $this->io()->warning("There is no data from the sheet. Skipping Generating fields data for $this->entity.");
+        return self::EXIT_SUCCESS;
+      }
+      foreach ($data as $bundle) {
+        if ($bundle['type'] === $this->entity) {
+          $bundles_data[$bundle['name']] = $bundle['machine_name'];
+        }
+      }
+      $this->helper->generateEntityFields($this->entity, $fields_data, $bundles_data);
     }
   }
 
@@ -179,6 +193,12 @@ class Media extends BaseEntityGenerate {
 
   }
 
+  /**
+   * Get available media source options.
+   *
+   * @return array
+   *   Array of media source options.
+   */
   private function getAvailableMediaSourceOptions() {
     $plugins = $this->sourceManager->getDefinitions();
     $options = [];

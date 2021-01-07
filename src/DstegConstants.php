@@ -50,6 +50,15 @@ final class DstegConstants {
     'Text (formatted, long, with summary)' => [
       'type' => 'text_with_summary',
     ],
+    'Number (decimal)' => [
+      'type' => 'decimal',
+    ],
+    'Number (float)' => [
+      'type' => 'float',
+    ],
+    'Number (integer)' => [
+      'type' => 'integer',
+    ],
     'Boolean' => [
       'type' => 'boolean',
     ],
@@ -58,6 +67,16 @@ final class DstegConstants {
     ],
     'List (float)' => [
       'type' => 'list_float',
+      'dependencies' => [
+        'required' => [
+          'settings' => [
+            'allowed_values',
+          ],
+        ],
+      ],
+    ],
+    'List (integer)' => [
+      'type' => 'list_integer',
       'dependencies' => [
         'required' => [
           'settings' => [

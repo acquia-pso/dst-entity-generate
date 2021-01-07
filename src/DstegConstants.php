@@ -124,6 +124,13 @@ final class DstegConstants {
         ],
       ],
     ],
+    'Color' => [
+      'type' => 'color_field_type',
+      'dependencies' => [
+        'required' => [
+          'module' => 'color_field',
+        ],
+      ],
     'File' => [
       'type' => 'file',
     ],

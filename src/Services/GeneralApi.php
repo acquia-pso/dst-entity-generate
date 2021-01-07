@@ -456,7 +456,9 @@ class GeneralApi {
                     ));
                     return FALSE;
                   }
-                  $entity_storage = $entity_type_storage->loadByProperties(['name' => $target_bundle]);
+                  // Todo: Machine name should be read from bundles tab.
+                  $target_bundle_machine_name = strtolower(str_replace(" ", "_", $target_bundle));
+                  $entity_storage = $entity_type_storage->load($target_bundle_machine_name);
                   if (empty($entity_storage)) {
                     $this->logger->notice($this->t(
                       'The @target_bundle does not exist. Skipping @field field generation.',
@@ -472,7 +474,7 @@ class GeneralApi {
                     'handler' => 'default',
                     'handler_settings' => [
                       'target_bundles' => [
-                        reset($entity_storage)->id(),
+                        $entity_storage->id(),
                       ],
                     ],
                   ];

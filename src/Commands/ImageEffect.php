@@ -132,7 +132,6 @@ class ImageEffect extends BaseEntityGenerate {
    *   Available Image effects.
    */
   private function getAvailableImageEffects() {
-    $effects = [];
     $image_effect_definitions = $this->effectManager->getDefinitions();
     $effects = [];
     foreach ($image_effect_definitions as $effect) {

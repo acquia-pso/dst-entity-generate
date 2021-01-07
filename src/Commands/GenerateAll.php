@@ -19,51 +19,80 @@ class GenerateAll extends BaseEntityGenerate {
   /**
    * Bundle command definition.
    *
-   * @var Bundle
+   * @var \Drupal\dst_entity_generate\Commands\Bundle
    */
-  protected $dstegBundle;
+  protected $bundle;
 
   /**
    * Menu command definition.
    *
-   * @var Menu
+   * @var \Drupal\dst_entity_generate\Commands\Menu
    */
-  protected $dstegMenus;
+  protected $menus;
 
   /**
    * UserRole command definition.
    *
-   * @var UserRole
+   * @var \Drupal\dst_entity_generate\Commands\UserRole
    */
-  protected $dstegUserRoles;
+  protected $userRoles;
 
   /**
    * ImageEffect command definition.
    *
-   * @var ImageEffect
+   * @var \Drupal\dst_entity_generate\Commands\ImageEffect
    */
-  protected $dstegImageEffect;
+  protected $imageEffect;
 
   /**
    * Workflow command definition.
    *
-   * @var Workflow
+   * @var \Drupal\dst_entity_generate\Commands\Workflow
    */
-  protected $dstegWorkflows;
+  protected $workflow;
 
   /**
    * ImageStyle command definition.
    *
-   * @var ImageStyle
+   * @var \Drupal\dst_entity_generate\Commands\ImageStyle
    */
-  protected $dstegImageStyle;
+  protected $imageStyle;
 
   /**
    * DstegVocabulary command definition.
    *
-   * @var Vocabulary
+   * @var \Drupal\dst_entity_generate\Commands\Vocabulary
    */
-  protected $dstegVocabulary;
+  protected $vocabulary;
+
+  /**
+   * Generate media command definition.
+   *
+   * @var \Drupal\dst_entity_generate\Commands\Media
+   */
+  protected $media;
+
+  /**
+   * Generate paragraph command definition.
+   *
+   * @var \Drupal\dst_entity_generate\Commands\Paragraph
+   */
+  protected $paragraph;
+
+  /**
+   * {@inheritDoc}
+   */
+  protected $dstEntityName = 'all';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $dependentModules = [
+    'workflows',
+    'content_moderation',
+    'media',
+    'paragraphs',
+  ];
 
   /**
    * DstCommands constructor.
@@ -90,6 +119,8 @@ class GenerateAll extends BaseEntityGenerate {
    *   The helper service for DSTEG.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
+   * @param \Drupal\dst_entity_generate\Commands\Media $media
+   *   Media generate command definition.
    */
   public function __construct(TranslationInterface $stringTranslation,
                               Bundle $dstegBundle,
@@ -101,17 +132,20 @@ class GenerateAll extends BaseEntityGenerate {
                               Vocabulary $dstegVocabulary,
                               GoogleSheetApi $sheet,
                               GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
+                              ConfigFactoryInterface $configFactory,
+                              Media $media,
+                              Paragraph $paragraph) {
     parent::__construct($sheet, $generalApi, $configFactory);
     $this->stringTranslation = $stringTranslation;
-    $this->dstegBundle = $dstegBundle;
-    $this->dstegMenus = $dstegMenus;
-    $this->dstegUserRoles = $dstegUserRoles;
-    $this->dstegImageEffect = $dstegImageEffect;
-    $this->dstegWorkflows = $dstegWorkflows;
-    $this->dstegImageStyle = $dstegImageStyle;
-    $this->dstegVocabulary = $dstegVocabulary;
-
+    $this->bundle = $dstegBundle;
+    $this->menus = $dstegMenus;
+    $this->userRoles = $dstegUserRoles;
+    $this->imageEffect = $dstegImageEffect;
+    $this->workflow = $dstegWorkflows;
+    $this->imageStyle = $dstegImageStyle;
+    $this->vocabulary = $dstegVocabulary;
+    $this->media = $media;
+    $this->paragraph = $paragraph;
   }
 
   /**
@@ -124,26 +158,32 @@ class GenerateAll extends BaseEntityGenerate {
   public function generate() {
     $this->say($this->t('Generating Drupal entities.'));
 
-    // Generate bundles.
-    $this->dstegBundle->generateBundle();
-
     // Generate Menus.
-    $this->dstegMenus->generateMenus();
+    $this->menus->generateMenus();
 
     // Generate User roles.
-    $this->dstegUserRoles->generateUserRoles();
-
-    // Generate Image effects.
-    $this->dstegImageEffect->generateImageEffects();
-
-    // Generate workflows.
-    $this->dstegWorkflows->generateWorkflows();
+    $this->userRoles->generateUserRoles();
 
     // Generate image styles.
-    $this->dstegImageStyle->generateImageStyle();
+    $this->imageStyle->generateImageStyle();
+
+    // Generate Image effects.
+    $this->imageEffect->generateImageEffects();
+
+    // Generate workflows.
+    $this->workflow->generateWorkflows();
 
     // Generate vocabularies.
-    $this->dstegVocabulary->generateVocabularies();
+    $this->vocabulary->generateVocabularies();
+
+    // Generate media types.
+    $this->media->generateBundle();
+
+    // Generate bundles.
+    $this->bundle->generateBundle();
+
+    // Generate paragraphs.
+    $this->paragraph->generateParagraph();
 
     // Call all the methods to generate the Drupal entities.
     $this->yell($this->t('Congratulations. The entities which are enabled for sync are generated successfully.'));

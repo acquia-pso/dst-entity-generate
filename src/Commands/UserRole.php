@@ -4,6 +4,7 @@ namespace Drupal\dst_entity_generate\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
@@ -17,19 +18,32 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 class UserRole extends BaseEntityGenerate {
 
   /**
-   * DstCommands constructor.
-   *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
-   *   Google Sheet Api service definition.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   GeneralApi service definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * {@inheritDoc}
    */
-  public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($googleSheetApi, $generalApi, $configFactory);
+  protected $dstEntityName = 'user_roles';
+
+  /**
+   * Machine name of entity which is going to import.
+   *
+   * @var string
+   */
+  protected $entity = '';
+
+  /**
+   * Entity Type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * DstegMenu constructor.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity Type manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -44,9 +58,9 @@ class UserRole extends BaseEntityGenerate {
     $logMessages = [];
     try {
       $this->yell($this->t('Generating user roles.'), 100, 'blue');
-      $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
+      $user_role_data = $this->getDataFromSheet(DstegConstants::USER_ROLES);
       if (!empty($user_role_data)) {
-        $user_role_storage = $this->helper->getAllEntities('user_role');
+        $user_role_storage = $this->entityTypeManager->getStorage('user_role');
         foreach ($user_role_data as $user_role) {
           // Create role only if it is in Wait and implement state.
           if ($user_role['x'] === 'w') {
@@ -91,7 +105,6 @@ class UserRole extends BaseEntityGenerate {
       $result = CommandResult::exitCode(self::EXIT_FAILURE);
     }
 
-    $this->helper->logMessage($logMessages);
     return $result;
   }
 

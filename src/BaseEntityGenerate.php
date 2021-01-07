@@ -80,7 +80,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
    */
   public function validateEntityForImport() {
     $enabled_entities = \Drupal::configFactory()->get('dst_entity_generate.settings')->get('sync_entities');
-    if ($enabled_entities[$this->dstEntityName] !== $this->dstEntityName) {
+    if ($enabled_entities[$this->dstEntityName] !== $this->dstEntityName && $this->dstEntityName !== 'all') {
       throw new \Exception("Entity $this->dstEntityName is not enabled for import. Aborting...");
     }
   }

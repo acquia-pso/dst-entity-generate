@@ -1,6 +1,6 @@
 services:
   dst_entity_generate.commands:
-    class: \Drupal\dst_entity_generate\Commands\GenerateAll
+    class: Drupal\dst_entity_generate\Commands\GenerateAll
     arguments:
     - '@string_translation'
     - '@dst_entity_generate.commands.bundle'
@@ -13,6 +13,8 @@ services:
     - '@dst_entity_generate.google_sheet_api'
     - '@dst_entity_generate.general_api'
     - '@config.factory'
+    - '@dst_entity_generate.commands.media'
+    - '@dst_entity_generate.commands.paragraph'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.menus:
@@ -32,9 +34,7 @@ services:
   dst_entity_generate.commands.user_roles:
     class: Drupal\dst_entity_generate\Commands\UserRole
     arguments:
-      - '@dst_entity_generate.google_sheet_api'
-      - '@dst_entity_generate.general_api'
-      - '@config.factory'
+      - '@entity_type.manager'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.image_effect:

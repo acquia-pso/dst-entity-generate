@@ -158,7 +158,10 @@ class GeneralApi {
       'type' => $field['drupal_field_type'],
       'cardinality' => $cardinality,
     ];
-    if (array_key_exists('settings', $field) && !empty($field['settings'])) {
+    if ($field['field_type'] === 'Layout canvas') {
+      $field_configs['settings']['target_type'] = 'cohesion_layout';
+    }
+    elseif (array_key_exists('settings', $field) && !empty($field['settings'])) {
       $field_configs['settings'] = $field['settings'];
     }
     FieldStorageConfig::create($field_configs)->save();

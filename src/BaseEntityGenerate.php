@@ -98,9 +98,18 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
 
     $moduleHandler = \Drupal::moduleHandler();
+    $moduleInstaller = \Drupal::service("module_installer");
     $disabledModules = [];
     foreach ($this->dependentModules as $module) {
       if (!$moduleHandler->moduleExists($module)) {
+        $choice = $this->io()->choice("Do you want to enable $module module?",  [
+          'yes' => 'Yes',
+          'no' => 'No',
+        ]);
+        if ($choice === 'yes') {
+          $moduleInstaller->install([$module]);
+          continue;
+        }
         \array_push($disabledModules, $module);
       }
     }

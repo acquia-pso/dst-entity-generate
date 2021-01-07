@@ -9,6 +9,7 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Site\Settings;
 
 /**
  * Google Api Settings Form.
@@ -102,6 +103,14 @@ class GoogleSheetApiSetting extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $store = $this->keyValue->get("dst_google_sheet_storage");
+    $file_private_path = Settings::get('file_private_path', '');
+
+    if (empty($file_private_path)) {
+      $form['private_directory_message'] = [
+        '#type' => 'item',
+        '#markup' => '<div class="messages messages--error"><b>' . $this->t('Please configure private file path.') . '</b></div>',
+      ];
+    }
 
     if ($this->step === 1) {
       $form['step'] = [
@@ -164,11 +173,13 @@ class GoogleSheetApiSetting extends FormBase {
       $button_label = $this->t('Next');
     }
 
-    $form['actions']['submit'] = [
-      '#type' => 'submit',
-      '#value' => $button_label,
-      '#button_type' => 'primary',
-    ];
+    if (!empty($file_private_path)) {
+      $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $button_label,
+        '#button_type' => 'primary',
+      ];
+    }
     return $form;
   }
 

@@ -59,9 +59,10 @@ class Workflow extends BaseEntityGenerate {
     $this->io()->success('Generating Workflows...');
 
     // Get data fromm the DST Sheet.
-    $workflows = $this->getWorkflowTypeData($this->getDataFromSheet(DstegConstants::WORKFLOWS));
-    $workflow_states = $this->getDataFromSheet(DstegConstants::WORKFLOW_STATES);
-    $workflow_transitions = $this->getDataFromSheet(DstegConstants::WORKFLOW_TRANSITIONS);
+    $data = $this->getDataFromSheet(DstegConstants::WORKFLOWS, FALSE);
+    $workflows = $this->getWorkflowTypeData($data);
+    $workflow_states = $this->getDataFromSheet(DstegConstants::WORKFLOW_STATES, FALSE);
+    $workflow_transitions = $this->getDataFromSheet(DstegConstants::WORKFLOW_TRANSITIONS, FALSE);
 
     // Create the workflow config with all states and transitions data.
     $workflow_config = $workflow_state_map = [];

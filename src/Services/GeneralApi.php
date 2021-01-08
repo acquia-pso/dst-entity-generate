@@ -158,7 +158,7 @@ class GeneralApi {
       'type' => $field['drupal_field_type'],
       'cardinality' => $cardinality,
     ];
-    if ($field['field_type'] === 'Layout canvas') {
+    if ($field['field_type'] === 'Layout Canvas (Site Studio)') {
       $field_configs['settings']['target_type'] = 'cohesion_layout';
     }
     elseif (array_key_exists('settings', $field) && !empty($field['settings'])) {

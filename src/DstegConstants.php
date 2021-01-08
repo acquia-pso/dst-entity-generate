@@ -215,6 +215,14 @@ final class DstegConstants {
     'File' => [
       'type' => 'file',
     ],
+    'Layout Canvas (Site Studio)' => [
+      'type' => 'cohesion_entity_reference_revisions',
+      'dependencies' => [
+        'required' => [
+          'module' => 'cohesion_elements',
+        ],
+      ],
+    ],
   ];
   const ENTITY_TYPE_MAPPING = [
     'Vocabulary' => [

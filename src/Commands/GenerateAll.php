@@ -121,6 +121,8 @@ class GenerateAll extends BaseEntityGenerate {
    *   The config factory.
    * @param \Drupal\dst_entity_generate\Commands\Media $media
    *   Media generate command definition.
+   * @param \Drupal\dst_entity_generate\Commands\Paragraph $paragraph
+   *   Paragraph generate command definition.
    */
   public function __construct(TranslationInterface $stringTranslation,
                               Bundle $dstegBundle,
@@ -186,7 +188,7 @@ class GenerateAll extends BaseEntityGenerate {
     $this->paragraph->generateParagraph();
 
     // Call all the methods to generate the Drupal entities.
-    $this->yell($this->t('Congratulations. The entities which are enabled for sync are generated successfully.'));
+    $this->io()->success('Congratulations. The entities which are enabled for sync are generated successfully.');
 
     return CommandResult::exitCode(self::EXIT_SUCCESS);
   }

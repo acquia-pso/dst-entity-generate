@@ -2,15 +2,29 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drush\Commands\DrushCommands;
+use Drupal\dst_entity_generate\BaseEntityGenerate;
 
 /**
  * Class provides functionality of supported entity generation from DST sheet.
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class GenerateAll extends DrushCommands {
+class GenerateAll extends BaseEntityGenerate {
+
+  /**
+   * {@inheritDoc}
+   */
+  protected $dstEntityName = 'all';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $dependentModules = [
+    'workflows',
+    'content_moderation',
+    'media',
+    'paragraphs',
+  ];
 
   /**
    * Generate all the Drupal entities from Drupal Spec tool sheet.
@@ -24,31 +38,31 @@ class GenerateAll extends DrushCommands {
 
     // @todo Further refactor it so that we don't have to use exec fuynction.
     // Generate Menus.
-    \exec('drush dst:m');
+    \system('drush dst:m');
 
     // Generate User Roles.
-    \exec('drush dst:ur');
+    \system('drush dst:ur');
 
     // Generate Image Styles.
-    \exec('drush dst:is');
+    \system('drush dst:is');
 
     // Generate Image Effects.
-    \exec('drush dst:ie');
+    \system('drush dst:ie');
 
     // Generate Workflow.
-    \exec('drush dst:w');
+    \system('drush dst:w');
 
     // Generate Vocabularies.
-    \exec('drush dst:v');
+    \system('drush dst:v');
 
     // Generate Media.
-    \exec('drush dst:media');
+    \system('drush dst:media');
 
     // Generate Paragraphs.
-    \exec('drush dst:p');
+    \system('drush dst:p');
 
     // Generate Bundles.
-    \exec('drush dst:b');
+    \system('drush dst:b');
   }
 
 }

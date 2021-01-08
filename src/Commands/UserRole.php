@@ -2,12 +2,9 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
  * Class provides functionality of User roles generation from DST sheet.
@@ -17,19 +14,32 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 class UserRole extends BaseEntityGenerate {
 
   /**
-   * DstCommands constructor.
-   *
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $googleSheetApi
-   *   Google Sheet Api service definition.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   GeneralApi service definition.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * {@inheritDoc}
    */
-  public function __construct(GoogleSheetApi $googleSheetApi,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($googleSheetApi, $generalApi, $configFactory);
+  protected $dstEntityName = 'user_roles';
+
+  /**
+   * Machine name of entity which is going to import.
+   *
+   * @var string
+   */
+  protected $entity = '';
+
+  /**
+   * Entity Type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * User Role constructor.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity Type manager.
+   */
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -40,59 +50,48 @@ class UserRole extends BaseEntityGenerate {
    * @usage drush dst:generate:user-roles
    */
   public function generateUserRoles() {
-    $result = FALSE;
-    $logMessages = [];
-    try {
-      $this->yell($this->t('Generating user roles.'), 100, 'blue');
-      $user_role_data = $this->sheet->getData(DstegConstants::USER_ROLES);
-      if (!empty($user_role_data)) {
-        $user_role_storage = $this->helper->getAllEntities('user_role');
-        foreach ($user_role_data as $user_role) {
-          // Create role only if it is in Wait and implement state.
-          if ($user_role['x'] === 'w') {
-            $is_role_present = $user_role_storage
-              ->load($user_role['machine_name']);
-            // Prevent exception if role is already present.
-            if (!isset($is_role_present) || empty($is_role_present)) {
-              $is_saved = $user_role_storage
-                ->create([
-                  'id' => $user_role['machine_name'],
-                  'label' => $user_role['name'],
-                ])
-                ->save();
-              if ($is_saved === 1) {
-                $success_message = $this->t('New role @role created.', [
-                  '@role' => $user_role['name'],
-                ]);
-                $this->say($success_message);
-                $logMessages[] = $success_message;
-              }
-            }
-            else {
-              $present_message = $this->t('Role @role already present.', [
-                '@role' => $user_role['name'],
-              ]);
-              $this->say($present_message);
-              $logMessages[] = $present_message;
-            }
-          }
+    $this->io()->success('Generating Drupal User Roles...');
+    $entity_data = $this->getDataFromSheet(DstegConstants::USER_ROLES, FALSE);
+    if (!empty($entity_data)) {
+      $user_role_data = $this->getUserRoleData($entity_data);
+      $user_role_storage = $this->entityTypeManager->getStorage('user_role');
+      $user_roles = $user_role_storage->loadMultiple();
+      foreach ($user_role_data as $user_role) {
+        $user_role_name = $user_role['label'];
+        if ($user_roles[$user_role['id']]) {
+          $this->io()->warning("user_role $user_role_name Already exists. Skipping creation...");
+          continue;
+        }
+        $status = $user_role_storage->create($user_role)->save();
+        if ($status === SAVED_NEW) {
+          $this->io()->success("user_role $user_role_name is successfully created...");
         }
       }
-      else {
-        $no_data_message = $this->t('There is no data for the User role entity in your DST sheet.');
-        $this->say($no_data_message);
-        $logMessages[] = $no_data_message;
-      }
-      $this->yell($this->t('Finished generating User roles.'), 100, 'blue');
-      $result = CommandResult::exitCode(self::EXIT_SUCCESS);
     }
-    catch (\Exception $exception) {
-      $this->displayAndLogException($exception, DstegConstants::USER_ROLES);
-      $result = CommandResult::exitCode(self::EXIT_FAILURE);
+    else {
+      $this->io()->warning('There is no data for the user_role entity in your DST sheet.');
     }
+  }
 
-    $this->helper->logMessage($logMessages);
-    return $result;
+  /**
+   * Get data needed for user role entity.
+   *
+   * @param array $data
+   *   Array of user roles.
+   *
+   * @return array|null
+   *   User Role compliant data.
+   */
+  private function getUserRoleData(array $data) {
+    $user_roles = [];
+    foreach ($data as $item) {
+      $user_role = [];
+      $user_role['id'] = $item['machine_name'];
+      $user_role['label'] = $item['name'];
+      \array_push($user_roles, $user_role);
+    }
+    return $user_roles;
+
   }
 
 }

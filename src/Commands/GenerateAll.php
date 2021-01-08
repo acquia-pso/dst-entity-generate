@@ -2,12 +2,7 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
-use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 
 /**
  * Class provides functionality of supported entity generation from DST sheet.
@@ -17,102 +12,19 @@ use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 class GenerateAll extends BaseEntityGenerate {
 
   /**
-   * Bundle command definition.
-   *
-   * @var Bundle
+   * {@inheritDoc}
    */
-  protected $dstegBundle;
+  protected $dstEntityName = 'all';
 
   /**
-   * Menu command definition.
-   *
-   * @var Menu
+   * {@inheritdoc}
    */
-  protected $dstegMenus;
-
-  /**
-   * UserRole command definition.
-   *
-   * @var UserRole
-   */
-  protected $dstegUserRoles;
-
-  /**
-   * ImageEffect command definition.
-   *
-   * @var ImageEffect
-   */
-  protected $dstegImageEffect;
-
-  /**
-   * Workflow command definition.
-   *
-   * @var Workflow
-   */
-  protected $dstegWorkflows;
-
-  /**
-   * ImageStyle command definition.
-   *
-   * @var ImageStyle
-   */
-  protected $dstegImageStyle;
-
-  /**
-   * DstegVocabulary command definition.
-   *
-   * @var Vocabulary
-   */
-  protected $dstegVocabulary;
-
-  /**
-   * DstCommands constructor.
-   *
-   * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
-   *   StringTranslation service definition.
-   * @param Bundle $dstegBundle
-   *   Bundle command definition.
-   * @param Menu $dstegMenus
-   *   DstegMenus command definition.
-   * @param UserRole $dstegUserRoles
-   *   DstegUserRoles command definition.
-   * @param ImageEffect $dstegImageEffect
-   *   ImageEffect command definition.
-   * @param Workflow $dstegWorkflows
-   *   DstegWorkflows command definition.
-   * @param ImageStyle $dstegImageStyle
-   *   DstegImageStyle command definition.
-   * @param Vocabulary $dstegVocabulary
-   *   Vocabulary command definition.
-   * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $sheet
-   *   GoogleSheetApi service class object.
-   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
-   *   The helper service for DSTEG.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
-   */
-  public function __construct(TranslationInterface $stringTranslation,
-                              Bundle $dstegBundle,
-                              Menu $dstegMenus,
-                              UserRole $dstegUserRoles,
-                              ImageEffect $dstegImageEffect,
-                              Workflow $dstegWorkflows,
-                              ImageStyle $dstegImageStyle,
-                              Vocabulary $dstegVocabulary,
-                              GoogleSheetApi $sheet,
-                              GeneralApi $generalApi,
-                              ConfigFactoryInterface $configFactory) {
-    parent::__construct($sheet, $generalApi, $configFactory);
-    $this->stringTranslation = $stringTranslation;
-    $this->dstegBundle = $dstegBundle;
-    $this->dstegMenus = $dstegMenus;
-    $this->dstegUserRoles = $dstegUserRoles;
-    $this->dstegImageEffect = $dstegImageEffect;
-    $this->dstegWorkflows = $dstegWorkflows;
-    $this->dstegImageStyle = $dstegImageStyle;
-    $this->dstegVocabulary = $dstegVocabulary;
-
-  }
+  protected $dependentModules = [
+    'workflows',
+    'content_moderation',
+    'media',
+    'paragraphs',
+  ];
 
   /**
    * Generate all the Drupal entities from Drupal Spec tool sheet.
@@ -122,33 +34,35 @@ class GenerateAll extends BaseEntityGenerate {
    * @usage drush dst:generate
    */
   public function generate() {
-    $this->say($this->t('Generating Drupal entities.'));
+    $this->io()->success('Generating All Drupal entities.');
 
-    // Generate bundles.
-    $this->dstegBundle->generateBundle();
-
+    // @todo Further refactor it so that we don't have to use exec fuynction.
     // Generate Menus.
-    $this->dstegMenus->generateMenus();
+    \system('drush dst:m');
 
-    // Generate User roles.
-    $this->dstegUserRoles->generateUserRoles();
+    // Generate User Roles.
+    \system('drush dst:ur');
 
-    // Generate Image effects.
-    $this->dstegImageEffect->generateImageEffects();
+    // Generate Image Styles.
+    \system('drush dst:is');
 
-    // Generate workflows.
-    $this->dstegWorkflows->generateWorkflows();
+    // Generate Image Effects.
+    \system('drush dst:ie');
 
-    // Generate image styles.
-    $this->dstegImageStyle->generateImageStyle();
+    // Generate Workflow.
+    \system('drush dst:w');
 
-    // Generate vocabularies.
-    $this->dstegVocabulary->generateVocabularies();
+    // Generate Vocabularies.
+    \system('drush dst:v');
 
-    // Call all the methods to generate the Drupal entities.
-    $this->yell($this->t('Congratulations. The entities which are enabled for sync are generated successfully.'));
+    // Generate Media.
+    \system('drush dst:media');
 
-    return CommandResult::exitCode(self::EXIT_SUCCESS);
+    // Generate Paragraphs.
+    \system('drush dst:p');
+
+    // Generate Bundles.
+    \system('drush dst:b');
   }
 
 }

@@ -1,20 +1,6 @@
 services:
   dst_entity_generate.commands:
     class: Drupal\dst_entity_generate\Commands\GenerateAll
-    arguments:
-    - '@string_translation'
-    - '@dst_entity_generate.commands.bundle'
-    - '@dst_entity_generate.commands.menus'
-    - '@dst_entity_generate.commands.user_roles'
-    - '@dst_entity_generate.commands.image_effect'
-    - '@dst_entity_generate.commands.workflow'
-    - '@dst_entity_generate.commands.image_style'
-    - '@dst_entity_generate.commands.vocabulary'
-    - '@dst_entity_generate.google_sheet_api'
-    - '@dst_entity_generate.general_api'
-    - '@config.factory'
-    - '@dst_entity_generate.commands.media'
-    - '@dst_entity_generate.commands.paragraph'
     tags:
       - { name: drush.command }
   dst_entity_generate.commands.menus:

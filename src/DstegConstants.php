@@ -215,12 +215,12 @@ final class DstegConstants {
     'File' => [
       'type' => 'file',
     ],
-    'Layout canvas' => [
+    'Layout Canvas (Site Studio)' => [
       'type' => 'cohesion_entity_reference_revisions',
       'dependencies' => [
-          'required' => [
-              'module' => 'cohesion_elements',
-          ],
+        'required' => [
+          'module' => 'cohesion_elements',
+        ],
       ],
     ],
   ];

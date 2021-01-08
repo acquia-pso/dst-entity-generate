@@ -242,7 +242,7 @@ class GeneralApi {
       }
     }
     else {
-      $this->logger->notice($this->t('The @bundle bundle does not exists.', ['@bundle' => $bundle_machine_name]));
+      $this->logger->warning($this->t('The @bundle bundle does not exists.', ['@bundle' => $bundle_machine_name]));
     }
   }
 
@@ -280,7 +280,7 @@ class GeneralApi {
     }
     $field_types = DstegConstants::FIELD_TYPES;
     if (!array_key_exists($field['field_type'], $field_types)) {
-      $this->logger->notice($this->t(
+      $this->logger->warning($this->t(
         'Support for generating field of type @ftype is currently not supported.',
         ['@ftype' => $field['field_type']]
       ));
@@ -357,7 +357,7 @@ class GeneralApi {
 
           // Skip if field is present.
           if (!empty($drupal_field)) {
-            $this->logger->notice($this->t(
+            $this->logger->warning($this->t(
               'The field @field is present in @ctype. Skipping.',
               [
                 '@field' => $field['machine_name'],
@@ -414,7 +414,7 @@ class GeneralApi {
         switch ($dependency_key) {
           case 'module':
             if (!$this->isModuleEnabled($dependency_value)) {
-              $this->logger->notice($this->t(
+              $this->logger->warning($this->t(
                 'The @module module is not installed. Skipping @field field generation.',
                 [
                   '@module' => $dependency_value,
@@ -439,7 +439,7 @@ class GeneralApi {
                   $target_bundle_type = $temp[1];
                   $entity_type_mapping = DstegConstants::ENTITY_TYPE_MAPPING;
                   if (!array_key_exists($target_bundle_type, $entity_type_mapping)) {
-                    $this->logger->notice($this->t(
+                    $this->logger->warning($this->t(
                       'The @target_bundle_type is not supported entity type. Skipping @field field generation.',
                       [
                         '@target_bundle_type' => $target_bundle_type,
@@ -450,7 +450,7 @@ class GeneralApi {
                   }
                   $entity_type_storage = $this->entityTypeManager->getStorage($entity_type_mapping[$target_bundle_type]['entity_type_id']);
                   if (empty($entity_type_storage)) {
-                    $this->logger->notice($this->t(
+                    $this->logger->warning($this->t(
                       'The @target_bundle_type is invalid or not exist. Skipping @field field generation.',
                       [
                         '@target_bundle_type' => $target_bundle_type,
@@ -463,7 +463,7 @@ class GeneralApi {
                   $target_bundle_machine_name = strtolower(str_replace(" ", "_", $target_bundle));
                   $entity_storage = $entity_type_storage->load($target_bundle_machine_name);
                   if (empty($entity_storage)) {
-                    $this->logger->notice($this->t(
+                    $this->logger->warning($this->t(
                       'The @target_bundle does not exist. Skipping @field field generation.',
                       [
                         '@target_bundle' => $target_bundle,

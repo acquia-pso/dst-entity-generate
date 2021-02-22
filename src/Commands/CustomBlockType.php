@@ -61,7 +61,6 @@ class CustomBlockType extends BaseEntityGenerate {
     $this->io()->success('Generating Drupal Custom Block Type...');
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $block_content_storage = $this->entityTypeManager->getStorage('block_content_type');
-  //var_dump($block_content_storage); exit;
     $block_content_types = $this->getCustomBlockTypeData($data);
 
     foreach ($block_content_types as $block_content_type) {

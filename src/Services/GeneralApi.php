@@ -352,6 +352,11 @@ class GeneralApi {
               $entity_type_id = 'paragraphs_type';
               $entity_type = 'paragraph';
               break;
+
+            case 'Block types':
+              $entity_type_id = 'block_content_type';
+              $entity_type = 'block_content';
+              break;
           }
           $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field_machine_name);
 

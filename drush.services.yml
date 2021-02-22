@@ -49,6 +49,13 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@dst_entity_generate.general_api'
+  dst_entity_generate.commands.custom_block_type:
+    class: Drupal\dst_entity_generate\Commands\CustomBlockType
+    arguments:
+      - '@entity_type.manager'
+      - '@dst_entity_generate.general_api'
+    tags:
+      - { name: drush.command }
   dst_entity_generate.commands.paragraph:
     class: Drupal\dst_entity_generate\Commands\Paragraph
     arguments:

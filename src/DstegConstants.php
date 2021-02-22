@@ -11,6 +11,7 @@ final class DstegConstants {
 
   // Constants containing sheet names.
   const BUNDLES = 'Bundles';
+  const BLOCK_TYPES = 'Block types';
   const CONTENT_TYPES = 'Content types';
   const VOCABULARIES = 'Vocabularies';
   const PARAGRAPHS = 'Paragraph Types';

@@ -18,7 +18,7 @@ class OptionalDependencyHandler {
   protected $sourceManager;
 
   /**
-   * Sets optional MediaSourceManager dependency
+   * Sets optional MediaSourceManager dependency.
    *
    * @param \Drupal\Component\Plugin\PluginManagerInterface $source_manager
    *   Media source plugin manager.
@@ -34,6 +34,7 @@ class OptionalDependencyHandler {
    * Returns MediaSourceManager if available.
    *
    * @return \Drupal\Component\Plugin\PluginManagerInterface|\Drupal\media\MediaSourceManager|null
+   *   Returns MediaSourceManager if exists otherwise null.
    */
   public function getMediaSourceManager() {
     if (isset($this->sourceManager) && $this->sourceManager instanceof MediaSourceManager) {

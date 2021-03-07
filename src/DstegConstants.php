@@ -242,6 +242,10 @@ final class DstegConstants {
       'entity_type_id' => 'media_type',
       'entity_type' => 'media',
     ],
+    'Block type' => [
+      'entity_type_id' => 'block_content_type',
+      'entity_type' => 'block_content',
+    ]
   ];
 
 }

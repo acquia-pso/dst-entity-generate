@@ -76,7 +76,7 @@ class CustomBlockType extends BaseEntityGenerate {
     }
 
     // Generate fields now.
-    $bundle_type = DstegConstants::BLOCK_TYPES;
+    $bundle_type = 'Block type';
     $fields_data = $bundles_data = [];
     $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
     $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');

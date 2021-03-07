@@ -75,8 +75,8 @@ class Paragraph extends BaseEntityGenerate {
     }
 
     // Generate fields now.
-    $bundle_type = DstegConstants::PARAGRAPHS;
-    $fields_data = $bundles_data = [];
+    $bundle_type = 'Paragraph type';
+    $bundles_data = [];
     $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
     $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
 

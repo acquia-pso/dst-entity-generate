@@ -332,32 +332,8 @@ class GeneralApi {
       }
       if (isset($bundleVal)) {
         try {
-          switch ($bundle_type) {
-            case 'Content type':
-              $entity_type_id = 'node_type';
-              $entity_type = 'node';
-              break;
-
-            case 'Vocabulary':
-              $entity_type_id = 'taxonomy_vocabulary';
-              $entity_type = 'taxonomy_term';
-              break;
-
-            case 'Media type':
-              $entity_type_id = 'media_type';
-              $entity_type = 'media';
-              break;
-
-            case 'Paragraph Types':
-              $entity_type_id = 'paragraphs_type';
-              $entity_type = 'paragraph';
-              break;
-
-            case 'Block types':
-              $entity_type_id = 'block_content_type';
-              $entity_type = 'block_content';
-              break;
-          }
+          $entity_type_id = DstegConstants::ENTITY_TYPE_MAPPING[$bundle_type]['entity_type_id'];
+          $entity_type = DstegConstants::ENTITY_TYPE_MAPPING[$bundle_type]['entity_type'];
           $drupal_field = FieldConfig::loadByName($entity_type, $bundleVal, $field_machine_name);
 
           // Skip if field is present.

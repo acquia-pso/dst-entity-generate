@@ -62,7 +62,7 @@ class GenerateAll extends BaseEntityGenerate {
     \system('drush dst:p');
 
     // Generate Bundles.
-    \system('drush dst:b');
+    \system('drush dst:ct');
   }
 
 }

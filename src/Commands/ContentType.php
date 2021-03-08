@@ -13,7 +13,7 @@ use Drupal\dst_entity_generate\Services\GeneralApi;
  *
  * @package Drupal\dst_entity_generate\Commands
  */
-class Bundle extends BaseEntityGenerate {
+class ContentType extends BaseEntityGenerate {
 
   /**
    * {@inheritDoc}
@@ -47,7 +47,7 @@ class Bundle extends BaseEntityGenerate {
   protected $displayRepository;
 
   /**
-   * DstegBundle constructor.
+   * Content type generator constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity Type manager.
@@ -65,11 +65,11 @@ class Bundle extends BaseEntityGenerate {
   /**
    * Generate all the Drupal entities from Drupal Spec tool sheet.
    *
-   * @command dst:generate:bundles
-   * @aliases dst:bundles dst:b
-   * @usage drush dst:generate:bundles
+   * @command dst:generate:content_types
+   * @aliases dst:content_types dst:ct
+   * @usage drush dst:generate:content_types
    */
-  public function generateBundle() {
+  public function generateContentType() {
     $this->io()->success('Generating Drupal Content types.');
     // Call all the methods to generate the Drupal entities.
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
@@ -101,7 +101,7 @@ class Bundle extends BaseEntityGenerate {
 
     // Generate fields now.
     $bundle_type = 'Content type';
-    $fields_data = $bundles_data = [];
+    $bundles_data = [];
     $fields_data = $this->getDataFromSheet(DstegConstants::FIELDS, FALSE);
     $fields_data = $this->filterEntityTypeSpecificData($fields_data, 'bundle');
     if (empty($fields_data)) {

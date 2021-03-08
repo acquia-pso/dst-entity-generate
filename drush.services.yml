@@ -9,8 +9,8 @@ services:
       - { name: drush.command }
     arguments:
       - '@entity_type.manager'
-  dst_entity_generate.commands.bundle:
-    class: Drupal\dst_entity_generate\Commands\Bundle
+  dst_entity_generate.commands.content_type:
+    class: Drupal\dst_entity_generate\Commands\ContentType
     tags:
       - { name: drush.command }
     arguments:

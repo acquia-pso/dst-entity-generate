@@ -192,21 +192,21 @@ final class EntityGenerateSettings extends ConfigFormBase {
    */
   public function entityTypeDependencyCheck(array $entity_types): array {
     $dependencies = array_change_key_case(DstegConstants::ENTITY_TYPE_MODULE_DEPENDENCIES, CASE_LOWER);
-    $disable_elements = [];
+    $disable_entities = [];
     if (empty($entity_types)) {
-      return $disable_elements;
+      return $disable_entities;
     }
-    foreach ($entity_types as $key => $entity_type) {
-      $entity_type = strtolower($entity_type);
-      if (array_key_exists($entity_type, $dependencies)) {
+    foreach ($entity_types as $entity_type => $entity_name) {
+      $entity_name = strtolower($entity_name);
+      if (array_key_exists($entity_name, $dependencies)) {
         $required_modules = [];
-        foreach ($dependencies[$entity_type] as $module) {
+        foreach ($dependencies[$entity_name] as $module) {
           if (!$this->helper->isModuleEnabled($module)) {
-            $disable_elements[$key]['#disabled'] = TRUE;
+            $disable_entities[$entity_type]['#disabled'] = TRUE;
             $required_modules[] = $module;
-            if (end($dependencies[$entity_type]) == $module) {
-              $disable_elements[$key]['#description'] = $this->formatPlural(
-                count($dependencies[$entity_type]),
+            if (end($dependencies[$entity_name]) == $module) {
+              $disable_entities[$entity_type]['#description'] = $this->formatPlural(
+                count($dependencies[$entity_name]),
                 '%module module is disabled.',
                 '%module modules are disabled.',
                 ['%module' => implode(', ', $required_modules)]
@@ -216,7 +216,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
         }
       }
     }
-    return $disable_elements;
+    return $disable_entities;
   }
 
 }

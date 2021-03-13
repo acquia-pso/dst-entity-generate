@@ -1,9 +1,25 @@
 <?php
 
+use Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\Url;
+
 /**
  * @file
  * Contains the implementations for the DST Entity Generate install.
  */
+
+/**
+ * Implements hook_install().
+ */
+function dst_entity_generate_install() {
+  if (!InstallerKernel::installationAttempted()) {
+    $google_sheet_api_settings_url = Url::fromRoute('dst_entity_generate.google_sheet_api_settings')->toString();
+    $message = t('Configure <a href="@google_sheet_api_settings_url">Google Sheet API</a> to start with entity generation.',
+      ['@google_sheet_api_settings_url' => $google_sheet_api_settings_url]
+    );
+    \Drupal::messenger()->addMessage($message);
+  }
+ }
 
 /**
  * Implements hook_uninstall().

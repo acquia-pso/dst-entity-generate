@@ -130,9 +130,24 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
 
     if (!empty($disabledModules)) {
-      $disabledModules = \implode(',', $disabledModules);
-      throw new \Exception("Please enable $disabledModules to continue with this operation. Aborting...");
+      $disabledModulesString = \implode(',', $disabledModules);
+      $choice = $this->io()->choice("Module(s) $disabledModulesString is/are not enabled. Do you want to enable it?", ['Yes', 'No'], 'Yes');
+      switch ($choice) {
+        case 0:
+          $this->enableModules($disabledModules);
+          break;
+
+        case 1:
+          throw new \Exception("Please enable $disabledModulesString to continue with this operation. Aborting...");
+          break;
+      }
     }
+  }
+
+  public function enableModules(array $modules) {
+    $modulesString = \implode(',', $modules);
+    $this->io()->text("Installing module(s) $modulesString");
+    \Drupal::service('module_installer')->install($modules, TRUE);
   }
 
   /**

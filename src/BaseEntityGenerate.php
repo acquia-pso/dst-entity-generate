@@ -81,8 +81,33 @@ abstract class BaseEntityGenerate extends DrushCommands {
   public function validateEntityForImport() {
     $enabled_entities = \Drupal::configFactory()->get('dst_entity_generate.settings')->get('sync_entities');
     if ($enabled_entities[$this->dstEntityName] !== $this->dstEntityName && $this->dstEntityName !== 'all') {
-      throw new \Exception("Entity $this->dstEntityName is not enabled for import. Aborting...");
+      $choice = $this->io()->choice("Entity $this->dstEntityName is not enabled for import. Do you want to enable it?",
+        ['Yes', 'No'],
+        'Yes'
+      );
+      $this->io()->text("Your choice is $choice");
+      switch ($choice) {
+        case 0:
+          $this->enableEntitySync($this->dstEntityName);
+          break;
+
+        case 1:
+          throw new \Exception("Entity $this->dstEntityName is not enabled for import. Aborting...");
+      }
     }
+  }
+
+  /**
+   * Helper function to enable entity sync.
+   *
+   * @param string $entity_name
+   *   Entity name to enable sync.
+   */
+  public function enableEntitySync(string $entity_name) {
+    $dst_entity_generate_settings = \Drupal::configFactory()->getEditable('dst_entity_generate.settings');
+    $sync_entities = $dst_entity_generate_settings->get('sync_entities');
+    $sync_entities[$entity_name] = $entity_name;
+    $dst_entity_generate_settings->set('sync_entities', $sync_entities)->save();
   }
 
   /**

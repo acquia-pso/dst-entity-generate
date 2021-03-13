@@ -85,7 +85,6 @@ abstract class BaseEntityGenerate extends DrushCommands {
         ['Yes', 'No'],
         'Yes'
       );
-      $this->io()->text("Your choice is $choice");
       switch ($choice) {
         case 0:
           $this->enableEntitySync($this->dstEntityName);

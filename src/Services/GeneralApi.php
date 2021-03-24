@@ -218,6 +218,7 @@ class GeneralApi {
         $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
           ->setThirdPartySetting('field_group', $field_data['machine_name'], $field_settings)
           ->save();
+
         $this->logger->notice($this->t('@field field group is created in bundle "@bundle"',
           [
             '@field' => $field_data['machine_name'],
@@ -226,12 +227,15 @@ class GeneralApi {
         ));
       }
       elseif ($field_data['type'] !== 'field_group') {
+        $options = ['region' => 'content'];
+        // Configuring form widget if it's not empty.
+        if(!empty($field_data['drupal_field_form_widget'])) {
+          $options['type'] = $field_data['drupal_field_form_widget'];
+        }
         FieldConfig::create($field_configs)->save();
         // Set form display for new field.
         $this->displayRepository->getFormDisplay($entity_type, $bundle_machine_name)
-          ->setComponent($field_data['machine_name'],
-            ['region' => 'content']
-          )
+          ->setComponent($field_data['machine_name'], $options)
           ->save();
         $this->logger->notice($this->t('@field field is created in bundle "@bundle"',
           [
@@ -286,10 +290,31 @@ class GeneralApi {
       ));
       return FALSE;
     }
+
     $field_meta = $field_types[$field['field_type']];
     if (array_key_exists('dependencies', $field_meta) && !empty($field_meta['dependencies'])) {
       $field = $this->fieldDependencyCheck($field_meta, $field);
+      if (empty($field)) {
+        return FALSE;
+      }
     }
+
+    $field_types = DstegConstants::FIELD_FORM_WIDGET;
+    $field['drupal_field_form_widget'] = '';
+    $is_empty_form_widget = FALSE;
+    if(empty($field['form_widget']) || $field['form_widget'] === '-') {
+      $is_empty_form_widget = TRUE;
+    }
+    if ($is_empty_form_widget === FALSE  && !array_key_exists($field['form_widget'], $field_types)) {
+      $this->logger->warning($this->t(
+        "Support for generating field of form widget '@fwidget' is currently not supported.",
+        ['@fwidget' => $field['form_widget']]
+      ));
+      return FALSE;
+    } elseif ($is_empty_form_widget === FALSE) {
+        $field['drupal_field_form_widget'] = $field_types[$field['form_widget']];
+    }
+
     if ($field && $field_meta['type'] !== 'field_group') {
       $field['drupal_field_type'] = $field_meta['type'];
       $this->createFieldStorage($field, $entity_type);

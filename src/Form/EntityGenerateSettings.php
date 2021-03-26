@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\dst_entity_generate\DstegConstants;
+use Drupal\dst_entity_generate\Services\GeneralApi;
 use Drupal\dst_entity_generate\Services\GoogleSheetApi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -42,11 +43,15 @@ final class EntityGenerateSettings extends ConfigFormBase {
    *   The entity_type_manager.
    * @param \Drupal\dst_entity_generate\Services\GoogleSheetApi $google_sheet_api
    *   The GoogleSheetApi definition.
+   * @param \Drupal\dst_entity_generate\Services\GeneralApi $generalApi
+   *   The helper service for DSTEG.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager,
-                              GoogleSheetApi $google_sheet_api) {
+                              GoogleSheetApi $google_sheet_api,
+                              GeneralApi $generalApi) {
     $this->entityTypeManager = $entity_type_manager;
     $this->googleSheetApi = $google_sheet_api;
+    $this->helper = $generalApi;
   }
 
   /**
@@ -55,7 +60,8 @@ final class EntityGenerateSettings extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('dst_entity_generate.google_sheet_api')
+      $container->get('dst_entity_generate.google_sheet_api'),
+      $container->get('dst_entity_generate.general_api')
     );
   }
 
@@ -70,8 +76,7 @@ final class EntityGenerateSettings extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this
-      ->config(self::SETTINGS);
+    $config = $this->config(self::SETTINGS);
 
     $entity_list_items = $this->getEntityList();
     if (is_array($entity_list_items) && !empty($entity_list_items)) {
@@ -84,6 +89,10 @@ final class EntityGenerateSettings extends ConfigFormBase {
         '#default_value' => isset($sync_entities) ? $sync_entities : [],
         '#description' => $this->t('Select entity type to sync from the Drupal spec tool sheet.'),
       ];
+      $disable_entities = $this->entityTypeDependencyCheck($entity_list_items);
+      if (!empty($disable_entities)) {
+        $form['sync_entities'] = array_merge($form['sync_entities'], $disable_entities);
+      }
       $form['column_name'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Column Name'),
@@ -170,6 +179,44 @@ final class EntityGenerateSettings extends ConfigFormBase {
     return [
       static::SETTINGS,
     ];
+  }
+
+  /**
+   * Helper function to check required modules are enabled or not.
+   *
+   * @param array $entity_types
+   *   List of entity types.
+   *
+   * @return array
+   *   Formatted array to disable form element.
+   */
+  public function entityTypeDependencyCheck(array $entity_types): array {
+    $dependencies = array_change_key_case(DstegConstants::ENTITY_TYPE_MODULE_DEPENDENCIES, CASE_LOWER);
+    $disable_entities = [];
+    if (empty($entity_types)) {
+      return $disable_entities;
+    }
+    foreach ($entity_types as $entity_type => $entity_name) {
+      $entity_name = strtolower($entity_name);
+      if (array_key_exists($entity_name, $dependencies)) {
+        $required_modules = [];
+        foreach ($dependencies[$entity_name] as $module) {
+          if (!$this->helper->isModuleEnabled($module)) {
+            $disable_entities[$entity_type]['#disabled'] = TRUE;
+            $required_modules[] = $module;
+            if (end($dependencies[$entity_name]) == $module) {
+              $disable_entities[$entity_type]['#description'] = $this->formatPlural(
+                count($dependencies[$entity_name]),
+                '%module module is disabled.',
+                '%module modules are disabled.',
+                ['%module' => implode(', ', $required_modules)]
+              );
+            }
+          }
+        }
+      }
+    }
+    return $disable_entities;
   }
 
 }

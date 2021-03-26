@@ -7,7 +7,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
 use Drupal\dst_entity_generate\Services\GeneralApi;
-use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\dst_entity_generate\Services\OptionalDependencyHandler;
+use Drupal\media\MediaSourceManager;
 
 /**
  * Class provides functionality of Content types generation from DST sheet.
@@ -61,15 +62,18 @@ class Media extends BaseEntityGenerate {
    *   Entity field manager service.
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository
    *   Display mode repository.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $source_manager
-   *   Media source plugin manager.
+   * @param \Drupal\dst_entity_generate\Services\OptionalDependencyHandler $optional_dependency_handler
+   *   Optional Dependency handler.
    * @param \Drupal\dst_entity_generate\Services\GeneralApi $general_api
    *   The helper service for DSTEG.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityDisplayRepositoryInterface $display_repository, PluginManagerInterface $source_manager, GeneralApi $general_api) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityDisplayRepositoryInterface $display_repository, OptionalDependencyHandler $optional_dependency_handler, GeneralApi $general_api) {
     $this->entityTypeManager = $entity_type_manager;
     $this->displayRepository = $display_repository;
-    $this->sourceManager = $source_manager;
+    $media_source_manager = $optional_dependency_handler->getMediaSourceManager();
+    if ($media_source_manager instanceof MediaSourceManager) {
+      $this->sourceManager = $media_source_manager;
+    }
     $this->helper = $general_api;
   }
 

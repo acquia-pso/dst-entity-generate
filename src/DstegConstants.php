@@ -248,4 +248,16 @@ final class DstegConstants {
     ]
   ];
 
+  const ENTITY_TYPE_MODULE_DEPENDENCIES = [
+    DstegConstants::MEDIA_TYPES => ['media'],
+    DstegConstants::PARAGRAPHS => ['paragraphs'],
+    DstegConstants::BLOCK_TYPES => ['block'],
+    DstegConstants::CONTENT_TYPES => ['node'],
+    DstegConstants::IMAGE_EFFECTS => ['image'],
+    DstegConstants::IMAGE_STYLES => ['image'],
+    DstegConstants::MENUS => ['menu_ui'],
+    DstegConstants::VOCABULARIES => ['taxonomy'],
+    DstegConstants::WORKFLOWS => ['workflows', 'content_moderation'],
+  ];
+
 }

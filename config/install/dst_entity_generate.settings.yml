@@ -1,3 +1,4 @@
 sync_entities: { }
 column_name: 'x'
 column_value: 'w'
+update_flag: 'c'

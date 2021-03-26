@@ -60,19 +60,27 @@ class ImageStyle extends BaseEntityGenerate {
    * @command dst:generate:imagestyle
    * @aliases dst:imagestyle dst:is
    * @usage drush dst:generate:imagestyle
+   * @options update Update existing entities.
    */
-  public function generateImageStyle() {
+  public function generateImageStyle($options = ['update' => false]) {
     $this->io()->success('Generating Drupal Image Style...');
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::IMAGE_STYLES);
     $image_effects = $this->getDataFromSheet(DstegConstants::IMAGE_EFFECTS);
     $image_styles = $this->getImageStyleData($data, $image_effects);
     $image_style_storage = $this->entityTypeManager->getStorage('image_style');
 
     foreach ($image_styles as $image_style) {
-      $style_name = $image_style['name'];
-      $image_style_entity = $image_style_storage->load($style_name);
-      if (!\is_null($image_style_entity)) {
-        $this->io()->error("Image style $style_name already exists. Skipping creation...");
+      $name = $image_style['name'];
+      $image_style_entity = $image_style_storage->load($name);
+      if (!\is_null($image_style)) {
+        if ($this->updateMode) {
+          $this->updateEntityType($image_style_entity, $image_style);
+          $this->io()->success("Image style $name updated.");
+        }
+        else {
+          $this->io()->warning("Image style $name already exists. Skipping creation...");
+        }
         if (array_key_exists('effects', $image_style) && !empty($image_style['effects'])) {
           $this->generateImageEffects($image_style['effects'], $image_style_entity);
         }
@@ -84,7 +92,7 @@ class ImageStyle extends BaseEntityGenerate {
       ]);
       $status = $image_style_entity->save();
       if ($status === SAVED_NEW) {
-        $this->io()->success("Image Style $style_name is successfully created...");
+        $this->io()->success("Image Style $name is successfully created...");
       }
       if (array_key_exists('effects', $image_style) && !empty($image_style['effects'])) {
         $this->generateImageEffects($image_style['effects'], $image_style_entity);

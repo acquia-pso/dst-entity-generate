@@ -56,15 +56,23 @@ class Paragraph extends BaseEntityGenerate {
    *
    * @command dst:generate:paragraphs
    * @aliases dst:para dst:p
+   * @options update Update existing entities.
    */
-  public function generateParagraph() {
+  public function generateParagraph($options = ['update' => false]) {
     $this->io()->success('Generating Drupal Paragraphs...');
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $paragraph_storage = $this->entityTypeManager->getStorage('paragraphs_type');
     $paragraph_types = $this->getParagraphTypeData($data);
     foreach ($paragraph_types as $paragraph_type) {
       $id = $paragraph_type['id'];
-      if (!\is_null($paragraph_storage->load($id))) {
+      $paragraph_type_entity = $paragraph_storage->load($id);
+      if (!\is_null($paragraph_type_entity)) {
+        if ($this->updateMode) {
+          $this->updateEntityType($paragraph_type_entity, $paragraph_type);
+          $this->io()->success("Paragraph Type $id updated.");
+          continue;
+        }
         $this->io()->warning("Paragraph Type $id Already exists. Skipping creation...");
         continue;
       }

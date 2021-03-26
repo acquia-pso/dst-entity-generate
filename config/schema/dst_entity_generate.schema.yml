@@ -11,3 +11,6 @@ dst_entity_generate.settings:
     column_value:
       type: string
       label: 'Column Value'
+    update_flag:
+      type: string
+      label: 'Update flag'

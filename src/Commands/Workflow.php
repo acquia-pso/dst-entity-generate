@@ -53,11 +53,12 @@ class Workflow extends BaseEntityGenerate {
    * @command dst:generate:workflow
    * @aliases dst:w
    * @usage drush dst:generate:workflow
+   * @options update Update existing entities.
    */
-  public function generateWorkflows() {
+  public function generateWorkflows($options = ['update' => false]) {
 
     $this->io()->success('Generating Workflows...');
-
+    $this->updateMode = $options['update'];
     // Get data fromm the DST Sheet.
     $data = $this->getDataFromSheet(DstegConstants::WORKFLOWS, FALSE);
     $workflows = $this->getWorkflowTypeData($data);
@@ -114,7 +115,13 @@ class Workflow extends BaseEntityGenerate {
       $wf_id = $wf_data['id'];
       if (!\is_null($wf_storage = $workflow_storage->load($wf_id))) {
         // Update the existing workflow with states and transitions.
-        $this->io()->warning("$wf_label workflow already exists. Updating States & Transitions in case of any changes.");
+        if ($this->updateMode) {
+          $this->updateEntityType($wf_storage, $wf_data);
+          $this->io()->success("Workflow $wf_label updated. Updating States & Transitions in case of any changes.");
+        }
+        else {
+          $this->io()->warning("$wf_label workflow already exists. Updating States & Transitions in case of any changes.");
+        }
         $type_settings = $wf_storage->get('type_settings');
         if (!empty($workflow_config['type_settings']['states'])) {
           $type_settings['states'] = array_merge($type_settings['states'], $workflow_config['type_settings']['states']);

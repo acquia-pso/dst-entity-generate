@@ -2,6 +2,7 @@
 
 namespace Drupal\dst_entity_generate;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drush\Commands\DrushCommands;
 
@@ -32,6 +33,13 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * @var array
    */
   protected $dependentModules = [];
+
+  /**
+   * Update mode.
+   *
+   * @var boolean
+   */
+  protected $updateMode = FALSE;
 
   /**
    * Validate hook for commands.
@@ -213,6 +221,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
     $config = \Drupal::config('dst_entity_generate.settings');
     $column_name = $config->get('column_name');
     $column_value = $config->get('column_value');
+    $update_flag = $config->get('update_flag');
 
     $approved_data = [];
 
@@ -222,6 +231,11 @@ abstract class BaseEntityGenerate extends DrushCommands {
       }
       if ($item[$column_name] === $column_value) {
         \array_push($approved_data, $item);
+      }
+      if ($this->updateMode) {
+        if ($item[$column_name] === $update_flag) {
+          \array_push($approved_data, $item);
+        }
       }
     }
     return $approved_data;
@@ -282,6 +296,28 @@ abstract class BaseEntityGenerate extends DrushCommands {
     else {
       $this->io()->warning($this->t('Alias for @bundle is not available, skipping.', ['@bundle' => $bundle]));
     }
+  }
+
+  /**
+   * Function to update entity type configurations.
+   *
+   * @param EntityInterface $entity_type
+   *   Entity type object.
+   * @param array $data
+   *   DST sheet data to update entity.
+   * @param array $allowed_fields
+   *   List of allowed fields to update.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function updateEntityType(EntityInterface $entity_type, array $data) {
+    $allowed_fields = DstegConstants::ENTITY_TYPE_UPDATE_ALLOWED_FIELDS[$entity_type->getEntityTypeId()];
+    foreach ($data as $field_name => $field_value) {
+      if (in_array($field_name, $allowed_fields)) {
+        $entity_type->set($field_name, $field_value);
+      }
+    }
+    $entity_type->save();
   }
 
 }

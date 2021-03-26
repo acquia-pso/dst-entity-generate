@@ -83,17 +83,25 @@ class Media extends BaseEntityGenerate {
    * @command dst:generate:media
    * @aliases dst:media
    * @usage drush dst:generate:media
+   * @options update Update existing entities.
    */
-  public function generateBundle() {
+  public function generateBundle($options = ['update' => false]) {
     $this->io()->success('Generating Drupal Media types.');
     // Call all the methods to generate the Drupal entities.
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $media_storage = $this->entityTypeManager->getStorage('media_type');
     $media_types = $this->getMediaTypeData($data);
 
     foreach ($media_types as $media_type) {
       $type = $media_type['id'];
-      if (!\is_null($media_storage->load($type))) {
+      $media_type_entity = $media_storage->load($type);
+      if (!\is_null($media_type_entity)) {
+        if ($this->updateMode) {
+          $this->updateEntityType($media_type_entity, $media_type);
+          $this->io()->success("Media Type $type updated.");
+          continue;
+        }
         $this->io()->warning("Media Type $type Already exists. Skipping creation...");
         continue;
       }

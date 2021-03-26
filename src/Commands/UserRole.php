@@ -48,9 +48,11 @@ class UserRole extends BaseEntityGenerate {
    * @command dst:generate:user-roles
    * @aliases dst:ur
    * @usage drush dst:generate:user-roles
+   * @options update Update existing entities.
    */
-  public function generateUserRoles() {
+  public function generateUserRoles($options = ['update' => false]) {
     $this->io()->success('Generating Drupal User Roles...');
+    $this->updateMode = $options['update'];
     $entity_data = $this->getDataFromSheet(DstegConstants::USER_ROLES, FALSE);
     if (!empty($entity_data)) {
       $user_role_data = $this->getUserRoleData($entity_data);
@@ -59,6 +61,11 @@ class UserRole extends BaseEntityGenerate {
       foreach ($user_role_data as $user_role) {
         $user_role_name = $user_role['label'];
         if ($user_roles[$user_role['id']]) {
+          if ($this->updateMode) {
+            $this->updateEntityType($user_roles[$user_role['id']], $user_role);
+            $this->io()->success("User role $user_role_name updated.");
+            continue;
+          }
           $this->io()->warning("user_role $user_role_name Already exists. Skipping creation...");
           continue;
         }

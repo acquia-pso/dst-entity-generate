@@ -48,9 +48,11 @@ class Menu extends BaseEntityGenerate {
    * @command dst:generate:menus
    * @aliases dst:m
    * @usage drush dst:generate:menus
+   * @options update Update existing entities.
    */
-  public function generateMenus() {
+  public function generateMenus($options = ['update' => false]) {
     $this->io()->success('Generating Drupal Menus.');
+    $this->updateMode = $options['update'];
     $entity_data = $this->getDataFromSheet(DstegConstants::MENUS);
     if (!empty($entity_data)) {
       $menus_data = $this->getMenuData($entity_data);
@@ -59,6 +61,11 @@ class Menu extends BaseEntityGenerate {
       foreach ($menus_data as $menu) {
         $menu_name = $menu['label'];
         if ($menus[$menu['id']]) {
+          if ($this->updateMode) {
+            $this->updateEntityType($menus[$menu['id']], $menu);
+            $this->io()->success("Menu $menu_name updated.");
+            continue;
+          }
           $this->io()->warning("Menu $menu_name Already exists. Skipping creation...");
           continue;
         }

@@ -46,9 +46,6 @@ class GenerateAll extends BaseEntityGenerate {
     // Generate Image Styles.
     \system('drush dst:is');
 
-    // Generate Image Effects.
-    \system('drush dst:ie');
-
     // Generate Workflow.
     \system('drush dst:w');
 

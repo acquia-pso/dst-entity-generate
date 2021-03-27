@@ -62,7 +62,7 @@ class ImageStyle extends BaseEntityGenerate {
    * @usage drush dst:generate:imagestyle
    * @options update Update existing entities.
    */
-  public function generateImageStyle($options = ['update' => false]) {
+  public function generateImageStyle($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Image Style...');
     $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::IMAGE_STYLES);

@@ -50,7 +50,7 @@ class Menu extends BaseEntityGenerate {
    * @usage drush dst:generate:menus
    * @options update Update existing entities.
    */
-  public function generateMenus($options = ['update' => false]) {
+  public function generateMenus($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Menus.');
     $this->updateMode = $options['update'];
     $entity_data = $this->getDataFromSheet(DstegConstants::MENUS);

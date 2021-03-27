@@ -55,7 +55,7 @@ class Workflow extends BaseEntityGenerate {
    * @usage drush dst:generate:workflow
    * @options update Update existing entities.
    */
-  public function generateWorkflows($options = ['update' => false]) {
+  public function generateWorkflows($options = ['update' => FALSE]) {
 
     $this->io()->success('Generating Workflows...');
     $this->updateMode = $options['update'];
@@ -86,7 +86,6 @@ class Workflow extends BaseEntityGenerate {
       }
 
       // Add only non-implemented workflow transitions.
-
       foreach ($workflow_transitions as $workflow_transition) {
         if ($workflow_transition['workflow'] === $wf_label) {
           $workflow_transition_from[$workflow_transition['machine_name']][] = array_search(

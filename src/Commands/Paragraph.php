@@ -58,7 +58,7 @@ class Paragraph extends BaseEntityGenerate {
    * @aliases dst:para dst:p
    * @options update Update existing entities.
    */
-  public function generateParagraph($options = ['update' => false]) {
+  public function generateParagraph($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Paragraphs...');
     $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);

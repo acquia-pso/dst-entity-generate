@@ -59,7 +59,7 @@ class Vocabulary extends BaseEntityGenerate {
    * @usage drush dst:generate:vocabs
    * @options update Update existing entities.
    */
-  public function generateVocabularies($options = ['update' => false]) {
+  public function generateVocabularies($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Vocabularies.');
     // Call all the methods to generate the Drupal entities.
     $entity = 'taxonomy_term';

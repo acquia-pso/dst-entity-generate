@@ -70,7 +70,7 @@ class ContentType extends BaseEntityGenerate {
    * @usage drush dst:generate:content_types
    * @options update Update existing entities.
    */
-  public function generateContentType($options = ['update' => false]) {
+  public function generateContentType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Content types.');
     // Call all the methods to generate the Drupal entities.
     $this->updateMode = $options['update'];

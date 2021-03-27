@@ -50,7 +50,7 @@ class UserRole extends BaseEntityGenerate {
    * @usage drush dst:generate:user-roles
    * @options update Update existing entities.
    */
-  public function generateUserRoles($options = ['update' => false]) {
+  public function generateUserRoles($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal User Roles...');
     $this->updateMode = $options['update'];
     $entity_data = $this->getDataFromSheet(DstegConstants::USER_ROLES, FALSE);

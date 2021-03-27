@@ -58,7 +58,7 @@ class CustomBlockType extends BaseEntityGenerate {
    * @aliases dst:cbt
    * @options update Update existing entities.
    */
-  public function generateCustomBlockType($options = ['update' => false]) {
+  public function generateCustomBlockType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Custom Block Type...');
     $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);

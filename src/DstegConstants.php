@@ -245,7 +245,7 @@ final class DstegConstants {
     'Block type' => [
       'entity_type_id' => 'block_content_type',
       'entity_type' => 'block_content',
-    ]
+    ],
   ];
   const ENTITY_TYPE_UPDATE_ALLOWED_FIELDS = [
     'node_type' => [

@@ -85,7 +85,7 @@ class Media extends BaseEntityGenerate {
    * @usage drush dst:generate:media
    * @options update Update existing entities.
    */
-  public function generateBundle($options = ['update' => false]) {
+  public function generateBundle($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Media types.');
     // Call all the methods to generate the Drupal entities.
     $this->updateMode = $options['update'];

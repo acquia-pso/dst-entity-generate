@@ -37,7 +37,7 @@ abstract class BaseEntityGenerate extends DrushCommands {
   /**
    * Update mode.
    *
-   * @var boolean
+   * @var bool
    */
   protected $updateMode = FALSE;
 
@@ -301,12 +301,10 @@ abstract class BaseEntityGenerate extends DrushCommands {
   /**
    * Function to update entity type configurations.
    *
-   * @param EntityInterface $entity_type
+   * @param \Drupal\Core\Entity\EntityInterface $entity_type
    *   Entity type object.
    * @param array $data
    *   DST sheet data to update entity.
-   * @param array $allowed_fields
-   *   List of allowed fields to update.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */

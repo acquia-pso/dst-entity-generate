@@ -143,10 +143,8 @@ class GeneralApi {
    *   Field details.
    * @param string $entity_type
    *   Entity type.
-   * @param string $reusedField
-   *   Field reused status.
    */
-  public function createFieldStorage(array $field, string $entity_type, string $reusedField) {
+  public function createFieldStorage(array $field, string $entity_type) {
     $cardinality = $field['vals.'];
     if ($cardinality === '*') {
       $cardinality = -1;
@@ -160,17 +158,13 @@ class GeneralApi {
       'type' => $field['drupal_field_type'],
       'cardinality' => $cardinality,
     ];
-
     if ($field['field_type'] === 'Layout Canvas (Site Studio)') {
       $field_configs['settings']['target_type'] = 'cohesion_layout';
     }
     elseif (array_key_exists('settings', $field) && !empty($field['settings'])) {
       $field_configs['settings'] = $field['settings'];
     }
-
-    if (!isset($reusedField)) {
-      FieldStorageConfig::create($field_configs)->save();
-    }
+    FieldStorageConfig::create($field_configs)->save();
   }
 
   /**
@@ -203,7 +197,6 @@ class GeneralApi {
         'label' => $field_data['field_label'],
         'required' => $required,
       ];
-
       if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
@@ -281,19 +274,11 @@ class GeneralApi {
     if (empty($field)) {
       return FALSE;
     }
-
     $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
-    $fieldType = $field_storage->getType();
-    $field_types = DstegConstants::FIELD_TYPES;
-    $field_meta = $field_types[$field['field_type']];
-    $reusedField = FALSE;
-    if (!empty($field_storage) && $fieldType == $field_meta['type']) {
-      $reusedField = TRUE;
-    }
-    else {
+    if (!empty($field_storage)) {
       return FALSE;
     }
-
+    $field_types = DstegConstants::FIELD_TYPES;
     if (!array_key_exists($field['field_type'], $field_types)) {
       $this->logger->warning($this->t(
         'Support for generating field of type @ftype is currently not supported.',
@@ -301,13 +286,13 @@ class GeneralApi {
       ));
       return FALSE;
     }
-
+    $field_meta = $field_types[$field['field_type']];
     if (array_key_exists('dependencies', $field_meta) && !empty($field_meta['dependencies'])) {
       $field = $this->fieldDependencyCheck($field_meta, $field);
     }
     if ($field && $field_meta['type'] !== 'field_group') {
       $field['drupal_field_type'] = $field_meta['type'];
-      $this->createFieldStorage($field, $entity_type, $reusedField);
+      $this->createFieldStorage($field, $entity_type);
       $this->logger->notice($this->t('Field storage created for @field',
         ['@field' => $field['machine_name']]
       ));
@@ -455,7 +440,7 @@ class GeneralApi {
                     ));
                     return FALSE;
                   }
-                  // @todo Machine name should be read from bundles tab.
+                  // Todo: Machine name should be read from bundles tab.
                   $target_bundle_machine_name = strtolower(str_replace(" ", "_", $target_bundle));
                   $entity_storage = $entity_type_storage->load($target_bundle_machine_name);
                   if (empty($entity_storage)) {

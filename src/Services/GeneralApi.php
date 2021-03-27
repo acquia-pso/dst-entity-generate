@@ -187,7 +187,6 @@ class GeneralApi {
     $entity_types_storage = $this->entityTypeManager->getStorage($entity_type_id);
     $bundle = $entity_types_storage->load($bundle_machine_name);
     if ($bundle != NULL) {
-
       $required = $field_data['req'] === 'y';
       // Create field instance.
       $field_configs = [
@@ -340,6 +339,10 @@ class GeneralApi {
       $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
       if (array_key_exists($bundle_name, $bundles_data)) {
         $bundleVal = $bundles_data[$bundle_name];
+      }
+      else {
+        // Skip fields if entity type is not ready to implement.
+        continue;
       }
       if (isset($bundleVal)) {
         try {

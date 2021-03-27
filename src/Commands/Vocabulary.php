@@ -68,13 +68,13 @@ class Vocabulary extends BaseEntityGenerate {
     $vocab_types = $this->getVocabTypeData($data);
     $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
     $vocabularies = $vocab_storage->loadMultiple();
-    foreach ($vocab_types as $vocab) {
+    foreach ($vocab_types as $index => $vocab) {
       $vocab_name = $vocab['vid'];
       $vocan_url_alias = $vocab['url_alias_pattern'];
       $type = $vocab['type'];
       if ($vocabularies[$vocab['vid']]) {
         $this->generatePathautoPattern($vocab_name, $vocan_url_alias, $entity);
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($vocabularies[$vocab['vid']], $vocab);
           $this->io()->success("Vocabulary $vocab_name updated.");
           continue;

@@ -93,11 +93,11 @@ class Media extends BaseEntityGenerate {
     $media_storage = $this->entityTypeManager->getStorage('media_type');
     $media_types = $this->getMediaTypeData($data);
 
-    foreach ($media_types as $media_type) {
+    foreach ($media_types as $index => $media_type) {
       $type = $media_type['id'];
       $media_type_entity = $media_storage->load($type);
       if (!\is_null($media_type_entity)) {
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($media_type_entity, $media_type);
           $this->io()->success("Media Type $type updated.");
           continue;

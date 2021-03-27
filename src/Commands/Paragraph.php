@@ -64,11 +64,11 @@ class Paragraph extends BaseEntityGenerate {
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $paragraph_storage = $this->entityTypeManager->getStorage('paragraphs_type');
     $paragraph_types = $this->getParagraphTypeData($data);
-    foreach ($paragraph_types as $paragraph_type) {
+    foreach ($paragraph_types as $index => $paragraph_type) {
       $id = $paragraph_type['id'];
       $paragraph_type_entity = $paragraph_storage->load($id);
       if (!\is_null($paragraph_type_entity)) {
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($paragraph_type_entity, $paragraph_type);
           $this->io()->success("Paragraph Type $id updated.");
           continue;

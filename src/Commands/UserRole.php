@@ -58,10 +58,10 @@ class UserRole extends BaseEntityGenerate {
       $user_role_data = $this->getUserRoleData($entity_data);
       $user_role_storage = $this->entityTypeManager->getStorage('user_role');
       $user_roles = $user_role_storage->loadMultiple();
-      foreach ($user_role_data as $user_role) {
+      foreach ($user_role_data as $index => $user_role) {
         $user_role_name = $user_role['label'];
         if ($user_roles[$user_role['id']]) {
-          if ($this->updateMode) {
+          if ($this->updateMode && $entity_data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
             $this->updateEntityType($user_roles[$user_role['id']], $user_role);
             $this->io()->success("User role $user_role_name updated.");
             continue;

@@ -35,11 +35,25 @@ abstract class BaseEntityGenerate extends DrushCommands {
   protected $dependentModules = [];
 
   /**
-   * Update mode.
+   * Command with Update mode.
    *
    * @var bool
    */
   protected $updateMode = FALSE;
+
+  /**
+   * Update identifier set in DST sheet.
+   *
+   * @var string
+   */
+  protected $updateFlag = 'c';
+
+  /**
+   * Implementation status column name from DST sheet.
+   *
+   * @var string
+   */
+  protected $implementationFlagColumn = 'x';
 
   /**
    * Validate hook for commands.
@@ -219,21 +233,21 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
 
     $config = \Drupal::config('dst_entity_generate.settings');
-    $column_name = $config->get('column_name');
+    $this->implementationFlagColumn = $config->get('column_name');
     $column_value = $config->get('column_value');
-    $update_flag = $config->get('update_flag');
+    $this->updateFlag = $config->get('update_flag');
 
     $approved_data = [];
 
     foreach ($data as $item) {
-      if (!isset($item[$column_name])) {
-        throw new \Exception("Please provide correct column name. $column_name doesn't exists. Aborting...");
+      if (!isset($item[$this->implementationFlagColumn])) {
+        throw new \Exception("Please provide correct column name. $this->implementationFlagColumn doesn't exists. Aborting...");
       }
-      if ($item[$column_name] === $column_value) {
+      if ($item[$this->implementationFlagColumn] === $column_value) {
         \array_push($approved_data, $item);
       }
       if ($this->updateMode) {
-        if ($item[$column_name] === $update_flag) {
+        if ($item[$this->implementationFlagColumn] === $this->updateFlag) {
           \array_push($approved_data, $item);
         }
       }

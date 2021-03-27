@@ -78,14 +78,14 @@ class ContentType extends BaseEntityGenerate {
     $node_storage = $this->entityTypeManager->getStorage('node_type');
     $node_types = $this->getNodeTypeData($data);
 
-    foreach ($node_types as $node_type) {
+    foreach ($node_types as $index => $node_type) {
       $type = $node_type['type'];
       $entity = 'node';
       $url_alias_pattern = $node_type['url_alias_pattern'];
       $entity_type = $node_storage->load($type);
       if (!\is_null($entity_type)) {
         $this->generatePathautoPattern($type, $url_alias_pattern, $entity);
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($entity_type, $node_type);
           $this->io()->success("Node Type $type updated.");
           continue;

@@ -69,7 +69,7 @@ class Workflow extends BaseEntityGenerate {
     $workflow_config = $workflow_state_map = [];
     $default_weight = 0;
     $workflow_storage = $this->entityTypeManager->getStorage('workflow');
-    foreach ($workflows as $wf_data) {
+    foreach ($workflows as $index => $wf_data) {
       $wf_label = $wf_data['label'];
       $workflow_config['type_settings']['states'] = [];
       $workflow_config['type_settings']['transitions'] = [];
@@ -114,7 +114,7 @@ class Workflow extends BaseEntityGenerate {
       $wf_id = $wf_data['id'];
       if (!\is_null($wf_storage = $workflow_storage->load($wf_id))) {
         // Update the existing workflow with states and transitions.
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($wf_storage, $wf_data);
           $this->io()->success("Workflow $wf_label updated. Updating States & Transitions in case of any changes.");
         }

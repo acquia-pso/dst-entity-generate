@@ -53,15 +53,15 @@ class Menu extends BaseEntityGenerate {
   public function generateMenus($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Menus.');
     $this->updateMode = $options['update'];
-    $entity_data = $this->getDataFromSheet(DstegConstants::MENUS);
-    if (!empty($entity_data)) {
-      $menus_data = $this->getMenuData($entity_data);
+    $data = $this->getDataFromSheet(DstegConstants::MENUS);
+    if (!empty($data)) {
+      $menus_data = $this->getMenuData($data);
       $menu_storage = $this->entityTypeManager->getStorage('menu');
       $menus = $menu_storage->loadMultiple();
-      foreach ($menus_data as $menu) {
+      foreach ($menus_data as $index => $menu) {
         $menu_name = $menu['label'];
         if ($menus[$menu['id']]) {
-          if ($this->updateMode) {
+          if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
             $this->updateEntityType($menus[$menu['id']], $menu);
             $this->io()->success("Menu $menu_name updated.");
             continue;

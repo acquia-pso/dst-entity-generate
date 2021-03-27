@@ -65,11 +65,11 @@ class CustomBlockType extends BaseEntityGenerate {
     $block_content_storage = $this->entityTypeManager->getStorage('block_content_type');
     $block_content_types = $this->getCustomBlockTypeData($data);
 
-    foreach ($block_content_types as $block_content_type) {
+    foreach ($block_content_types as $index => $block_content_type) {
       $id = $block_content_type['id'];
       $block_type = $block_content_storage->load($id);
       if (!\is_null($block_type)) {
-        if ($this->updateMode) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($block_type, $block_content_type);
           $this->io()->success("Block Type $id updated.");
           continue;

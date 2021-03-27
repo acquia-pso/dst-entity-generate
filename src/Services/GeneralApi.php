@@ -274,10 +274,6 @@ class GeneralApi {
     if (empty($field)) {
       return FALSE;
     }
-    $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
-    if (!empty($field_storage)) {
-      return FALSE;
-    }
     $field_types = DstegConstants::FIELD_TYPES;
     if (!array_key_exists($field['field_type'], $field_types)) {
       $this->logger->warning($this->t(
@@ -292,10 +288,25 @@ class GeneralApi {
     }
     if ($field && $field_meta['type'] !== 'field_group') {
       $field['drupal_field_type'] = $field_meta['type'];
-      $this->createFieldStorage($field, $entity_type);
-      $this->logger->notice($this->t('Field storage created for @field',
-        ['@field' => $field['machine_name']]
-      ));
+      $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
+      if (empty($field_storage)) {
+        $this->createFieldStorage($field, $entity_type);
+        $this->logger->notice($this->t('Field storage created for @field',
+          ['@field' => $field['machine_name']]
+        ));
+      }
+      elseif ($field_storage->getType() !== $field['drupal_field_type']) {
+        $this->logger->warning($this->t(
+          'Field storage "@field_machine_name" already exist with type "@field_type". Change machine name of "@field_label" in "@bundle" to create new field or select same field type as existing to reuse it. Skipping for now.',
+          [
+            '@field_machine_name' => $field['machine_name'],
+            '@field_type' => array_keys(array_combine(array_keys(DstegConstants::FIELD_TYPES), array_column(DstegConstants::FIELD_TYPES, 'type')), $field_storage->getType())[0],
+            '@bundle' => $field['bundle'],
+            '@field_label' => $field['field_label'],
+          ]
+        ));
+        return FALSE;
+      }
     }
     elseif ($field_meta['type'] === 'field_group') {
       $field['format_type'] = $field_meta['format_type'];
@@ -440,7 +451,7 @@ class GeneralApi {
                     ));
                     return FALSE;
                   }
-                  // Todo: Machine name should be read from bundles tab.
+                  // @todo Machine name should be read from bundles tab.
                   $target_bundle_machine_name = strtolower(str_replace(" ", "_", $target_bundle));
                   $entity_storage = $entity_type_storage->load($target_bundle_machine_name);
                   if (empty($entity_storage)) {

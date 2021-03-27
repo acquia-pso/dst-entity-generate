@@ -130,20 +130,36 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
 
     if (!empty($disabledModules)) {
-      $disabledModulesString = \implode(',', $disabledModules);
-      $choice = $this->io()->choice("Module(s) $disabledModulesString is/are not enabled. Do you want to enable it?", ['Yes', 'No'], 'Yes');
+      $message = $this->formatPlural(
+        count($disabledModules),
+        '%module module is disabled.',
+        '%module modules are disabled.',
+        ['%module' => implode(', ', $disabledModules)]
+      );
+      $this->io()->warning(strip_tags($message));
+      $choice = $this->io()->choice("Do you want to enable it? Note: After enabling modules, re-run same command to process entities.",
+        ['Yes', 'No'],
+        'Yes'
+      );
       switch ($choice) {
         case 0:
           $this->enableModules($disabledModules);
-          break;
+          $this->io()->note("Terminating command. Please re-run same command to process entities.");
+          return FALSE;
 
         case 1:
-          throw new \Exception("Please enable $disabledModulesString to continue with this operation. Aborting...");
-          break;
+          $this->io()->note("Terminating command.");
+          return FALSE;
       }
     }
   }
 
+  /**
+   * Enable list of modules.
+   *
+   * @param array $modules
+   *   List of modules to enable.
+   */
   public function enableModules(array $modules) {
     $modulesString = \implode(',', $modules);
     $this->io()->text("Installing module(s) $modulesString");

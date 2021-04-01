@@ -109,6 +109,14 @@ final class EntityGenerateSettings extends ConfigFormBase {
         '#size' => 30,
         '#required' => TRUE,
       ];
+      $form['update_flag'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Update flag'),
+        '#description' => $this->t('Value of the column in DST sheet which will be used to identify that the row is changed after earlier implementation and ready to sync. For e.g. "c"'),
+        '#default_value' => !empty($config->get('update_flag')) ? $config->get('update_flag') : 'c',
+        '#size' => 30,
+        '#required' => TRUE,
+      ];
     }
 
     return parent::buildForm($form, $form_state);
@@ -134,6 +142,11 @@ final class EntityGenerateSettings extends ConfigFormBase {
     // Save column_value in config.
     $this->config(self::SETTINGS)
       ->set('column_value', $form_values['column_value'])
+      ->save();
+
+    // Save column_value in config.
+    $this->config(self::SETTINGS)
+      ->set('update_flag', $form_values['update_flag'])
       ->save();
   }
 

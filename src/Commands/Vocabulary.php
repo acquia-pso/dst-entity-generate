@@ -57,22 +57,29 @@ class Vocabulary extends BaseEntityGenerate {
    * @command dst:generate:vocabs
    * @aliases dst:v
    * @usage drush dst:generate:vocabs
+   * @options update Update existing entities.
    */
-  public function generateVocabularies() {
+  public function generateVocabularies($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Vocabularies.');
     // Call all the methods to generate the Drupal entities.
     $entity = 'taxonomy_term';
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $vocab_types = $this->getVocabTypeData($data);
     $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
     $vocabularies = $vocab_storage->loadMultiple();
-    foreach ($vocab_types as $vocab) {
+    foreach ($vocab_types as $index => $vocab) {
       $vocab_name = $vocab['vid'];
       $vocan_url_alias = $vocab['url_alias_pattern'];
       $type = $vocab['type'];
       if ($vocabularies[$vocab['vid']]) {
-        $this->io()->warning("Vocabulary $vocab_name Already exists. Skipping creation...");
         $this->generatePathautoPattern($vocab_name, $vocan_url_alias, $entity);
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
+          $this->updateEntityType($vocabularies[$vocab['vid']], $vocab);
+          $this->io()->success("Vocabulary $vocab_name updated.");
+          continue;
+        }
+        $this->io()->warning("Vocabulary $vocab_name Already exists. Skipping creation...");
         continue;
       }
       $status = $vocab_storage->create($vocab)->save();

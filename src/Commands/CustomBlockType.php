@@ -56,16 +56,24 @@ class CustomBlockType extends BaseEntityGenerate {
    *
    * @command dst:generate:custom_block_type
    * @aliases dst:cbt
+   * @options update Update existing entities.
    */
-  public function generateCustomBlockType() {
+  public function generateCustomBlockType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Custom Block Type...');
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $block_content_storage = $this->entityTypeManager->getStorage('block_content_type');
     $block_content_types = $this->getCustomBlockTypeData($data);
 
-    foreach ($block_content_types as $block_content_type) {
+    foreach ($block_content_types as $index => $block_content_type) {
       $id = $block_content_type['id'];
-      if (!\is_null($block_content_storage->load($id))) {
+      $block_type = $block_content_storage->load($id);
+      if (!\is_null($block_type)) {
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
+          $this->updateEntityType($block_type, $block_content_type);
+          $this->io()->success("Block Type $id updated.");
+          continue;
+        }
         $this->io()->warning("Custom Block Type $id Already exists. Skipping creation...");
         continue;
       }

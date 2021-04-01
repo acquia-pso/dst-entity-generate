@@ -2,6 +2,7 @@
 
 namespace Drupal\dst_entity_generate;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drush\Commands\DrushCommands;
 
@@ -32,6 +33,27 @@ abstract class BaseEntityGenerate extends DrushCommands {
    * @var array
    */
   protected $dependentModules = [];
+
+  /**
+   * Command with Update mode.
+   *
+   * @var bool
+   */
+  protected $updateMode = FALSE;
+
+  /**
+   * Update identifier set in DST sheet.
+   *
+   * @var string
+   */
+  protected $updateFlag = 'c';
+
+  /**
+   * Implementation status column name from DST sheet.
+   *
+   * @var string
+   */
+  protected $implementationFlagColumn = 'x';
 
   /**
    * Validate hook for commands.
@@ -211,17 +233,23 @@ abstract class BaseEntityGenerate extends DrushCommands {
     }
 
     $config = \Drupal::config('dst_entity_generate.settings');
-    $column_name = $config->get('column_name');
+    $this->implementationFlagColumn = $config->get('column_name');
     $column_value = $config->get('column_value');
+    $this->updateFlag = $config->get('update_flag');
 
     $approved_data = [];
 
     foreach ($data as $item) {
-      if (!isset($item[$column_name])) {
-        throw new \Exception("Please provide correct column name. $column_name doesn't exists. Aborting...");
+      if (!isset($item[$this->implementationFlagColumn])) {
+        throw new \Exception("Please provide correct column name. $this->implementationFlagColumn doesn't exists. Aborting...");
       }
-      if ($item[$column_name] === $column_value) {
+      if ($item[$this->implementationFlagColumn] === $column_value) {
         \array_push($approved_data, $item);
+      }
+      if ($this->updateMode) {
+        if ($item[$this->implementationFlagColumn] === $this->updateFlag) {
+          \array_push($approved_data, $item);
+        }
       }
     }
     return $approved_data;
@@ -282,6 +310,26 @@ abstract class BaseEntityGenerate extends DrushCommands {
     else {
       $this->io()->warning($this->t('Alias for @bundle is not available, skipping.', ['@bundle' => $bundle]));
     }
+  }
+
+  /**
+   * Function to update entity type configurations.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity_type
+   *   Entity type object.
+   * @param array $data
+   *   DST sheet data to update entity.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function updateEntityType(EntityInterface $entity_type, array $data) {
+    $allowed_fields = DstegConstants::ENTITY_TYPE_UPDATE_ALLOWED_FIELDS[$entity_type->getEntityTypeId()];
+    foreach ($data as $field_name => $field_value) {
+      if (in_array($field_name, $allowed_fields)) {
+        $entity_type->set($field_name, $field_value);
+      }
+    }
+    $entity_type->save();
   }
 
 }

@@ -68,21 +68,29 @@ class ContentType extends BaseEntityGenerate {
    * @command dst:generate:content_types
    * @aliases dst:content_types dst:ct
    * @usage drush dst:generate:content_types
+   * @options update Update existing entities.
    */
-  public function generateContentType() {
+  public function generateContentType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Content types.');
     // Call all the methods to generate the Drupal entities.
+    $this->updateMode = $options['update'];
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $node_storage = $this->entityTypeManager->getStorage('node_type');
     $node_types = $this->getNodeTypeData($data);
 
-    foreach ($node_types as $node_type) {
+    foreach ($node_types as $index => $node_type) {
       $type = $node_type['type'];
       $entity = 'node';
       $url_alias_pattern = $node_type['url_alias_pattern'];
-      if (!\is_null($node_storage->load($type))) {
-        $this->io()->warning("Node Type $type Already exists. Skipping creation...");
+      $entity_type = $node_storage->load($type);
+      if (!\is_null($entity_type)) {
         $this->generatePathautoPattern($type, $url_alias_pattern, $entity);
+        if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
+          $this->updateEntityType($entity_type, $node_type);
+          $this->io()->success("Node Type $type updated.");
+          continue;
+        }
+        $this->io()->warning("Node Type $type Already exists. Skipping creation...");
         continue;
       }
       $status = $node_storage->create($node_type)->save();

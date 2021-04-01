@@ -245,7 +245,42 @@ final class DstegConstants {
     'Block type' => [
       'entity_type_id' => 'block_content_type',
       'entity_type' => 'block_content',
-    ]
+    ],
+  ];
+  const ENTITY_TYPE_UPDATE_ALLOWED_FIELDS = [
+    'node_type' => [
+      'name',
+      'description',
+    ],
+    'block_content_type' => [
+      'label',
+      'description',
+    ],
+    'image_style' => [
+      'label',
+    ],
+    'media_type' => [
+      'label',
+      'description',
+    ],
+    'menu' => [
+      'label',
+      'description',
+    ],
+    'paragraphs_type' => [
+      'label',
+      'description',
+    ],
+    'user_role' => [
+      'label',
+    ],
+    'taxonomy_vocabulary' => [
+      'name',
+      'description',
+    ],
+    'workflow' => [
+      'label',
+    ],
   ];
 
   const ENTITY_TYPE_MODULE_DEPENDENCIES = [

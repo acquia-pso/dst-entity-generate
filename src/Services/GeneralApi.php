@@ -143,10 +143,8 @@ class GeneralApi {
    *   Field details.
    * @param string $entity_type
    *   Entity type.
-   * @param string $reusedField
-   *   Field reused status.
    */
-  public function createFieldStorage(array $field, string $entity_type, string $reusedField) {
+  public function createFieldStorage(array $field, string $entity_type) {
     $cardinality = $field['vals.'];
     if ($cardinality === '*') {
       $cardinality = -1;
@@ -160,17 +158,13 @@ class GeneralApi {
       'type' => $field['drupal_field_type'],
       'cardinality' => $cardinality,
     ];
-
     if ($field['field_type'] === 'Layout Canvas (Site Studio)') {
       $field_configs['settings']['target_type'] = 'cohesion_layout';
     }
     elseif (array_key_exists('settings', $field) && !empty($field['settings'])) {
       $field_configs['settings'] = $field['settings'];
     }
-
-    if (!isset($reusedField)) {
-      FieldStorageConfig::create($field_configs)->save();
-    }
+    FieldStorageConfig::create($field_configs)->save();
   }
 
   /**
@@ -193,7 +187,6 @@ class GeneralApi {
     $entity_types_storage = $this->entityTypeManager->getStorage($entity_type_id);
     $bundle = $entity_types_storage->load($bundle_machine_name);
     if ($bundle != NULL) {
-
       $required = $field_data['req'] === 'y';
       // Create field instance.
       $field_configs = [
@@ -203,7 +196,6 @@ class GeneralApi {
         'label' => $field_data['field_label'],
         'required' => $required,
       ];
-
       if (is_array($field_data['settings']) && array_key_exists('handler_settings', $field_data['settings'])) {
         $field_configs['settings'] = $field_data['settings']['handler_settings'];
       }
@@ -281,19 +273,7 @@ class GeneralApi {
     if (empty($field)) {
       return FALSE;
     }
-
-    $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
-    $fieldType = $field_storage->getType();
     $field_types = DstegConstants::FIELD_TYPES;
-    $field_meta = $field_types[$field['field_type']];
-    $reusedField = FALSE;
-    if (!empty($field_storage) && $fieldType == $field_meta['type']) {
-      $reusedField = TRUE;
-    }
-    else {
-      return FALSE;
-    }
-
     if (!array_key_exists($field['field_type'], $field_types)) {
       $this->logger->warning($this->t(
         'Support for generating field of type @ftype is currently not supported.',
@@ -301,16 +281,31 @@ class GeneralApi {
       ));
       return FALSE;
     }
-
+    $field_meta = $field_types[$field['field_type']];
     if (array_key_exists('dependencies', $field_meta) && !empty($field_meta['dependencies'])) {
       $field = $this->fieldDependencyCheck($field_meta, $field);
     }
     if ($field && $field_meta['type'] !== 'field_group') {
       $field['drupal_field_type'] = $field_meta['type'];
-      $this->createFieldStorage($field, $entity_type, $reusedField);
-      $this->logger->notice($this->t('Field storage created for @field',
-        ['@field' => $field['machine_name']]
-      ));
+      $field_storage = FieldStorageConfig::loadByName($entity_type, $field['machine_name']);
+      if (empty($field_storage)) {
+        $this->createFieldStorage($field, $entity_type);
+        $this->logger->notice($this->t('Field storage created for @field',
+          ['@field' => $field['machine_name']]
+        ));
+      }
+      elseif ($field_storage->getType() !== $field['drupal_field_type']) {
+        $this->logger->warning($this->t(
+          'Field storage "@field_machine_name" already exist with type "@field_type". Change machine name of "@field_label" in "@bundle" to create new field or select same field type as existing to reuse it. Skipping for now.',
+          [
+            '@field_machine_name' => $field['machine_name'],
+            '@field_type' => array_keys(array_combine(array_keys(DstegConstants::FIELD_TYPES), array_column(DstegConstants::FIELD_TYPES, 'type')), $field_storage->getType())[0],
+            '@bundle' => $field['bundle'],
+            '@field_label' => $field['field_label'],
+          ]
+        ));
+        return FALSE;
+      }
     }
     elseif ($field_meta['type'] === 'field_group') {
       $field['format_type'] = $field_meta['format_type'];
@@ -344,6 +339,10 @@ class GeneralApi {
       $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
       if (array_key_exists($bundle_name, $bundles_data)) {
         $bundleVal = $bundles_data[$bundle_name];
+      }
+      else {
+        // Skip fields if entity type is not ready to implement.
+        continue;
       }
       if (isset($bundleVal)) {
         try {

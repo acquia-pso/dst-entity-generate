@@ -40,11 +40,10 @@ Generate user roles
 -----------------------
 dst:generate:user-roles (dst:ur)
 
-Generate Vocabularies
+Generate vocabularies
 -----------------------
 dst:generate:vocabs (dst:v)
 
------------------------
 Generate workflows
 -----------------------
 dst:generate:workflow (dst:w)

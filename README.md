@@ -85,6 +85,17 @@ dst:update:all (dst:up)    // Read & Update all the entities
 dst:update:bundles         // Read & Update specific  entities, e.g. bundles for content type updates.
 ```
 
+## To manage Document
+There is docs directory having all documents related to Drupal Entity Generator (DEG).
+We have used Sphinx for generating the documents. Install Sphinx(https://www.sphinx-doc.org/en/master) to update and manage the documents.
+There are .rst  source files for documents in 'docs/source' directory.
+
+```
+dst:update                 // Read & Update all the entities
+dst:update:all (dst:up)    // Read & Update all the entities
+dst:update:bundles         // Read & Update specific  entities, e.g. bundles for content type updates.
+```
+
 
 ## Contributors
 

@@ -295,4 +295,22 @@ final class DstegConstants {
     DstegConstants::WORKFLOWS => ['workflows', 'content_moderation'],
   ];
 
+  const FIELD_FORM_WIDGET = [
+    'Textfield' => 'string_textfield',
+    'Select list' => 'options_select',
+    'Text area (multiple rows)' => 'text_textarea',
+    'Date and time range' => 'daterange_default',
+    'Date and time' => 'datetime_default',
+    'Color boxes' => 'colorbox',
+    'Email' => 'email_default',
+    'Telephone number' => 'telephone_default',
+    'Autocomplete' => 'entity_reference_autocomplete',
+    'Image' => 'image_image',
+    'Single on/off checkbox' => 'boolean_checkbox',
+    'Number field' => 'number',
+    'Check boxes/radio buttons' => 'options_buttons',
+    'File' => 'file_generic',
+    'Site Studio layout canvas' => 'cohesion_layout_builder_widget',
+  ];
+
 }

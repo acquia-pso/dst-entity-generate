@@ -61,6 +61,10 @@ class Paragraph extends BaseEntityGenerate {
   public function generateParagraph($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Paragraphs...');
     $this->updateMode = $options['update'];
+    $mode = 'create';
+    if ($this->updateMode) {
+      $mode = 'update';
+    }
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $paragraph_storage = $this->entityTypeManager->getStorage('paragraphs_type');
     $paragraph_types = $this->getParagraphTypeData($data);
@@ -96,7 +100,7 @@ class Paragraph extends BaseEntityGenerate {
       $bundles_data[$paragraph_type['label']] = $paragraph_type['id'];
     }
 
-    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data, $mode);
   }
 
   /**

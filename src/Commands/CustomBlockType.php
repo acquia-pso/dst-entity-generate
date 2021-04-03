@@ -61,6 +61,10 @@ class CustomBlockType extends BaseEntityGenerate {
   public function generateCustomBlockType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Custom Block Type...');
     $this->updateMode = $options['update'];
+    $mode = 'create';
+    if ($this->updateMode) {
+      $mode = 'update';
+    }
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $block_content_storage = $this->entityTypeManager->getStorage('block_content_type');
     $block_content_types = $this->getCustomBlockTypeData($data);
@@ -97,7 +101,7 @@ class CustomBlockType extends BaseEntityGenerate {
       $bundles_data[$block_content_type['label']] = $block_content_type['id'];
     }
 
-    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data, $mode);
   }
 
   /**

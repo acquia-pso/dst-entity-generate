@@ -61,6 +61,13 @@ class GeneralApi {
   private $syncEntities;
 
   /**
+   * Update identifier set in DST sheet.
+   *
+   * @var string
+   */
+  protected $updateFlag = 'c';
+
+  /**
    * Constructs a new GoogleSpreadsheetAccess object.
    *
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
@@ -82,6 +89,7 @@ class GeneralApi {
 
     $this->logger = $logger_factory->get('dst_entity_generate');
     $this->syncEntities = $configFactory->get('dst_entity_generate.settings')->get('sync_entities');
+    $this->updateFlag = $configFactory->get('dst_entity_generate.settings')->get('update_flag');
     $this->entityTypeManager = $entityTypeManager;
     $this->displayRepository = $displayRepository;
     $this->moduleHandler = $moduleHandler;
@@ -145,18 +153,11 @@ class GeneralApi {
    *   Entity type.
    */
   public function createFieldStorage(array $field, string $entity_type) {
-    $cardinality = $field['vals.'];
-    if ($cardinality === '*') {
-      $cardinality = -1;
-    }
-    elseif ($cardinality === '-') {
-      $cardinality = 1;
-    }
     $field_configs = [
       'field_name' => $field['machine_name'],
       'entity_type' => $entity_type,
       'type' => $field['drupal_field_type'],
-      'cardinality' => $cardinality,
+      'cardinality' => $this->getCardinality($field),
     ];
     if ($field['field_type'] === 'Layout Canvas (Site Studio)') {
       $field_configs['settings']['target_type'] = 'cohesion_layout';
@@ -228,7 +229,7 @@ class GeneralApi {
       elseif ($field_data['type'] !== 'field_group') {
         $options = ['region' => 'content'];
         // Configuring form widget if it's not empty.
-        if(!empty($field_data['drupal_field_form_widget'])) {
+        if (!empty($field_data['drupal_field_form_widget'])) {
           $options['type'] = $field_data['drupal_field_form_widget'];
         }
         FieldConfig::create($field_configs)->save();
@@ -269,11 +270,15 @@ class GeneralApi {
    *   Field data from Google sheet.
    * @param string $entity_type
    *   Entity type.
+   * @param string $mode
+   *   Command execution mode.
    *
    * @return mixed
    *   Returns array based on unmet dependency.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function fieldStorageHandler(array $field, string $entity_type) {
+  public function fieldStorageHandler(array $field, string $entity_type, $mode = 'create') {
     if (empty($field)) {
       return FALSE;
     }
@@ -297,7 +302,7 @@ class GeneralApi {
     $field_types = DstegConstants::FIELD_FORM_WIDGET;
     $field['drupal_field_form_widget'] = '';
     $is_empty_form_widget = FALSE;
-    if(empty($field['form_widget']) || $field['form_widget'] === '-') {
+    if (empty($field['form_widget']) || $field['form_widget'] === '-') {
       $is_empty_form_widget = TRUE;
     }
     if ($is_empty_form_widget === FALSE  && !array_key_exists($field['form_widget'], $field_types)) {
@@ -306,8 +311,9 @@ class GeneralApi {
         ['@fwidget' => $field['form_widget']]
       ));
       return FALSE;
-    } elseif ($is_empty_form_widget === FALSE) {
-        $field['drupal_field_form_widget'] = $field_types[$field['form_widget']];
+    }
+    elseif ($is_empty_form_widget === FALSE) {
+      $field['drupal_field_form_widget'] = $field_types[$field['form_widget']];
     }
 
     if ($field && $field_meta['type'] !== 'field_group') {
@@ -319,17 +325,55 @@ class GeneralApi {
           ['@field' => $field['machine_name']]
         ));
       }
-      elseif ($field_storage->getType() !== $field['drupal_field_type']) {
-        $this->logger->warning($this->t(
-          'Field storage "@field_machine_name" already exist with type "@field_type". Change machine name of "@field_label" in "@bundle" to create new field or select same field type as existing to reuse it. Skipping for now.',
-          [
-            '@field_machine_name' => $field['machine_name'],
-            '@field_type' => array_keys(array_combine(array_keys(DstegConstants::FIELD_TYPES), array_column(DstegConstants::FIELD_TYPES, 'type')), $field_storage->getType())[0],
-            '@bundle' => $field['bundle'],
-            '@field_label' => $field['field_label'],
-          ]
-        ));
-        return FALSE;
+      else {
+        $storage_changed = FALSE;
+        $message = '';
+        if ($field_storage->getType() !== $field['drupal_field_type']) {
+          $storage_changed = TRUE;
+          $message = $this->t(
+            'Field storage "@field_machine_name" already exist with type "@field_type". Change machine name of "@field_label" in "@bundle" to create new field or select same field type as existing to reuse it. Skipping for now.',
+            [
+              '@field_machine_name' => $field['machine_name'],
+              '@field_type' => array_keys(array_combine(array_keys(DstegConstants::FIELD_TYPES), array_column(DstegConstants::FIELD_TYPES, 'type')), $field_storage->getType())[0],
+              '@bundle' => $field['bundle'],
+              '@field_label' => $field['field_label'],
+            ]
+          );
+        }
+        switch ($mode) {
+          case 'create':
+            if ($storage_changed) {
+              $this->logger->warning($message);
+              return FALSE;
+            }
+            break;
+
+          case 'update':
+            if ($this->updateFlag === $field['x']) {
+              // Update field storage configurations.
+              if ($storage_changed) {
+                $this->logger->warning($message);
+                return FALSE;
+              }
+              else {
+                $this->updateFieldStorageConfigurations($field_storage, $field);
+                $this->logger->notice($this->t('Field storage config updated for @field',
+                  ['@field' => $field['machine_name']]
+                ));
+              }
+            }
+            else {
+              $this->logger->warning($this->t(
+                'The field @field is not configured to update in DST sheet.',
+                ['@field' => $field['machine_name']]
+              ));
+            }
+            break;
+
+          case 'delete':
+            // @todo Delete mode placeholder.
+            break;
+        }
       }
     }
     elseif ($field_meta['type'] === 'field_group') {
@@ -337,6 +381,50 @@ class GeneralApi {
       $field['type'] = $field_meta['type'];
     }
     return $field;
+  }
+
+  /**
+   * Update Field storage configurations.
+   *
+   * @param \Drupal\field\Entity\FieldStorageConfig $field_storage_config
+   *   Field storage config object.
+   * @param array $data
+   *   Field array from DST sheet.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function updateFieldStorageConfigurations(FieldStorageConfig $field_storage_config, array $data) {
+    $allowed_configs = [
+      'cardinality',
+    ];
+    foreach ($allowed_configs as $allowed_config) {
+      switch ($allowed_config) {
+        case 'cardinality':
+          $field_storage_config->setCardinality($this->getCardinality($data));
+          break;
+      }
+    }
+    $field_storage_config->save();
+  }
+
+  /**
+   * Get cardinality value from field array.
+   *
+   * @param array $data
+   *   Field array from DST sheet.
+   *
+   * @return int|mixed
+   *   Returns cardinality value.
+   */
+  public function getCardinality(array $data) {
+    $cardinality = $data['vals.'];
+    if ($cardinality === '*') {
+      $cardinality = -1;
+    }
+    elseif ($cardinality === '-') {
+      $cardinality = 1;
+    }
+    return $cardinality;
   }
 
   /**
@@ -348,11 +436,13 @@ class GeneralApi {
    *   The field data to be created.
    * @param array $bundles_data
    *   The bundle data to create fields.
+   * @param string $mode
+   *   Command execution mode. Either Create or Update or Delete.
    *
    * @return mixed
    *   Can return the command output or FALSE.
    */
-  public function generateEntityFields(string $bundle_type, array $fields_data, array $bundles_data) {
+  public function generateEntityFields(string $bundle_type, array $fields_data, array $bundles_data, $mode = 'create') {
 
     $result = TRUE;
     $this->logger->notice($this->t('Generating all Drupal Entities Fields.'));
@@ -377,13 +467,43 @@ class GeneralApi {
 
           // Skip if field is present.
           if (!empty($drupal_field)) {
-            $this->logger->warning($this->t(
-              'The field @field is present in @ctype. Skipping.',
-              [
-                '@field' => $field['machine_name'],
-                '@ctype' => $bundleVal,
-              ]
-            ));
+            switch ($mode) {
+              case 'create':
+                $this->logger->warning($this->t(
+                  'The field @field is present in @ctype. Skipping.',
+                  [
+                    '@field' => $field['machine_name'],
+                    '@ctype' => $bundleVal,
+                  ]
+                ));
+                break;
+
+              case 'update':
+                if ($this->updateFlag === $field['x']) {
+                  // Update field configurations.
+                  $this->updateFieldConfigurations($drupal_field, $field);
+                  $this->logger->notice($this->t(
+                    'The field configurations for @field are updated in @ctype.',
+                    [
+                      '@field' => $field['machine_name'],
+                      '@ctype' => $bundleVal,
+                    ]
+                  ));
+                  // Update field storage configurations.
+                  $this->fieldStorageHandler($field, $entity_type, 'update');
+                }
+                else {
+                  $this->logger->warning($this->t(
+                    'The field @field is not configured to update in DST sheet.',
+                    ['@field' => $field['machine_name']]
+                  ));
+                }
+                break;
+
+              case 'delete':
+                // @todo Placeholder for delete mode.
+                break;
+            }
             continue;
           }
 
@@ -414,6 +534,41 @@ class GeneralApi {
       }
     }
     return $result;
+  }
+
+  /**
+   * Update field configurations.
+   *
+   * @param \Drupal\field\Entity\FieldConfig $field_config
+   *   Field config object.
+   * @param array $data
+   *   Data array from DST sheet.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function updateFieldConfigurations(FieldConfig $field_config, array $data) {
+    $allowed_configs = [
+      'label',
+      'description',
+      'required',
+    ];
+    foreach ($allowed_configs as $allowed_config) {
+      switch ($allowed_config) {
+        case 'label':
+          $field_config->setLabel($data['field_label']);
+          break;
+
+        case 'description':
+          $field_config->setDescription($data['help_text']);
+          break;
+
+        case 'required':
+          $required = $data['req'] === 'y';
+          $field_config->setRequired($required);
+          break;
+      }
+    }
+    $field_config->save();
   }
 
   /**

@@ -89,6 +89,10 @@ class Media extends BaseEntityGenerate {
     $this->io()->success('Generating Drupal Media types.');
     // Call all the methods to generate the Drupal entities.
     $this->updateMode = $options['update'];
+    $mode = 'create';
+    if ($this->updateMode) {
+      $mode = 'update';
+    }
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $media_storage = $this->entityTypeManager->getStorage('media_type');
     $media_types = $this->getMediaTypeData($data);
@@ -165,7 +169,7 @@ class Media extends BaseEntityGenerate {
     foreach ($media_types as $media_type) {
       $bundles_data[$media_type['label']] = $media_type['id'];
     }
-    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data, $mode);
 
   }
 

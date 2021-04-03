@@ -74,6 +74,10 @@ class ContentType extends BaseEntityGenerate {
     $this->io()->success('Generating Drupal Content types.');
     // Call all the methods to generate the Drupal entities.
     $this->updateMode = $options['update'];
+    $mode = 'create';
+    if ($this->updateMode) {
+      $mode = 'update';
+    }
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $node_storage = $this->entityTypeManager->getStorage('node_type');
     $node_types = $this->getNodeTypeData($data);
@@ -119,7 +123,7 @@ class ContentType extends BaseEntityGenerate {
     foreach ($node_types as $bundle) {
       $bundles_data[$bundle['name']] = $bundle['type'];
     }
-    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data, $mode);
 
   }
 

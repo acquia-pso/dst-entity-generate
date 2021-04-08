@@ -64,6 +64,10 @@ class Vocabulary extends BaseEntityGenerate {
     // Call all the methods to generate the Drupal entities.
     $entity = 'taxonomy_term';
     $this->updateMode = $options['update'];
+    $mode = 'create';
+    if ($this->updateMode) {
+      $mode = 'update';
+    }
     $data = $this->getDataFromSheet(DstegConstants::BUNDLES);
     $vocab_types = $this->getVocabTypeData($data);
     $vocab_storage = $this->entityTypeManager->getStorage('taxonomy_vocabulary');
@@ -101,7 +105,7 @@ class Vocabulary extends BaseEntityGenerate {
     foreach ($vocab_types as $bundle) {
       $bundles_data[$bundle['name']] = $bundle['vid'];
     }
-    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data);
+    $this->helper->generateEntityFields($bundle_type, $fields_data, $bundles_data, $mode);
   }
 
   /**

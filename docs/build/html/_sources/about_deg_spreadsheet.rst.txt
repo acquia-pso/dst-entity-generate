@@ -1,0 +1,73 @@
+.. _about_deg_spreadsheet:
+
+About DEG Spreadsheet
+===============================
+DEG Spreadsheet is simply a Google Spreadsheet template used for capturing structure of entities, all types of entities can be defined based on project requirements.
+We can can copy and create a new spreadsheet with same structure and can add/update entities.
+
+Overview
+-----------------------
+A sheet used to keep track of numbers of entities used in different sheets.
+
+.. list-table:: Overview Sheet
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Column
+     - Specifications
+   * - Specification
+     - List of different entity sheets
+   * - Done
+     - Number of entities(rows) 'Implemented and done(x)' as per status of column X of that sheet.
+   * - Total
+     - Number of entities(rows) defined.
+   * - %
+     - Percentage of entities(rows) 'Implemented and done(x)'.
+
+
+Bundles
+-----------------------
+A sheet used to keep bundles of different entity types.
+
+.. list-table:: Bundles
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Column
+     - Specifications
+   * - ID
+     - An optional identifier for references in external documents.
+   * - Name
+     - To keep name of entity types like Article, Page etc.
+   * - Machine name
+     - Unique machine name for Drupal bundles.
+   * - X
+     - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
+   * - Machine name
+     - Unique machine name for Drupal bundles.
+   * - Description
+     - Description about the bundles.
+   * - Example(s)
+     - One or more relevant examples, optionally hyperlinked.
+   * - Mod.
+     - Moderated (Content moderation is enabled), for example: y = Yes, n = No
+   * - Layout
+     - Layout-enabled, via Core Layout Builder or via Panels, for example: y = Yes, n = No
+   * - Trns.
+     - Translatable, for example: y = Yes, n = No
+   * - Migr.
+     - Migrated (Content will be populated via migration)
+   * - Cmnt.
+     - Translatable, for example: y = Yes, n = No
+   * - Meta.
+     - Translatable, for example: y = Yes, n = No
+   * - Meta.
+     - Meta tags are enabled
+   * - Sched.
+     - Schedulable (Scheduled updates are enabled), for example: y = Yes, n = No
+   * - Type
+     - Entity type, for example: Content type, Vocabulary, Paragraph type, Media type, Custom block type
+   * - URL alias pattern
+     - To configure URL alias pattern.
+   * - Settings/notes
+     - To configure settings/notes related to bundle, for example: 'Image' for media type image

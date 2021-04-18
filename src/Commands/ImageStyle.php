@@ -55,11 +55,11 @@ class ImageStyle extends BaseEntityGenerate {
   }
 
   /**
-   * Generate the Drupal image style from Drupal Spec tool sheet.
+   * Generate the Drupal image style from DEG sheet.
    *
-   * @command dst:generate:imagestyle
-   * @aliases dst:imagestyle dst:is
-   * @usage drush dst:generate:imagestyle
+   * @command deg:generate:imagestyle
+   * @aliases deg:imagestyle deg:is
+   * @usage drush deg:generate:imagestyle
    * @options update Update existing entities.
    */
   public function generateImageStyle($options = ['update' => FALSE]) {

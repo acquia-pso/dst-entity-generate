@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>List of Drush Commands &mdash; Drupal Entity Generator (DEG) 0.1 documentation</title>
+  <title>Drush Commands &mdash; Drupal Entity Generator (DEG) 0.1 documentation</title>
   
 
   
@@ -38,6 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -86,21 +87,72 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about-deg-spreadsheet.html">About DEG Spreadsheet</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">List of Drush Commands</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#generate-all-entities">Generate all entities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-content-types">Generate content types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-blocks">Generate blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-image-effects">Generate image effects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-image-style">Generate image style</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-media">Generate media</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-menus">Generate menus</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-paragraphs">Generate paragraphs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-user-roles">Generate user roles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-vocabularies">Generate vocabularies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-workflows">Generate workflows</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Drush Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generate-content-types">Generate content types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aliases"><strong>Aliases</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description"><strong>Description</strong></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-vocabularies">Generate vocabularies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alias"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-blocks">Generate blocks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-image-style">Generate image style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-media">Generate media</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-menus">Generate menus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-paragraphs">Generate paragraphs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id15"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16"><strong>Aliases</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-user-roles">Generate user roles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id18"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-workflows">Generate workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22"><strong>Alias</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23"><strong>Description</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-all-entities">Generate all entities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id24"><strong>Command</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25"><strong>Aliases</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26"><strong>Description</strong></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
             
@@ -149,7 +201,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>List of Drush Commands</li>
+      <li>Drush Commands</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,52 +220,405 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="list-of-drush-commands">
-<span id="drush-commands-list"></span><h1>List of Drush Commands<a class="headerlink" href="#list-of-drush-commands" title="Permalink to this headline">¶</a></h1>
-<p>There are following drush commands in to generate the drupal entities in Drupal Entity Generator (DEG) ,</p>
-<div class="section" id="generate-all-entities">
-<h2>Generate all entities<a class="headerlink" href="#generate-all-entities" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate (dst:generate:all, dst:ga)</p>
-</div>
+  <div class="section" id="drush-commands">
+<span id="drush-commands-list"></span><h1>Drush Commands<a class="headerlink" href="#drush-commands" title="Permalink to this headline">¶</a></h1>
+<p>A list of drush commands used to generate the drupal entities in Drupal using Drupal Entity Generator (DEG) Spreadsheet ,</p>
 <div class="section" id="generate-content-types">
 <h2>Generate content types<a class="headerlink" href="#generate-content-types" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:content_types (dst:content_types, dst:ct)</p>
+<div class="section" id="command">
+<h3><strong>Command</strong><a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:content_types</p>
+</div></blockquote>
 </div>
-<div class="section" id="generate-blocks">
-<h2>Generate blocks<a class="headerlink" href="#generate-blocks" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:custom_block_type (dst:cbt)</p>
+<div class="section" id="aliases">
+<h3><strong>Aliases</strong><a class="headerlink" href="#aliases" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:content_types, dst:ct</p>
+</div></blockquote>
 </div>
-<div class="section" id="generate-image-effects">
-<h2>Generate image effects<a class="headerlink" href="#generate-image-effects" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:image-effects (dst:ie)</p>
+<div class="section" id="description">
+<h3><strong>Description</strong><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate all types of content with fields in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means bundle has been executed successfully.</dt><dd><p>Example -  [OK] Node Type article is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example -  [notice] Field storage created for field_teaser_title.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example -  [WARNING] Alias for article is already present, skipping.</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
 </div>
-<div class="section" id="generate-image-style">
-<h2>Generate image style<a class="headerlink" href="#generate-image-style" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:imagestyle (dst:imagestyle, dst:is)</p>
-</div>
-<div class="section" id="generate-media">
-<h2>Generate media<a class="headerlink" href="#generate-media" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:media (dst:media)</p>
-</div>
-<div class="section" id="generate-menus">
-<h2>Generate menus<a class="headerlink" href="#generate-menus" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:menus (dst:m)</p>
-</div>
-<div class="section" id="generate-paragraphs">
-<h2>Generate paragraphs<a class="headerlink" href="#generate-paragraphs" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:paragraphs (dst:para, dst:p)</p>
-</div>
-<div class="section" id="generate-user-roles">
-<h2>Generate user roles<a class="headerlink" href="#generate-user-roles" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:user-roles (dst:ur)</p>
+<hr style="border: 1px solid grey;"></div>
 </div>
 <div class="section" id="generate-vocabularies">
 <h2>Generate vocabularies<a class="headerlink" href="#generate-vocabularies" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:vocabs (dst:v)</p>
+<div class="section" id="id1">
+<h3><strong>Command</strong><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:vocabs</p>
+</div></blockquote>
+</div>
+<div class="section" id="alias">
+<h3><strong>Alias</strong><a class="headerlink" href="#alias" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:v</p>
+</div></blockquote>
+</div>
+<div class="section" id="id2">
+<h3><strong>Description</strong><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate vocabularies in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means vocabulary has been created successfully.</dt><dd><p>Example - [OK] Vocabulary article_categories is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example - [notice] field_title field is created in bundle vocabulary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [WARNING] Vocabulary article_categories Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-blocks">
+<h2>Generate blocks<a class="headerlink" href="#generate-blocks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3><strong>Command</strong><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:custom_block_type</p>
+</div></blockquote>
+</div>
+<div class="section" id="id4">
+<h3><strong>Alias</strong><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:cbt</p>
+</div></blockquote>
+</div>
+<div class="section" id="id5">
+<h3><strong>Description</strong><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate custom block types in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means custom block type has been executed successfully.</dt><dd><p>Example -  [OK] Custom Block Type custom_block_type is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example -  field_block_title field is created in bundle “Custom Block type”.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example -  [WARNING] Custom Block Type custom_block_type Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-image-style">
+<h2>Generate image style<a class="headerlink" href="#generate-image-style" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h3><strong>Command</strong><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:imagestyle</p>
+</div></blockquote>
+</div>
+<div class="section" id="id7">
+<h3><strong>Alias</strong><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:is</p>
+</div></blockquote>
+</div>
+<div class="section" id="id8">
+<h3><strong>Description</strong><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate image style and effects in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means image style has been created successfully.</dt><dd><p>Example -  [OK] Generating Drupal Image Style…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example -  [WARNING] Image style demo_image_style already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-media">
+<h2>Generate media<a class="headerlink" href="#generate-media" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h3><strong>Command</strong><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:media</p>
+</div></blockquote>
+</div>
+<div class="section" id="id10">
+<h3><strong>Alias</strong><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:media</p>
+</div></blockquote>
+</div>
+<div class="section" id="id11">
+<h3><strong>Description</strong><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate media types in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means media type has been created successfully.</dt><dd><p>Example - [OK] Media Type Image_media is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example - [notice] field_summary field is created in bundle “Image Media”.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [WARNING] Media Type Image_media Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-menus">
+<h2>Generate menus<a class="headerlink" href="#generate-menus" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id12">
+<h3><strong>Command</strong><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:menus</p>
+</div></blockquote>
+</div>
+<div class="section" id="id13">
+<h3><strong>Alias</strong><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:m</p>
+</div></blockquote>
+</div>
+<div class="section" id="id14">
+<h3><strong>Description</strong><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate menu types in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means menu has been created successfully.</dt><dd><p>Example - [OK] Menu Event menu is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example - [notice] field_summary field is created in bundle “Image Media”.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [WARNING] Menu Sidebar menu Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-paragraphs">
+<h2>Generate paragraphs<a class="headerlink" href="#generate-paragraphs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id15">
+<h3><strong>Command</strong><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:paragraphs</p>
+</div></blockquote>
+</div>
+<div class="section" id="id16">
+<h3><strong>Aliases</strong><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:para, deg:p</p>
+</div></blockquote>
+</div>
+<div class="section" id="id17">
+<h3><strong>Description</strong><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate paragraph types in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means paragraph type has been created successfully.</dt><dd><p>Example - [OK] Paragraph Type slider is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[notice]: means field is created successfully.</dt><dd><p>Example - [notice] field_slider_title field is created in bundle “Slider”</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [Paragraph Type slider Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-user-roles">
+<h2>Generate user roles<a class="headerlink" href="#generate-user-roles" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id18">
+<h3><strong>Command</strong><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:user-roles</p>
+</div></blockquote>
+</div>
+<div class="section" id="id19">
+<h3><strong>Alias</strong><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:ur</p>
+</div></blockquote>
+</div>
+<div class="section" id="id20">
+<h3><strong>Description</strong><a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate user roles in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means user role has been created successfully.</dt><dd><p>Example - [OK] user_role Content Editor is successfully created…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [WARNING] user_role Site Configurator Already exists. Skipping creation…</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
 </div>
 <div class="section" id="generate-workflows">
 <h2>Generate workflows<a class="headerlink" href="#generate-workflows" title="Permalink to this headline">¶</a></h2>
-<p>dst:generate:workflow (dst:w)</p>
+<div class="section" id="id21">
+<h3><strong>Command</strong><a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:workflow</p>
+</div></blockquote>
+</div>
+<div class="section" id="id22">
+<h3><strong>Alias</strong><a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:w</p>
+</div></blockquote>
+</div>
+<div class="section" id="id23">
+<h3><strong>Description</strong><a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>This command is used to generate workflows, states and workflow transitions in Drupal.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following messages will come after execution of command.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>[OK]: means workflow has been created successfully.</dt><dd><p>Example - [OK] Editorial workflow was created successfully…</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[WARNING]: means there is some minor error comes on execution of command.</dt><dd><p>Example - [WARNING] To state Draft is not present for workflow Administrator</p>
+</dd>
+</dl>
+</li>
+<li><p>[ERROR]: means there is major error which is stopping the execution of command.</p></li>
+</ul>
+</div>
+<hr style="border: 1px solid grey;"></div>
+</div>
+<div class="section" id="generate-all-entities">
+<h2>Generate all entities<a class="headerlink" href="#generate-all-entities" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id24">
+<h3><strong>Command</strong><a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate</p>
+</div></blockquote>
+</div>
+<div class="section" id="id25">
+<h3><strong>Aliases</strong><a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>deg:generate:all, dst:ga</p>
+</div></blockquote>
+</div>
+<div class="section" id="id26">
+<h3><strong>Description</strong><a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Runs all DEG drush commands together.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Try to run other DEG commands separately, to get better visibility on entity generation.</p>
+</div>
+<hr style="border: 1px solid grey;"></div>
 </div>
 </div>
 
@@ -223,6 +628,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="references.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

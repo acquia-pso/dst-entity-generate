@@ -52,10 +52,10 @@ class Paragraph extends BaseEntityGenerate {
   }
 
   /**
-   * Generate all the Drupal entities from Drupal Spec tool sheet.
+   * Generate all the Drupal entities from DEG sheet.
    *
-   * @command dst:generate:paragraphs
-   * @aliases dst:para dst:p
+   * @command deg:generate:paragraphs
+   * @aliases deg:para deg:p
    * @options update Update existing entities.
    */
   public function generateParagraph($options = ['update' => FALSE]) {

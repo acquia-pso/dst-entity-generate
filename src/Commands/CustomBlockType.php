@@ -52,10 +52,10 @@ class CustomBlockType extends BaseEntityGenerate {
   }
 
   /**
-   * Generate all the Drupal entities from Drupal Spec tool sheet.
+   * Generate all the Drupal custom block type from DEG sheet.
    *
-   * @command dst:generate:custom_block_type
-   * @aliases dst:cbt
+   * @command deg:generate:custom_block_type
+   * @aliases deg:cbt
    * @options update Update existing entities.
    */
   public function generateCustomBlockType($options = ['update' => FALSE]) {

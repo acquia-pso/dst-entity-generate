@@ -27,39 +27,42 @@ class GenerateAll extends BaseEntityGenerate {
   ];
 
   /**
-   * Generate all the Drupal entities from Drupal Spec tool sheet.
+   * Generate all the Drupal entities from DEG sheet.
    *
-   * @command dst:generate
-   * @aliases dst:generate:all dst:ga
-   * @usage drush dst:generate
+   * @command deg:generate
+   * @aliases deg:generate:all deg:ga
+   * @usage drush deg:generate
    */
   public function generate() {
     $this->io()->success('Generating All Drupal entities.');
 
     // @todo Further refactor it so that we don't have to use exec fuynction.
     // Generate Menus.
-    \system('drush dst:m');
+    \system('drush deg:m');
 
     // Generate User Roles.
-    \system('drush dst:ur');
+    \system('drush deg:ur');
 
     // Generate Image Styles.
-    \system('drush dst:is');
+    \system('drush deg:is');
 
     // Generate Workflow.
-    \system('drush dst:w');
+    \system('drush deg:w');
 
     // Generate Vocabularies.
-    \system('drush dst:v');
+    \system('drush deg:v');
 
     // Generate Media.
-    \system('drush dst:media');
+    \system('drush deg:media');
 
     // Generate Paragraphs.
-    \system('drush dst:p');
+    \system('drush deg:p');
 
-    // Generate Bundles.
-    \system('drush dst:ct');
+    // Generate Content Types.
+    \system('drush deg:ct');
+
+    // Generate Custom Block Types.
+    \system('drush deg:cbt');
   }
 
 }

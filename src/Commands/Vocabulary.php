@@ -52,11 +52,11 @@ class Vocabulary extends BaseEntityGenerate {
   }
 
   /**
-   * Generate Vocabularies from Drupal Spec tool sheet.
+   * Generate all the Drupal vocabularies from DEG sheet.
    *
-   * @command dst:generate:vocabs
-   * @aliases dst:v
-   * @usage drush dst:generate:vocabs
+   * @command deg:generate:vocabs
+   * @aliases deg:v
+   * @usage drush deg:generate:vocabs
    * @options update Update existing entities.
    */
   public function generateVocabularies($options = ['update' => FALSE]) {

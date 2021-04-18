@@ -48,11 +48,11 @@ class Workflow extends BaseEntityGenerate {
   }
 
   /**
-   * Generate all the Drupal workflows from Drupal Spec tool sheet.
+   * Generate all the Drupal workflows from DEG sheet.
    *
-   * @command dst:generate:workflow
-   * @aliases dst:w
-   * @usage drush dst:generate:workflow
+   * @command deg:generate:workflow
+   * @aliases deg:w
+   * @usage drush deg:generate:workflow
    * @options update Update existing entities.
    */
   public function generateWorkflows($options = ['update' => FALSE]) {

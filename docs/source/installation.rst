@@ -21,7 +21,7 @@ You can now enable the modules via drush with the following commands:
 **drush cr**
 **drush pm:enable dst_entity_generate -y**
 
-Create a Google spreadsheet for defining all drupal entities like  https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30
+Create a Google spreadsheet for defining all drupal entities like  `DEG sample template <https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30>`_
 
 Configure DEG on Drupal
 ------------------------

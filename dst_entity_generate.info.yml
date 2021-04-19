@@ -1,6 +1,6 @@
-name: Drupal Spec Tool (DST) Entity Generate
+name: Drupal Entity Generator(DEG)
 type: module
-description: 'Extends the Drupal Spec tool to build Drupal entities using the architecture defined in the Spec tool sheet.'
-package: Drupal Spec Tool Generate
+description: 'Extends the Drupal Spec tool to build Drupal entities using the architecture defined in the DEG  spreadsheet.'
+package: Drupal Entity Generator
 core_version_requirement: ^8.8.0 || ^9
 configure: dst_entity_generate.google_sheet_api_settings

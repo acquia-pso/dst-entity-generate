@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Drupal Entity Generator (DEG)'
-copyright = '2021, Mukesh'
-author = 'Mukesh Kumar Sah'
+copyright = '2021, Mukesh Sah'
+author = 'Mukesh Sah'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'

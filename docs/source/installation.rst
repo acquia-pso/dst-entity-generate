@@ -30,8 +30,11 @@ Configure DEG on Drupal
 * And follow the steps for configuration fo Google spreadsheet in DEG tool.
 * Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.
 
-**Note: There are two important columns in sheets**,
 
-* **X**: For providing status of the row by default keep it to x to implement the row.
-* **Settings/notes**: To add settings related to that row.
+.. Note::
+
+   * **Private** file directory should be configured in Drupal.
+   * See **Recent log messages** of Drupal if any errors occur.
+
+
 

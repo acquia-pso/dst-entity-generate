@@ -18,13 +18,13 @@ There are .rst  source files for documents in 'docs/source' directory.
 
 [Mukesh Sah](https://www.drupal.org/u/mukeshdev)
 
-[Ashutosh Gupta](#)
+[Ashutosh Gupta](https://www.drupal.org/u/ashu1629)
 
-[Praveen Singh](#)
+[Praveen Singh](https://www.drupal.org/u/karan_mudi)
 
-[Sharique Farooqui](#)
+[Sharique Farooqui](https://www.drupal.org/u/sharique)
 
-[Omkar Pednekar](#)
+[Omkar Pednekar](https://www.drupal.org/u/omkar06)
 
 [Gaurav Goyal](https://www.drupal.org/u/gauravgoyal-0)
 

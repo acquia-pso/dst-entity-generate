@@ -12,3 +12,4 @@ Welcome to Drupal Entity Generator (DEG) documentation!
    installation
    drush-commands
    references
+   contributors

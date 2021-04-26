@@ -8,6 +8,8 @@ Welcome to Drupal Entity Generator (DEG) documentation!
    :caption: Contents:
 
    introduction
+   about-deg-spreadsheet
    installation
    drush-commands
-
+   references
+   contributors

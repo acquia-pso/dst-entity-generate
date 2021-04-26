@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="List of Drush Commands" href="drush-commands.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" /> 
+    <link rel="next" title="Drush Commands" href="drush-commands.html" />
+    <link rel="prev" title="About DEG Spreadsheet" href="about-deg-spreadsheet.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,12 +87,15 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about-deg-spreadsheet.html">About DEG Spreadsheet</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#download-using-composer">Download using composer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configure-deg-on-drupal">Configure DEG on Drupal</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="drush-commands.html">List of Drush Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drush-commands.html">Drush Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a></li>
 </ul>
 
             
@@ -172,7 +175,7 @@
 <p>You can now enable the modules via drush with the following commands:</p>
 <p><strong>drush cr</strong>
 <strong>drush pm:enable dst_entity_generate -y</strong></p>
-<p>Create a Google spreadsheet for defining all drupal entities like  <a class="reference external" href="https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30">https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30</a></p>
+<p>Create a Google spreadsheet for defining all drupal entities like  <a class="reference external" href="https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30">DEG sample template</a></p>
 </div>
 <div class="section" id="configure-deg-on-drupal">
 <h2>Configure DEG on Drupal<a class="headerlink" href="#configure-deg-on-drupal" title="Permalink to this headline">¶</a></h2>
@@ -182,11 +185,13 @@
 <li><p>And follow the steps for configuration fo Google spreadsheet in DEG tool.</p></li>
 <li><p>Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.</p></li>
 </ul>
-<p><strong>Note: There are two important columns in sheets</strong>,</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p><strong>X</strong>: For providing status of the row by default keep it to x to implement the row.</p></li>
-<li><p><strong>Settings/notes</strong>: To add settings related to that row.</p></li>
+<li><p><strong>Private</strong> file directory should be configured in Drupal.</p></li>
+<li><p>See <strong>Recent log messages</strong> of Drupal if any errors occur.</p></li>
 </ul>
+</div>
 </div>
 </div>
 
@@ -196,15 +201,15 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="drush-commands.html" class="btn btn-neutral float-right" title="List of Drush Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="drush-commands.html" class="btn btn-neutral float-right" title="Drush Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="about-deg-spreadsheet.html" class="btn btn-neutral float-left" title="About DEG Spreadsheet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Mukesh.
+        &#169; Copyright 2021, Mukesh Sah.
 
     </p>
   </div>

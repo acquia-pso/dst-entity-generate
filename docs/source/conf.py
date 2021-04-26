@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Drupal Entity Generator (DEG)'
-copyright = '2021, Mukesh'
-author = 'Mukesh'
+copyright = '2021, Mukesh Sah'
+author = 'Mukesh Sah'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
@@ -54,3 +54,4 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+pygments_style = 'sphinx'

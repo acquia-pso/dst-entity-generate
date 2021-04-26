@@ -2,7 +2,7 @@
 
 Introduction
 ===============================
-Drupal Entity Generator (DEG) is a tool used to build Drupal entities using the architecture defined in the Googlesheet.
+Drupal Entity Generator (DEG) is a tool used to build Drupal entities using the architecture defined in the Google spreadsheet.
 It provides drush commands to generate the following entity types:
 
 Entity Types
@@ -23,4 +23,3 @@ Entity Types
 
 By using this tool we can manage the entities of Drupal projects, based on structure defined in Google spreadsheet.
 It saves our time and improve the productivity of team.
-

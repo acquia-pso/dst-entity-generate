@@ -78,11 +78,11 @@ class Media extends BaseEntityGenerate {
   }
 
   /**
-   * Generate all the Drupal entities from Drupal Spec tool sheet.
+   * Generate all the Drupal media type from DEG sheet.
    *
-   * @command dst:generate:media
-   * @aliases dst:media
-   * @usage drush dst:generate:media
+   * @command deg:generate:media
+   * @aliases deg:media
+   * @usage drush deg:generate:media
    * @options update Update existing entities.
    */
   public function generateBundle($options = ['update' => FALSE]) {

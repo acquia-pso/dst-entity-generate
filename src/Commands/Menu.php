@@ -43,11 +43,11 @@ class Menu extends BaseEntityGenerate {
   }
 
   /**
-   * Generate all the Drupal Menus from Drupal Spec tool sheet.
+   * Generate all the Drupal menus from DEG sheet.
    *
-   * @command dst:generate:menus
-   * @aliases dst:m
-   * @usage drush dst:generate:menus
+   * @command deg:generate:menus
+   * @aliases deg:m
+   * @usage drush deg:generate:menus
    * @options update Update existing entities.
    */
   public function generateMenus($options = ['update' => FALSE]) {

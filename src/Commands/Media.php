@@ -82,8 +82,9 @@ class Media extends BaseEntityGenerate {
    *
    * @command deg:generate:media
    * @aliases deg:media
-   * @usage drush deg:generate:media
-   * @options update Update existing entities.
+   * @usage drush deg:media
+   *   Generates Media types with fields if not present.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateBundle($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Media types.');

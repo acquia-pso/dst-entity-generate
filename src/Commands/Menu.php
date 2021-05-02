@@ -47,8 +47,11 @@ class Menu extends BaseEntityGenerate {
    *
    * @command deg:generate:menus
    * @aliases deg:m
-   * @usage drush deg:generate:menus
-   * @options update Update existing entities.
+   * @usage drush deg:m
+   *   Generates menus if not present.
+   * @usage drush deg:m --update
+   *   Generates Menus if not present also updates existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateMenus($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Menus.');

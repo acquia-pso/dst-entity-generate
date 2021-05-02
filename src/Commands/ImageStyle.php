@@ -59,8 +59,11 @@ class ImageStyle extends BaseEntityGenerate {
    *
    * @command deg:generate:imagestyle
    * @aliases deg:imagestyle deg:is
-   * @usage drush deg:generate:imagestyle
-   * @options update Update existing entities.
+   * @usage drush deg:is
+   *   Generates Image styles with Image effects if not present.
+   * @usage drush deg:is --update
+   *   Generates Image styles with Image effects if not present also updates existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateImageStyle($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Image Style...');

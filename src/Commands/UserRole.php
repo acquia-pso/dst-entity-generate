@@ -47,8 +47,11 @@ class UserRole extends BaseEntityGenerate {
    *
    * @command deg:generate:user-roles
    * @aliases deg:ur
-   * @usage drush deg:generate:user-roles
-   * @options update Update existing entities.
+   * @usage drush deg:ur
+   *   Generates User roles if not present.
+   * @usage drush deg:ur --update
+   *   Generates User roles if not present also updates existing.
+   * @option update Update existing User roles and creates new if not present.
    */
   public function generateUserRoles($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal User Roles...');

@@ -67,8 +67,11 @@ class ContentType extends BaseEntityGenerate {
    *
    * @command deg:generate:content_types
    * @aliases deg:content_types deg:ct
-   * @usage drush deg:generate:content_types
-   * @options update Update existing entities.
+   * @usage drush deg:ct
+   *   Generates content types with fields if not present.
+   * @usage drush deg:ct --update
+   *   Generate content types with fields if not present also updates existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateContentType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Content types.');

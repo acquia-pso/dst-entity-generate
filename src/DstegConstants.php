@@ -297,20 +297,27 @@ final class DstegConstants {
 
   const FIELD_FORM_WIDGET = [
     'Textfield' => 'string_textfield',
-    'Select list' => 'options_select',
+    'Text area with a summary' => 'text_textarea_with_summary',
     'Text area (multiple rows)' => 'text_textarea',
+    'Select list' => 'options_select',
     'Date and time range' => 'daterange_default',
     'Date and time' => 'datetime_default',
-    'Color boxes' => 'colorbox',
+    'Color boxes' => 'color_field_widget_box',
+    'Color spectrum' => 'color_field_widget_spectrum',
+    'Color HTML5' => 'color_field_widget_html5',
+    'Color default' => 'color_field_widget_default',
+    'Color grid' => 'color_field_widget_grid',
     'Email' => 'email_default',
     'Telephone number' => 'telephone_default',
     'Autocomplete' => 'entity_reference_autocomplete',
+    'Autocomplete (Tags style)' => 'entity_reference_autocomplete_tags',
     'Image' => 'image_image',
     'Single on/off checkbox' => 'boolean_checkbox',
     'Number field' => 'number',
     'Check boxes/radio buttons' => 'options_buttons',
     'File' => 'file_generic',
     'Site Studio layout canvas' => 'cohesion_layout_builder_widget',
+    'Link' => 'link_default',
   ];
 
 }

@@ -56,7 +56,11 @@ class CustomBlockType extends BaseEntityGenerate {
    *
    * @command deg:generate:custom_block_type
    * @aliases deg:cbt
-   * @options update Update existing entities.
+   * @usage drush deg:cbt
+   *   Generates custom block types with fields if not present.
+   * @usage drush deg:cbt --update
+   *   Generates custom block types with fields if not present also updates existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateCustomBlockType($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Custom Block Type...');

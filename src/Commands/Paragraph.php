@@ -56,7 +56,11 @@ class Paragraph extends BaseEntityGenerate {
    *
    * @command deg:generate:paragraphs
    * @aliases deg:para deg:p
-   * @options update Update existing entities.
+   * @usage deg:p
+   *   Generates Paragraph types with fields if not present.
+   * @usage drush deg:p --update
+   *   Generates Paragraph types with fields if not present also updates existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
   public function generateParagraph($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Paragraphs...');

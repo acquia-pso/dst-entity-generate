@@ -32,37 +32,33 @@ class GenerateAll extends BaseEntityGenerate {
    * @command deg:generate
    * @aliases deg:generate:all deg:ga
    * @usage drush deg:generate
+   *   Generates all entities.
+   * @usage drush deg:generate --update
+   *   Generates all entities and update existing.
+   * @option update Update existing entity types with fields and creates new if not present.
    */
-  public function generate() {
+  public function generate($options = ['update' => FALSE]) {
     $this->io()->success('Generating All Drupal entities.');
 
-    // @todo Further refactor it so that we don't have to use exec fuynction.
-    // Generate Menus.
-    \system('drush deg:m');
-
-    // Generate User Roles.
-    \system('drush deg:ur');
-
-    // Generate Image Styles.
-    \system('drush deg:is');
-
-    // Generate Workflow.
-    \system('drush deg:w');
-
-    // Generate Vocabularies.
-    \system('drush deg:v');
-
-    // Generate Media.
-    \system('drush deg:media');
-
-    // Generate Paragraphs.
-    \system('drush deg:p');
-
-    // Generate Content Types.
-    \system('drush deg:ct');
-
-    // Generate Custom Block Types.
-    \system('drush deg:cbt');
+    $commands = [
+      'deg:m',
+      'deg:ur',
+      'deg:is',
+      'deg:w',
+      'deg:v',
+      'deg:media',
+      'deg:p',
+      'deg:ct',
+      'deg:cbt'
+    ];
+    if ($options['update']) {
+      $commands = array_map(function($command) { return $command . ' --update'; }, $commands);
+    }
+    var_dump($commands);
+    // @todo Further refactor it so that we don't have to use exec function.
+    foreach ($commands as $command) {
+      \system('drush ' . $command);
+    }
   }
 
 }

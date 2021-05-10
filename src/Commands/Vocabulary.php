@@ -56,8 +56,11 @@ class Vocabulary extends BaseEntityGenerate {
    *
    * @command deg:generate:vocabs
    * @aliases deg:v
-   * @usage drush deg:generate:vocabs
-   * @options update Update existing entities.
+   * @usage drush deg:v
+   *   Generates Vocabulary types with fields if not present.
+   * @usage drush deg:v --update
+   *   Generates Vocabulary types with fields if not present also updates existing.
+   * @option update Update existing Vocabulary types with fields and creates new if not present.
    */
   public function generateVocabularies($options = ['update' => FALSE]) {
     $this->io()->success('Generating Drupal Vocabularies.');

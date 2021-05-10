@@ -52,11 +52,13 @@ class Workflow extends BaseEntityGenerate {
    *
    * @command deg:generate:workflow
    * @aliases deg:w
-   * @usage drush deg:generate:workflow
-   * @options update Update existing entities.
+   * @usage drush deg:w
+   *   Generates Workflow types with transitions and states if not present.
+   * @usage drush deg:w --update
+   *   Generates Workflow types with transitions and states if not present also updates existing.
+   * @option update Update existing Workflow types and creates new if not present.
    */
   public function generateWorkflows($options = ['update' => FALSE]) {
-
     $this->io()->success('Generating Workflows...');
     $this->updateMode = $options['update'];
     // Get data fromm the DST Sheet.

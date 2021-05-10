@@ -86,6 +86,16 @@ final class DstegConstants {
         ],
       ],
     ],
+    'List (text)' => [
+      'type' => 'list_string',
+      'dependencies' => [
+        'required' => [
+          'settings' => [
+            'allowed_values',
+          ],
+        ],
+      ],
+    ],
     'Date' => [
       'type' => 'datetime',
     ],

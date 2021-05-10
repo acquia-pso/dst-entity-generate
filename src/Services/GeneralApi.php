@@ -192,6 +192,7 @@ class GeneralApi {
       // Create field instance.
       $field_configs = [
         'field_name' => $field_data['machine_name'],
+        'description' => $field_data['help_text'],
         'entity_type' => $entity_type,
         'bundle' => $bundle_machine_name,
         'label' => $field_data['field_label'],

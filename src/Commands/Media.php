@@ -56,6 +56,13 @@ class Media extends BaseEntityGenerate {
   protected $sourceManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * DstegBundle constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -192,7 +199,9 @@ class Media extends BaseEntityGenerate {
         $this->io()->error("Cannot create \"$media_name\" media without proper source. Please define source in \"settings/notes\" column of the sheet.");
         continue;
       }
-
+      if (!$this->requiredFieldsCheck($item, 'Media type')) {
+        continue;
+      }
       $source_option = $item['settings/notes'];
       if (!\in_array($source_option, $source_options)) {
         $implode_source_options = \implode(',', $source_options);

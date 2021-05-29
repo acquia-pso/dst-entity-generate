@@ -38,6 +38,13 @@ class Workflow extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['label', 'machine_name', 'type'];
+
+  /**
    * Construct the Workflow class object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -158,6 +165,9 @@ class Workflow extends BaseEntityGenerate {
   private function getWorkflowTypeData(array $data) {
     $workflow_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Workflow')) {
+        continue;
+      }
       $workflow = [];
       $workflow['label'] = $item['label'];
       $workflow['id'] = $item['machine_name'];

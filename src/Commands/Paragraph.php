@@ -39,6 +39,13 @@ class Paragraph extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * Construct the Paragrpah class object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -119,6 +126,9 @@ class Paragraph extends BaseEntityGenerate {
   private function getParagraphTypeData(array $data) {
     $paragraph_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Paragraph type')) {
+        continue;
+      }
       $paragraph = [];
       $paragraph['label'] = $item['name'];
       $paragraph['id'] = $item['machine_name'];

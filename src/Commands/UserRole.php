@@ -33,6 +33,13 @@ class UserRole extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * User Role constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -95,6 +102,9 @@ class UserRole extends BaseEntityGenerate {
   private function getUserRoleData(array $data) {
     $user_roles = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'User role')) {
+        continue;
+      }
       $user_role = [];
       $user_role['id'] = $item['machine_name'];
       $user_role['label'] = $item['name'];

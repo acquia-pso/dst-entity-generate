@@ -12,7 +12,9 @@ Open up your terminal and navigate to your project root directory.
 
 Run the following command  to require the module:
 
-**composer require acquia-pso/dst-entity-generate**
+.. prompt:: bash $
+
+    composer require acquia-pso/dst-entity-generate
 
 DST Entity Generate module will install along with several module dependencies from drupal.org.
 

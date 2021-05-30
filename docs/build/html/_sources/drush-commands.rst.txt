@@ -8,17 +8,21 @@ A list of Drush commands used to generate the drupal entities in Drupal using Dr
 Generate content types
 **********************
 
-**Command**
---------------
-   deg:generate:content_types
-
-**Aliases**
---------------
-   deg:content_types, deg:ct
-
 **Description**
 ------------------
    This command is used to generate all types of content with fields in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:content_types``
+
+**Aliases**
+--------------
+   ``deg:content_types``, ``deg:ct``
+
+**Options**
+--------------
+    ``--update`` Update existing entity types with fields and creates new if not present.
 
 .. Note::
 
@@ -40,17 +44,21 @@ Generate content types
 Generate vocabularies
 **********************
 
-**Command**
---------------
-   deg:generate:vocabs
-
-**Alias**
---------------
-    deg:v
-
 **Description**
 ------------------
    This command is used to generate vocabularies in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:vocabs``
+
+**Alias**
+--------------
+    ``deg:v``
+
+**Options**
+--------------
+    ``--update`` Update existing Vocabulary types with fields and creates new if not present.
 
 .. Note::
 
@@ -73,17 +81,21 @@ Generate vocabularies
 Generate blocks
 **********************
 
-**Command**
---------------
-   deg:generate:custom_block_type
-
-**Alias**
---------------
-    deg:cbt
-
 **Description**
 ------------------
    This command is used to generate custom block types in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:custom_block_type``
+
+**Alias**
+--------------
+    ``deg:cbt``
+
+**Options**
+--------------
+    ``--update`` Update existing entity types with fields and creates new if not present.
 
 .. Note::
 
@@ -108,17 +120,21 @@ Generate blocks
 Generate image style
 **********************
 
-**Command**
---------------
-   deg:generate:imagestyle
-
-**Alias**
---------------
-    deg:is
-
 **Description**
 ------------------
    This command is used to generate image style and effects in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:imagestyle``
+
+**Alias**
+--------------
+    ``deg:is``
+
+**Options**
+--------------
+    ``--update`` Update existing image styles and creates new if not present.
 
 .. Note::
 
@@ -140,17 +156,21 @@ Generate image style
 Generate media
 **********************
 
-**Command**
---------------
-   deg:generate:media
-
-**Alias**
---------------
-    deg:media
-
 **Description**
 ------------------
    This command is used to generate media types in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:media``
+
+**Alias**
+--------------
+    ``deg:media``
+
+**Options**
+--------------
+    ``--update`` Update existing entity types with fields and creates new if not present.
 
 .. Note::
 
@@ -173,17 +193,21 @@ Generate media
 Generate menus
 **********************
 
-**Command**
---------------
-   deg:generate:menus
-
-**Alias**
---------------
-    deg:m
-
 **Description**
 ------------------
    This command is used to generate menu types in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:menus``
+
+**Alias**
+--------------
+    ``deg:m``
+
+**Options**
+--------------
+    ``--update`` Update existing Menus and creates new if not present.
 
 .. Note::
 
@@ -206,17 +230,21 @@ Generate menus
 Generate paragraphs
 **********************
 
-**Command**
---------------
-   deg:generate:paragraphs
-
-**Aliases**
---------------
-    deg:para, deg:p
-
 **Description**
 ------------------
    This command is used to generate paragraph types in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:paragraphs``
+
+**Aliases**
+--------------
+    ``deg:para``, ``deg:p``
+
+**Options**
+--------------
+    ``--update`` Update existing entity types with fields and creates new if not present.
 
 .. Note::
 
@@ -239,17 +267,21 @@ Generate paragraphs
 Generate user roles
 **********************
 
-**Command**
---------------
-   deg:generate:user-roles
-
-**Alias**
---------------
-    deg:ur
-
 **Description**
 ------------------
    This command is used to generate user roles in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:user-roles``
+
+**Alias**
+--------------
+    ``deg:ur``
+
+**Options**
+--------------
+    ``--update`` Update existing User roles and creates new if not present.
 
 .. Note::
 
@@ -270,17 +302,21 @@ Generate user roles
 Generate workflows
 **********************
 
-**Command**
---------------
-   deg:generate:workflow
-
-**Alias**
---------------
-    deg:w
-
 **Description**
 ------------------
    This command is used to generate workflows, states and workflow transitions in Drupal.
+
+**Command**
+--------------
+   ``deg:generate:workflow``
+
+**Alias**
+--------------
+    ``deg:w``
+
+**Options**
+--------------
+    ``--update`` Update existing Workflow types and creates new if not present.
 
 .. Note::
 
@@ -301,21 +337,21 @@ Generate workflows
 Generate all entities
 **********************
 
-**Command**
-------------
-   deg:generate
-
-**Aliases**
-------------
-   deg:generate:all, deg:ga
-
 **Description**
 ----------------
    Runs all DEG drush commands together.
 
-.. Note::
+**Command**
+------------
+   ``deg:generate``
 
-   Run DEG commands separately to get better visibility on entity generation.
+**Aliases**
+------------
+   ``deg:generate:all``, ``deg:ga``
+
+**Options**
+--------------
+    ``--update`` Update existing entity types with fields and creates new if not present.
 
 .. raw:: html
 

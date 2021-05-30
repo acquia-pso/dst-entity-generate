@@ -5,12 +5,12 @@ Drush Commands
 A list of Drush commands used to generate the drupal entities in Drupal using Drupal Entity Generator (DEG) Spreadsheet ,
 
 
-Generate content types
+Generate Content Types
 **********************
 
 **Description**
 ------------------
-   This command is used to generate all types of content with fields in Drupal.
+   This command is used to generate content types with fields.
 
 **Command**
 --------------
@@ -46,7 +46,7 @@ Generate vocabularies
 
 **Description**
 ------------------
-   This command is used to generate vocabularies in Drupal.
+   This command is used to generate vocabularies with fields in Drupal.
 
 **Command**
 --------------
@@ -78,12 +78,12 @@ Generate vocabularies
    <hr style="border: 1px solid grey;">
 
 
-Generate blocks
+Generate Blocks Types
 **********************
 
 **Description**
 ------------------
-   This command is used to generate custom block types in Drupal.
+   This command is used to generate custom block types with fields in Drupal.
 
 **Command**
 --------------
@@ -117,12 +117,12 @@ Generate blocks
    <hr style="border: 1px solid grey;">
 
 
-Generate image style
+Generate Image Styles
 **********************
 
 **Description**
 ------------------
-   This command is used to generate image style and effects in Drupal.
+   This command is used to generate image styles and image effects in Drupal.
 
 **Command**
 --------------
@@ -153,12 +153,12 @@ Generate image style
 
    <hr style="border: 1px solid grey;">
 
-Generate media
+Generate Media Types
 **********************
 
 **Description**
 ------------------
-   This command is used to generate media types in Drupal.
+   This command is used to generate media types with fields in Drupal.
 
 **Command**
 --------------
@@ -227,12 +227,12 @@ Generate menus
    <hr style="border: 1px solid grey;">
 
 
-Generate paragraphs
-**********************
+Generate Paragraphs Types
+**************************
 
 **Description**
 ------------------
-   This command is used to generate paragraph types in Drupal.
+   This command is used to generate paragraph types with fields in Drupal.
 
 **Command**
 --------------
@@ -264,7 +264,7 @@ Generate paragraphs
    <hr style="border: 1px solid grey;">
 
 
-Generate user roles
+Generate User Roles
 **********************
 
 **Description**
@@ -299,7 +299,7 @@ Generate user roles
    <hr style="border: 1px solid grey;">
 
 
-Generate workflows
+Generate Workflows
 **********************
 
 **Description**
@@ -334,7 +334,7 @@ Generate workflows
 
    <hr style="border: 1px solid grey;">
 
-Generate all entities
+Generate All Entities
 **********************
 
 **Description**

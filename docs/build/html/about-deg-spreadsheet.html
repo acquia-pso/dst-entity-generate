@@ -211,87 +211,107 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id3">
 <caption><span class="caption-text">Bundles</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>ID</p></td>
-<td><p>Yes</p></td>
+<td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>An optional identifier for references in external documents.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Name</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>To keep name of entity types like Article, Page etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-odd"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Description</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>Description about the bundles.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Example(s)</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>One or more relevant examples, optionally hyperlinked.</p></td>
 </tr>
 <tr class="row-even"><td><p>Mod.</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Moderated (Content moderation is enabled), for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Layout</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Layout-enabled, via Core Layout Builder or via Panels, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-even"><td><p>Trns.</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Translatable, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Migr.</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Migrated (Content will be populated via migration)</p></td>
 </tr>
 <tr class="row-even"><td><p>Cmnt.</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Commenting is enabled, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Meta.</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Meta tags are enabled, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-even"><td><p>Sched.</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Schedulable (Scheduled updates are enabled), for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Type</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Entity type, for example: Content type, Vocabulary, Paragraph type, Media type, Custom block type</p></td>
 </tr>
 <tr class="row-even"><td><p>URL alias pattern</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To configure URL alias pattern.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Settings/notes</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To configure settings/notes related to bundle, for example: ‘Image’ for media type image</p></td>
 </tr>
 </tbody>
@@ -303,74 +323,91 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id4">
 <caption><span class="caption-text">Fields</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Bundle</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Name of bundles like Article (Content type), Page (Content type) etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Field label</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Field label of fields.</p></td>
 </tr>
 <tr class="row-even"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles, (use prefix + underscore: ‘field + underscore’ for field, for ‘group + underscore’ for group type fields)</p></td>
 </tr>
 <tr class="row-odd"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Field group</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Field group to which field comes</p></td>
 </tr>
 <tr class="row-odd"><td><p>Field type</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To define field type like Text (formatted, long), Text (plain) etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Ref. bundle</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Reference of bundle, for example: Article categories (Vocabulary)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Req</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Is field mandatory or not, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-even"><td><p>Vals.</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>Allowed number of values, Asterisk (*) means unlimited, for example: 1, 2, 3</p></td>
 </tr>
 <tr class="row-odd"><td><p>Form widget</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To define field Form widget, like Text area (multiple rows), Textfield</p></td>
 </tr>
 <tr class="row-even"><td><p>Trns.</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Translatable, for example: y = Yes, n = No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Settings/notes</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To configure settings/notes related to bundle, for example: ‘Image’ for media type image</p></td>
 </tr>
 <tr class="row-even"><td><p>Help text</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Notes about the field</p></td>
 </tr>
@@ -383,42 +420,51 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id5">
 <caption><span class="caption-text">User roles</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>ID</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>An optional identifier for references in external documents.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Name</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>To keep name of user roles like Administrators, Content Editor, Content Manager etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-odd"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes about the field</p></td>
 </tr>
@@ -431,46 +477,56 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id6">
 <caption><span class="caption-text">Workflows</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>ID</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>An optional identifier for references in external documents.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Label</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>To keep name of Drupal workflow like Editorial, Administrator etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-odd"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Type</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Workflow type Content Moderation</p></td>
 </tr>
 <tr class="row-odd"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow</p></td>
 </tr>
@@ -483,42 +539,51 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id7">
 <caption><span class="caption-text">Workflow states</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Workflow</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Defines name of Workflow like Editorial, Administrator etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Label</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>To keep name of Drupal workflow state like Draft, In review, Published etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-odd"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow states</p></td>
 </tr>
@@ -531,54 +596,66 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id8">
 <caption><span class="caption-text">Workflow transitions</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>ID</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>An optional identifier for references in external documents.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Workflow</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Name of Workflow like Editorial, Administrator etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>Label</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Name of Workflow transitions like Create New Draft, Send to review, Send to Publish etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-even"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-odd"><td><p>From state</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>From state, example Draft, In review, Published etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>To state</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>To state, example Draft, In review, Published etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Dev</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-even"><td><p>QA</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow states</p></td>
 </tr>
@@ -591,42 +668,51 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id9">
 <caption><span class="caption-text">Menus</span><a class="headerlink" href="#id9" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Label</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>Name of Menus like Article menu, Sidebar menu etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-even"><td><p>X</p></td>
+<td><p>Yes</p></td>
 <td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-odd"><td><p>Description</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>To keep description of menus</p></td>
 </tr>
 <tr class="row-even"><td><p>Dev</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Developer initials, signifying that the row has been implemented as specified.</p></td>
 </tr>
 <tr class="row-odd"><td><p>QA</p></td>
 <td><p>No</p></td>
+<td><p>No</p></td>
 <td><p>Tester initials, signifying that the row has been validated.</p></td>
 </tr>
 <tr class="row-even"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow states</p></td>
 </tr>
@@ -639,30 +725,36 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id10">
 <caption><span class="caption-text">Image styles</span><a class="headerlink" href="#id10" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Style name</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>Name of image style name like Crop thumbnail, Thumbnail (100×100), Medium (220×220), Large (480×480) etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Machine name</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Unique machine name for Drupal bundles.</p></td>
 </tr>
 <tr class="row-even"><td><p>X</p></td>
 <td><p>Yes</p></td>
+<td><p>Yes</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-odd"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow states</p></td>
 </tr>
@@ -675,34 +767,41 @@ for creation of new Google spreadsheet with same structure to generate different
 <table class="colwidths-given docutils align-default" id="id11">
 <caption><span class="caption-text">Image effects</span><a class="headerlink" href="#id11" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Column</p></th>
-<th class="head"><p>Supporting</p></th>
+<th class="head"><p>Creation support</p></th>
+<th class="head"><p>Update support</p></th>
 <th class="head"><p>Specifications</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Image style</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Name of image style name like Crop thumbnail, Thumbnail (100×100), Medium (220×220), Large (480×480) etc.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Effect</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Image style effects, example- Scale, Manual crop etc.</p></td>
 </tr>
 <tr class="row-even"><td><p>X</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted</p></td>
 </tr>
 <tr class="row-odd"><td><p>Summary</p></td>
 <td><p>Yes</p></td>
+<td><p>No</p></td>
 <td><p>Summary about image style effects like width, height of image, example -  width 400, uses Freeform crop type, 480×480</p></td>
 </tr>
 <tr class="row-even"><td><p>Notes</p></td>
+<td><p>No</p></td>
 <td><p>No</p></td>
 <td><p>Notes on workflow states</p></td>
 </tr>

@@ -7,20 +7,33 @@ Using composer is the preferred way of managing your modules and themes as compo
 
 Download using composer
 -----------------------
+Add Github repository source in you project composer.json. Add below is snippet under ``repositories`` in composer.json:
+::
+
+    "acquia-pso": {
+      "url": "https://github.com/acquia-pso/dst-entity-generate.git",
+      "type": "git"
+    }
+
+More information on adding repository can found at `Modifying Repositories <https://getcomposer.org/doc/03-cli.md#modifying-repositories>`_
 
 Open up your terminal and navigate to your project root directory.
-
 Run the following command  to require the module:
 ::
 
-    $ composer require acquia-pso/dst-entity-generate
+    composer require acquia-pso/dst-entity-generate
 
 DST Entity Generate module will install along with several module dependencies from drupal.org.
 
-You can now enable the modules via drush with the following commands:
+.. Important::
 
-**drush cr**
-**drush pm:enable dst_entity_generate -y**
+   * In installation, you may need to provide a token.
+   * You need to create a token in your github account.
+
+You can now enable the modules via drush with the following commands:
+::
+
+    drush pm:enable dst_entity_generate -y
 
 Create a Google spreadsheet for defining all drupal entities like  `DEG sample template <https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30>`_
 
@@ -32,7 +45,7 @@ Configure DEG on Drupal
 * Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.
 
 
-.. Note::
+.. Important::
 
    * **Private** file directory should be configured in Drupal.
    * See **Recent log messages** of Drupal if any errors occur.

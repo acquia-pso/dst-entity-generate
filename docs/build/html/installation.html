@@ -168,15 +168,31 @@
 <p>Using composer is the preferred way of managing your modules and themes as composer handles dependencies automatically and there is less margin for error. You can find out more about composer and how to install it here: <a class="reference external" href="https://getcomposer.org/">https://getcomposer.org/</a>. It is not recommended to edit your composer.json file manually.</p>
 <div class="section" id="download-using-composer">
 <h2>Download using composer<a class="headerlink" href="#download-using-composer" title="Permalink to this headline">¶</a></h2>
-<p>Open up your terminal and navigate to your project root directory.</p>
-<p>Run the following command  to require the module:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ composer require acquia-pso/dst-entity-generate
+<p>Add Github repository source in you project composer.json. Add below is snippet under <code class="docutils literal notranslate"><span class="pre">repositories</span></code> in composer.json:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;acquia-pso&quot;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/acquia-pso/dst-entity-generate.git&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;git&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>More information on adding repository can found at <a class="reference external" href="https://getcomposer.org/doc/03-cli.md#modifying-repositories">Modifying Repositories</a></p>
+<p>Open up your terminal and navigate to your project root directory.
+Run the following command  to require the module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">composer</span> <span class="n">require</span> <span class="n">acquia</span><span class="o">-</span><span class="n">pso</span><span class="o">/</span><span class="n">dst</span><span class="o">-</span><span class="n">entity</span><span class="o">-</span><span class="n">generate</span>
 </pre></div>
 </div>
 <p>DST Entity Generate module will install along with several module dependencies from drupal.org.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p>In installation, you may need to provide a token.</p></li>
+<li><p>You need to create a token in your github account.</p></li>
+</ul>
+</div>
 <p>You can now enable the modules via drush with the following commands:</p>
-<p><strong>drush cr</strong>
-<strong>drush pm:enable dst_entity_generate -y</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">drush</span> <span class="n">pm</span><span class="p">:</span><span class="n">enable</span> <span class="n">dst_entity_generate</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
 <p>Create a Google spreadsheet for defining all drupal entities like  <a class="reference external" href="https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30">DEG sample template</a></p>
 </div>
 <div class="section" id="configure-deg-on-drupal">
@@ -187,8 +203,8 @@
 <li><p>And follow the steps for configuration fo Google spreadsheet in DEG tool.</p></li>
 <li><p>Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.</p></li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
 <ul class="simple">
 <li><p><strong>Private</strong> file directory should be configured in Drupal.</p></li>
 <li><p>See <strong>Recent log messages</strong> of Drupal if any errors occur.</p></li>

@@ -3,7 +3,7 @@
 About DEG Spreadsheet
 ===============================
 
-DEG Spreadsheet is a Google Spreadsheet template used for capturing structure of entities, Use `DEG sample template <https://docs.google.com/spreadsheets/d/1xJFEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30>`_
+DEG Spreadsheet is a Google Spreadsheet template used for capturing structure of entities, Use `DEG sample template <https://docs.google.com/spreadsheets/d/1ssK5EDNvbMxyI_h_UorJ3ERP1GKJSF8EppMWig9HpH4/edit?pli=1#gid=0>`_
 for creation of new Google spreadsheet with same structure to generate different Drupal entities as per requirements.
 
 Overview
@@ -49,11 +49,17 @@ A list of bundles of different entity types in Drupal.
    * - X
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
+   * - Dev
+     - No
+     - Developer initials, signifying that the row has been implemented as specified.
+   * - QA
+     - No
+     - Tester initials, signifying that the row has been validated.
    * - Description
      - Yes
      - Description about the bundles.
    * - Example(s)
-     - Yes
+     - No
      - One or more relevant examples, optionally hyperlinked.
    * - Mod.
      - No
@@ -77,7 +83,7 @@ A list of bundles of different entity types in Drupal.
      - No
      - Schedulable (Scheduled updates are enabled), for example: y = Yes, n = No
    * - Type
-     - No
+     - Yes
      - Entity type, for example: Content type, Vocabulary, Paragraph type, Media type, Custom block type
    * - URL alias pattern
      - Yes
@@ -109,6 +115,12 @@ A list for fields which is required for bundles.
    * - X
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
+   * - Dev
+     - No
+     - Developer initials, signifying that the row has been implemented as specified.
+   * - QA
+     - No
+     - Tester initials, signifying that the row has been validated.
    * - Field group
      - No
      - Field group to which field comes
@@ -116,7 +128,7 @@ A list for fields which is required for bundles.
      - Yes
      - To define field type like Text (formatted, long), Text (plain) etc.
    * - Ref. bundle
-     - No
+     - Yes
      - Reference of bundle, for example: Article categories (Vocabulary)
    * - Req
      - Yes
@@ -149,7 +161,7 @@ Defines a list of user roles in Drupal.
      - Supporting
      - Specifications
    * - ID
-     - Yes
+     - No
      - An optional identifier for references in external documents.
    * - Name
      - Yes
@@ -161,13 +173,13 @@ Defines a list of user roles in Drupal.
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
    * - Dev
-     - Yes
+     - No
      - Developer initials, signifying that the row has been implemented as specified.
    * - QA
-     - Yes
+     - No
      - Tester initials, signifying that the row has been validated.
    * - Notes
-     - Yes
+     - No
      - Notes about the field
 
 
@@ -183,7 +195,7 @@ Defines a list of Drupal Workflows types.
      - Supporting
      - Specifications
    * - ID
-     - Yes
+     - No
      - An optional identifier for references in external documents.
    * - Label
      - Yes
@@ -195,16 +207,16 @@ Defines a list of Drupal Workflows types.
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
    * - Dev
-     - Yes
-     - Tester initials, signifying that the row has been validated.
-   * - QA
-     - Yes
+     - No
      - Developer initials, signifying that the row has been implemented as specified.
+   * - QA
+     - No
+     - Tester initials, signifying that the row has been validated.
    * - Type
      - Yes
      - Workflow type Content Moderation
    * - Notes
-     - Yes
+     - No
      - Notes on workflow
 
 
@@ -232,13 +244,13 @@ Defines a list of Workflow states for workflows.
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
    * - Dev
-     - Yes
+     - No
      - Developer initials, signifying that the row has been implemented as specified.
    * - QA
-     - Yes
+     - No
      - Tester initials, signifying that the row has been validated.
    * - Notes
-     - Yes
+     - No
      - Notes on workflow states
 
 Workflow transitions
@@ -253,7 +265,7 @@ Defines a list of Workflow transitions.
      - Supporting
      - Specifications
    * - ID
-     - Yes
+     - No
      - An optional identifier for references in external documents.
    * - Workflow
      - Yes
@@ -274,13 +286,13 @@ Defines a list of Workflow transitions.
      - Yes
      - To state, example Draft, In review, Published etc.
    * - Dev
-     - Yes
+     - No
      - Developer initials, signifying that the row has been implemented as specified.
    * - QA
-     - Yes
+     - No
      - Tester initials, signifying that the row has been validated.
    * - Notes
-     - Yes
+     - No
      - Notes on workflow states
 
 Menus
@@ -307,13 +319,13 @@ Defines a list of menu types in Drupal.
      - Yes
      - To keep description of menus
    * - Dev
-     - Yes
+     - No
      - Developer initials, signifying that the row has been implemented as specified.
    * - QA
-     - Yes
+     - No
      - Tester initials, signifying that the row has been validated.
    * - Notes
-     - Yes
+     - No
      - Notes on workflow states
 
 Image styles
@@ -337,7 +349,7 @@ Defines a list of image styles in Drupal.
      - Yes
      - Implementation status for bundles, a = Approved and ready to implement , w = Wait to implement, x = Implemented and done, - c = Changed since implemented, d = To be deleted
    * - Notes
-     - Yes
+     - No
      - Notes on workflow states
 
 
@@ -365,5 +377,5 @@ Defines a list of image style effects in Drupal.
      - Yes
      - Summary about image style effects like width, height of image, example -  width 400, uses Freeform crop type, 480×480
    * - Notes
-     - Yes
+     - No
      - Notes on workflow states

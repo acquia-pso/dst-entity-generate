@@ -47,6 +47,13 @@ class ContentType extends BaseEntityGenerate {
   protected $displayRepository;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * Content type generator constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -142,6 +149,9 @@ class ContentType extends BaseEntityGenerate {
   private function getNodeTypeData(array $data) {
     $node_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Content type')) {
+        continue;
+      }
       $node = [];
       $node['name'] = $item['name'];
       $node['type'] = $item['machine_name'];

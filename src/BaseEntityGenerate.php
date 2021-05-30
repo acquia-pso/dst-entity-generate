@@ -56,6 +56,13 @@ abstract class BaseEntityGenerate extends DrushCommands {
   protected $implementationFlagColumn = 'x';
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = [];
+
+  /**
    * Validate hook for commands.
    *
    * @hook validate
@@ -330,6 +337,31 @@ abstract class BaseEntityGenerate extends DrushCommands {
       }
     }
     $entity_type->save();
+  }
+
+  /**
+   * Function to check data having required fields to create entity.
+   *
+   * @param $data
+   *   Entity data from sheet.
+   * @return bool
+   *   Return status based on fields availability.
+   */
+  public function requiredFieldsCheck($data, $type = 'Entity type') {
+    $missing_fields = [];
+    foreach ($this->requiredFields as $requiredField) {
+      if (array_key_exists($requiredField, $data) && $data[$requiredField] == '') {
+        $missing_fields[] = $requiredField;
+      }
+    }
+    if (!empty($missing_fields)) {
+      $this->io()->warning("$type can not be created with empty " . implode(', ', $missing_fields) .". Skipping creation...");
+      $status = FALSE;
+    }
+    else {
+      $status = TRUE;
+    }
+    return $status;
   }
 
 }

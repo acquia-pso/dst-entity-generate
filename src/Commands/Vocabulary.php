@@ -39,6 +39,13 @@ class Vocabulary extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * DstegVocabulary constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -123,6 +130,9 @@ class Vocabulary extends BaseEntityGenerate {
   private function getVocabTypeData(array $data) {
     $vocab_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Vocabulary')) {
+        continue;
+      }
       $vocabs = [];
       $description = isset($item['description']) ? $item['description'] : $item['name'] . ' vocabulary.';
       $vocabs['vid'] = $item['machine_name'];

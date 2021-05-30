@@ -33,6 +33,13 @@ class Menu extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['title', 'machine_name'];
+
+  /**
    * DstegMenu constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -95,6 +102,9 @@ class Menu extends BaseEntityGenerate {
   private function getMenuData(array $data) {
     $menu_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Menu')) {
+        continue;
+      }
       $menu = [];
       $description = isset($item['description']) ? $item['description'] : $item['name'] . ' menu.';
       $menu['id'] = $item['machine_name'];

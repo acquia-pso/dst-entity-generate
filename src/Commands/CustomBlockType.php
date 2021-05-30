@@ -39,6 +39,13 @@ class CustomBlockType extends BaseEntityGenerate {
   protected $entityTypeManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['name', 'machine_name'];
+
+  /**
    * Construct the Custom Block Type class object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -120,6 +127,9 @@ class CustomBlockType extends BaseEntityGenerate {
   private function getCustomBlockTypeData(array $data) {
     $block_content_types = [];
     foreach ($data as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Custom block type')) {
+        continue;
+      }
       $block_content = [];
       $block_content['label'] = $item['name'];
       $block_content['id'] = $item['machine_name'];

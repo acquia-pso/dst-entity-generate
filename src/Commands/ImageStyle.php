@@ -42,6 +42,13 @@ class ImageStyle extends BaseEntityGenerate {
   protected $effectManager;
 
   /**
+   * List of required fields to create entity.
+   *
+   * @var array
+   */
+  protected $requiredFields = ['style_name', 'machine_name'];
+
+  /**
    * DstCommands constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -117,6 +124,9 @@ class ImageStyle extends BaseEntityGenerate {
   private function getImageStyleData(array $styles, array $effects) {
     $image_styles = [];
     foreach ($styles as $item) {
+      if (!$this->requiredFieldsCheck($item, 'Image style')) {
+        continue;
+      }
       $image_style = [];
       $image_style['label'] = $item['style_name'];
       $image_style['name'] = $item['machine_name'];

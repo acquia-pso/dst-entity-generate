@@ -83,7 +83,7 @@ class ImageStyle extends BaseEntityGenerate {
     foreach ($image_styles as $index => $image_style) {
       $name = $image_style['name'];
       $image_style_entity = $image_style_storage->load($name);
-      if (!\is_null($image_style)) {
+      if (!\is_null($image_style_entity)) {
         if ($this->updateMode && $data[$index][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($image_style_entity, $image_style);
           $this->io()->success("Image style $name updated.");

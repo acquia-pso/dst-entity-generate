@@ -107,7 +107,7 @@ class Menu extends BaseEntityGenerate {
       }
       $menu = [];
       $description = isset($item['description']) ? $item['description'] : $item['name'] . ' menu.';
-      $menu['id'] = $item['machine_name'];
+      $menu['id'] = str_replace('_', '-', $item['machine_name']);
       $menu['label'] = $item['title'];
       $menu['description'] = $description;
 

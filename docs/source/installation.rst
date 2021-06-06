@@ -39,15 +39,17 @@ Create a Google spreadsheet for defining all drupal entities like  `DEG sample t
 
 Configure DEG on Drupal
 ------------------------
+
+.. Important::
+   * **Private file system** should be configured before configuring DEG.
+   * To configure **Private file system**, refer **Private file path** section in `settings.php` file to configure it.
+
 * Login as Administrator on site
 * Go to menu Configuration -> Development -> Drupal Spec tool: Entity Generate -> Google Sheet API (/admin/config/dst_entity_generate/settings/google_sheet_api)
 * And follow the steps for configuration fo Google spreadsheet in DEG tool.
 * Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.
 
-
-.. Important::
-
-   * **Private** file directory should be configured in Drupal.
+.. Note::
    * See **Recent log messages** of Drupal if any errors occur.
 
 

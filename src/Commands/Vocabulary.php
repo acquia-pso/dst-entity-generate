@@ -133,6 +133,9 @@ class Vocabulary extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Vocabulary')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $vocabs = [];
       $description = isset($item['description']) ? $item['description'] : $item['name'] . ' vocabulary.';
       $vocabs['vid'] = $item['machine_name'];

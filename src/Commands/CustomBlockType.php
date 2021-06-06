@@ -130,6 +130,9 @@ class CustomBlockType extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Custom block type')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $block_content = [];
       $block_content['label'] = $item['name'];
       $block_content['id'] = $item['machine_name'];

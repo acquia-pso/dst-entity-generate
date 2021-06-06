@@ -105,6 +105,9 @@ class UserRole extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'User role')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $user_role = [];
       $user_role['id'] = $item['machine_name'];
       $user_role['label'] = $item['name'];

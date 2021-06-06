@@ -202,6 +202,9 @@ class Media extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Media type')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $source_option = $item['settings/notes'];
       if (!\in_array($source_option, $source_options)) {
         $implode_source_options = \implode(',', $source_options);

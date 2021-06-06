@@ -129,6 +129,9 @@ class Paragraph extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Paragraph type')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $paragraph = [];
       $paragraph['label'] = $item['name'];
       $paragraph['id'] = $item['machine_name'];

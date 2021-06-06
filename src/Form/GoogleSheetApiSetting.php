@@ -108,7 +108,7 @@ class GoogleSheetApiSetting extends FormBase {
     if (empty($file_private_path)) {
       $form['private_directory_message'] = [
         '#type' => 'item',
-        '#markup' => '<div class="messages messages--error"><b>' . $this->t('Please configure private file path.') . '</b></div>',
+        '#markup' => '<div class="messages messages--error"><b>' . $this->t('Private file system is not configured. Refer "Private file path" section in settings.php file to configure it.') . '</b></div>',
       ];
     }
 

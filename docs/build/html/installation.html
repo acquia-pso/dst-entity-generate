@@ -197,16 +197,22 @@ Run the following command  to require the module:</p>
 </div>
 <div class="section" id="configure-deg-on-drupal">
 <h2>Configure DEG on Drupal<a class="headerlink" href="#configure-deg-on-drupal" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p><strong>Private file system</strong> should be configured before configuring DEG.</p></li>
+<li><p>To configure <strong>Private file system</strong>, refer <strong>Private file path</strong> section in <cite>settings.php</cite> file to configure it.</p></li>
+</ul>
+</div>
 <ul class="simple">
 <li><p>Login as Administrator on site</p></li>
 <li><p>Go to menu Configuration -&gt; Development -&gt; Drupal Spec tool: Entity Generate -&gt; Google Sheet API (/admin/config/dst_entity_generate/settings/google_sheet_api)</p></li>
 <li><p>And follow the steps for configuration fo Google spreadsheet in DEG tool.</p></li>
 <li><p>Finally, It will redirect to General Settings (/admin/config/dst_entity_generate/settings) where we can enable the entity types.</p></li>
 </ul>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p><strong>Private</strong> file directory should be configured in Drupal.</p></li>
 <li><p>See <strong>Recent log messages</strong> of Drupal if any errors occur.</p></li>
 </ul>
 </div>

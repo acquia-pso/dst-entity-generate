@@ -105,6 +105,9 @@ class Menu extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Menu')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'], 32, '-_')) {
+        continue;
+      }
       $menu = [];
       $description = isset($item['description']) ? $item['description'] : $item['name'] . ' menu.';
       $menu['id'] = str_replace('_', '-', $item['machine_name']);

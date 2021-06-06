@@ -152,6 +152,9 @@ class ContentType extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Content type')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $node = [];
       $node['name'] = $item['name'];
       $node['type'] = $item['machine_name'];

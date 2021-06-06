@@ -168,6 +168,9 @@ class Workflow extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Workflow')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $workflow = [];
       $workflow['label'] = $item['label'];
       $workflow['id'] = $item['machine_name'];

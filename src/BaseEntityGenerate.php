@@ -342,12 +342,15 @@ abstract class BaseEntityGenerate extends DrushCommands {
   /**
    * Function to check data having required fields to create entity.
    *
-   * @param $data
+   * @param array $data
    *   Entity data from sheet.
+   * @param string $type
+   *   Entity type.
+   *
    * @return bool
    *   Return status based on fields availability.
    */
-  public function requiredFieldsCheck($data, $type = 'Entity type') {
+  public function requiredFieldsCheck(array $data, string $type = 'Entity type') {
     $missing_fields = [];
     foreach ($this->requiredFields as $requiredField) {
       if (array_key_exists($requiredField, $data) && $data[$requiredField] == '') {
@@ -355,13 +358,39 @@ abstract class BaseEntityGenerate extends DrushCommands {
       }
     }
     if (!empty($missing_fields)) {
-      $this->io()->warning("$type can not be created with empty " . implode(', ', $missing_fields) .". Skipping creation...");
+      $this->io()->warning("$type can not be created with empty " . implode(', ', $missing_fields) . ". Skipping creation...");
       $status = FALSE;
     }
     else {
       $status = TRUE;
     }
     return $status;
+  }
+
+  /**
+   * Helper function to validate machine name.
+   *
+   * @param string $machine_name
+   *   Machine name string to validate.
+   * @param int $length
+   *   Expected maximum length.
+   * @param string $separator
+   *   Separator to match in string.
+   *
+   * @return bool
+   *   Returns true or false based on matching result.
+   */
+  public function validateMachineName(string $machine_name, int $length = 32, string $separator = '_') {
+    $result = FALSE;
+    $pattern = "/^[a-z0-9$separator]+$/";
+    if (strlen($machine_name) <= $length && preg_match($pattern, $machine_name)) {
+      $result = TRUE;
+    }
+    else {
+      $message = "The machine-readable name must contain only lowercase letters, numbers, and underscores with maximum length of $length. Skipping bundle creation with machine name $machine_name";
+      $this->io()->warning($message);
+    }
+    return $result;
   }
 
 }

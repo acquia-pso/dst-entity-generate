@@ -127,6 +127,9 @@ class ImageStyle extends BaseEntityGenerate {
       if (!$this->requiredFieldsCheck($item, 'Image style')) {
         continue;
       }
+      if (!$this->validateMachineName($item['machine_name'])) {
+        continue;
+      }
       $image_style = [];
       $image_style['label'] = $item['style_name'];
       $image_style['name'] = $item['machine_name'];

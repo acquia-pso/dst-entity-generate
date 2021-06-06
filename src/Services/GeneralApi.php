@@ -452,6 +452,12 @@ class GeneralApi {
       $bundleVal = '';
       $bundle = $field['bundle'];
       $field_machine_name = $field['machine_name'];
+      if (!$this->validateMachineName($field_machine_name)) {
+        $message = $this->t("The machine-readable name must contain only lowercase letters, numbers, and underscores with maximum length of 32. Skipping bundle creation with machine name @machine_name",
+          ['@machine_name' => $field_machine_name]);
+        $this->logger->warning($message);
+        continue;
+      }
       $bundle_name = trim(substr($bundle, 0, strpos($bundle, "(")));
       if (array_key_exists($bundle_name, $bundles_data)) {
         $bundleVal = $bundles_data[$bundle_name];
@@ -665,6 +671,26 @@ class GeneralApi {
       }
     }
     return $field;
+  }
+
+  /**
+   * Helper function to validate machine name.
+   *
+   * @param string $machine_name
+   *   Machine name string to validate.
+   * @param int $length
+   *   Expected maximum length.
+   *
+   * @return bool
+   *   Returns true or false based on matching result.
+   */
+  public function validateMachineName(string $machine_name, int $length = 32) {
+    $result = FALSE;
+    $pattern = "/^[a-z0-9_]+$/";
+    if (strlen($machine_name) <= $length && preg_match($pattern, $machine_name)) {
+      $result = TRUE;
+    }
+    return $result;
   }
 
 }

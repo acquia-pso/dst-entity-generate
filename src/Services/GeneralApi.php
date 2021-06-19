@@ -203,7 +203,7 @@ class GeneralApi {
       }
       if ($field_data['type'] === 'field_group' && $this->isModuleEnabled('field_group')) {
         $field_settings = [
-          'children' => [],
+          'children' => $field_data['children'],
           'format_type' => $field_data['format_type'],
           'label' => $field_data['field_label'],
           'region' => 'content',
@@ -443,11 +443,12 @@ class GeneralApi {
    * @return mixed
    *   Can return the command output or FALSE.
    */
-  public function generateEntityFields(string $bundle_type, array $fields_data, array $bundles_data, $mode = 'create') {
+  public function generateEntityFields(string $bundle_type, array $fields_data, array $bundles_data, string $mode = 'create') {
 
     $result = TRUE;
     $this->logger->notice($this->t('Generating all Drupal Entities Fields.'));
 
+    $fields_data = $this->sortFieldData($fields_data);
     foreach ($fields_data as $field) {
       $bundleVal = '';
       $bundle = $field['bundle'];
@@ -517,6 +518,9 @@ class GeneralApi {
           // Create field storage.
           $field = $this->fieldStorageHandler($field, $entity_type);
           if ($field) {
+            if ($field['type'] === 'field_group') {
+              $field['children'] = $this->getFieldGroupChildren($field, $fields_data);
+            }
             $this->addField($bundleVal, $field, $entity_type_id, $entity_type);
           }
         }
@@ -691,6 +695,47 @@ class GeneralApi {
       $result = TRUE;
     }
     return $result;
+  }
+
+  /**
+   * Sorts field data.
+   *
+   * Fields which have field group, should be created at the end.
+   *
+   * @param array $fields
+   *   All applicable fields from sheet.
+   *
+   * @return array
+   *   Returns sorted fields data.
+   */
+  public function sortFieldData(array $fields) {
+    $field_group = [];
+    foreach ($fields as $key => $field) {
+      $field_group[$key] = $field['field_group'];
+    }
+    array_multisort($field_group, SORT_ASC, $fields);
+    return $fields;
+  }
+
+  /**
+   * Fetch all child fields for field group field.
+   *
+   * @param array $field_group_field
+   *   Array of field group field.
+   * @param array $fields_data
+   *   Array of all applicable fields from sheet.
+   *
+   * @return array
+   *   Returns child fields for field group field.
+   */
+  public function getFieldGroupChildren(array $field_group_field, array $fields_data) {
+    $children = [];
+    foreach ($fields_data as $field) {
+      if ($field['bundle'] === $field_group_field['bundle'] && $field_group_field['field_label'] === $field['field_group']) {
+        $children[] = $field['machine_name'];
+      }
+    }
+    return $children;
   }
 
 }

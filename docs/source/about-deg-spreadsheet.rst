@@ -148,8 +148,8 @@ A list for fields which is required for bundles.
      - No
      - Tester initials, signifying that the row has been validated.
    * - Field group
-     - No
-     - No
+     - Yes
+     - Yes
      - Field group to which field comes
    * - Field type
      - Yes

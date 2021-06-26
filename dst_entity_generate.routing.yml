@@ -2,7 +2,7 @@ dst_entity_generate.google_sheet_api_settings:
   path: '/admin/config/dst_entity_generate/settings/google_sheet_api'
   defaults:
     _form: '\Drupal\dst_entity_generate\Form\GoogleSheetApiSetting'
-    _title: 'Google Sheet API'
+    _title: 'Google Sheets API'
   requirements:
     _permission: 'administer dst_entity_generate settings'
 

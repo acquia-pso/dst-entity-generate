@@ -1,6 +1,6 @@
 dst_entity_generate.google_sheet_api_settings:
   route_name: dst_entity_generate.google_sheet_api_settings
-  title: Google Sheet API
+  title: Google Sheets API
   base_route: dst_entity_generate.settings
 
 dst_entity_generate.settings:

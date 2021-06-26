@@ -128,7 +128,7 @@ class GoogleSheetApiSetting extends FormBase {
 
       $form['spreadsheet_id'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Google Sheet Id'),
+        '#title' => $this->t('Google Sheets ID'),
         '#required' => TRUE,
         '#description' => $this->t(
           'Copy the spreadsheet unique id from google sheet url and paste in this field. It looks like 1xJOEeIqTAC-Au02PEwPVS1zLLnwhsYaqqYPsbF8fv30.'
@@ -138,9 +138,9 @@ class GoogleSheetApiSetting extends FormBase {
 
       $form['credentials_json_file'] = [
         '#type' => 'managed_file',
-        '#title' => $this->t('Upload credentials.json File'),
+        '#title' => $this->t('Client Secret File'),
         '#required' => TRUE,
-        '#description' => '<p>' . $this->t('To get credentials.json file, go to') . ' <a href="https://developers.google.com/sheets/api/quickstart/php" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Google API Credentials') . '</a> ' . $this->t('and just complete step 1 and follow the following steps.') . '</p><p>' . $this->t('Enter new project name -> Configure your OAuth client: Desktop App -> Finally click on Create button') . '</p>',
+        '#description' => '<p>' . $this->t('To get Client Secret file, follow instructions provided on') . ' <a href="file:///Users/omkar.pednekar/Projects/drupal-playground/docroot/modules/custom/dst_entity_generate/docs/build/html/installation.html#obtaining-google-oauth-2-0-client-credentials" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Obtaining Google OAuth 2.0 Client Credentials') . '</a></p>',
         '#upload_validators' => ['file_validate_extensions' => ['json']],
         '#upload_location' => 'private://google_credentials',
         '#default_value' => (isset($store) && !empty($store->get('credentials_json_file'))) ? $store->get('credentials_json_file') : '',

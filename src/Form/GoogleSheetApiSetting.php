@@ -140,7 +140,7 @@ class GoogleSheetApiSetting extends FormBase {
         '#type' => 'managed_file',
         '#title' => $this->t('Client Secret File'),
         '#required' => TRUE,
-        '#description' => '<p>' . $this->t('To get Client Secret file, follow instructions provided on') . ' <a href="file:///Users/omkar.pednekar/Projects/drupal-playground/docroot/modules/custom/dst_entity_generate/docs/build/html/installation.html#obtaining-google-oauth-2-0-client-credentials" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Obtaining Google OAuth 2.0 Client Credentials') . '</a></p>',
+        '#description' => '<p>' . $this->t('To get Client Secret file, follow instructions provided on') . ' <a href="https://drupal-entity-generator.readthedocs.io/en/latest/installation.html#obtaining-google-oauth-2-0-client-credentials" rel="nofollow noindex noopener external ugc" target="_blank">' . $this->t('Obtaining Google OAuth 2.0 Client Credentials') . '</a></p>',
         '#upload_validators' => ['file_validate_extensions' => ['json']],
         '#upload_location' => 'private://google_credentials',
         '#default_value' => (isset($store) && !empty($store->get('credentials_json_file'))) ? $store->get('credentials_json_file') : '',

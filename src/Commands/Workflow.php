@@ -90,6 +90,12 @@ class Workflow extends BaseEntityGenerate {
             'label' => $workflow_state['label'],
             'weight' => $default_weight,
           ];
+          if ($workflow_state['label'] === 'Published') {
+            $workflow_config['type_settings']['states'][$workflow_state['machine_name']] += [
+              'published' => TRUE,
+              'default_revision' => TRUE,
+            ];
+          }
           $workflow_state_map[$workflow_state['machine_name']] = $workflow_state['label'];
         }
       }

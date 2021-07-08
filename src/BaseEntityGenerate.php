@@ -248,7 +248,8 @@ abstract class BaseEntityGenerate extends DrushCommands {
 
     foreach ($data as $item) {
       if (!isset($item[$this->implementationFlagColumn])) {
-        throw new \Exception("Please provide correct column name. $this->implementationFlagColumn doesn't exists. Aborting...");
+        $this->io()->warning($this->t("Please provide correct value for @implementation_flag_column column. Aborting...", ['@implementation_flag_column' => $this->implementationFlagColumn]));
+        continue;
       }
       if ($item[$this->implementationFlagColumn] === $column_value) {
         \array_push($approved_data, $item);

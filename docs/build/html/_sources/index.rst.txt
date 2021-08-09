@@ -11,5 +11,6 @@ Welcome to Drupal Entity Generator (DEG) documentation!
    about-deg-spreadsheet
    installation
    drush-commands
+   supported-entities
    references
    contributors

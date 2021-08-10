@@ -54,7 +54,6 @@ class GenerateAll extends BaseEntityGenerate {
     if ($options['update']) {
       $commands = array_map(function($command) { return $command . ' --update'; }, $commands);
     }
-    var_dump($commands);
     // @todo Further refactor it so that we don't have to use exec function.
     foreach ($commands as $command) {
       \system('drush ' . $command);

@@ -12,25 +12,33 @@
     }
   ],
   "require": {
-    "cweagans/composer-patches": "^1.6",
-    "drush/drush": "^10.3",
-    "google/apiclient": "^2.8"
+    "cweagans/composer-patches": "^1.7",
+    "drush/drush": "^11",
+    "google/apiclient": "^2.12"
   },
   "require-dev": {
-    "acquia/coding-standards": "^0.4.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
-    "ergebnis/composer-normalize": "^2.8",
-    "vijaycs85/drupal-quality-checker": "dev-master"
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+    "acquia/coding-standards": "^1.0",
+    "ergebnis/composer-normalize": "^2.28",
+    "vijaycs85/drupal-quality-checker": "^1.5"
   },
   "suggest": {},
   "extra": {
     "drush": {
       "services": {
-        "drush.services.yml": "^9"
+        "drush.services.yml": "^9 || ^10 || ^11"
       }
     },
     "enable-patching": true
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "cweagans/composer-patches": true,
+      "phpro/grumphp": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true
+    }
+  }
 }

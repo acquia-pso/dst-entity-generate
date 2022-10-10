@@ -17,8 +17,8 @@
     "google/apiclient": "^2.8"
   },
   "require-dev": {
-    "acquia/coding-standards": "^0.4.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+    "acquia/coding-standards": "^1.0.1",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
     "ergebnis/composer-normalize": "^2.8",
     "vijaycs85/drupal-quality-checker": "dev-master"
   },
@@ -32,5 +32,13 @@
     "enable-patching": true
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "cweagans/composer-patches": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpro/grumphp": true,
+      "ergebnis/composer-normalize": true
+    }
+  }
 }

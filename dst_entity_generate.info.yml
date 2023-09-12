@@ -2,5 +2,5 @@ name: Drupal Entity Generator(DEG)
 type: module
 description: 'Extends the Drupal Spec tool to build Drupal entities using the architecture defined in the DEG  spreadsheet.'
 package: Drupal Entity Generator
-core_version_requirement: ^8.8.0 || ^9
+core_version_requirement: ^8.8.0 || ^9 || ^10
 configure: dst_entity_generate.google_sheet_api_settings

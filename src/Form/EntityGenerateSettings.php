@@ -37,6 +37,13 @@ final class EntityGenerateSettings extends ConfigFormBase {
   protected $googleSheetApi;
 
   /**
+   * GeneralApi definition.
+   *
+   * @var \Drupal\dst_entity_generate\Services\GeneralApi
+   */
+  protected $helper;
+
+  /**
    * Constructs a DstEntityGenerateSettings object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager

@@ -49,7 +49,8 @@ class GenerateAll extends BaseEntityGenerate {
       'deg:media',
       'deg:p',
       'deg:ct',
-      'deg:cbt'
+      'deg:cbt',
+      'deg:ssc'
     ];
     if ($options['update']) {
       $commands = array_map(function($command) { return $command . ' --update'; }, $commands);

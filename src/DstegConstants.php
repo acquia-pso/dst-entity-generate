@@ -18,6 +18,7 @@ final class DstegConstants {
   const MEDIA_TYPES = 'Media Types';
   const FIELDS = 'Fields';
   const MENUS = 'Menus';
+  const SITE_STUDIO_COLOR = 'Site Studio Color';
   const USER_ROLES = 'User roles';
   const WORKFLOWS = 'Workflows';
   const WORKFLOW_TRANSITIONS = 'Workflow transitions';
@@ -291,6 +292,10 @@ final class DstegConstants {
     'workflow' => [
       'label',
     ],
+    'cohesion_color' => [
+      'label',
+      'json_values',
+    ]
   ];
 
   const ENTITY_TYPE_MODULE_DEPENDENCIES = [
@@ -301,6 +306,7 @@ final class DstegConstants {
     DstegConstants::IMAGE_EFFECTS => ['image'],
     DstegConstants::IMAGE_STYLES => ['image'],
     DstegConstants::MENUS => ['menu_ui'],
+    DstegConstants::SITE_STUDIO_COLOR => ['cohesion'],
     DstegConstants::VOCABULARIES => ['taxonomy'],
     DstegConstants::WORKFLOWS => ['workflows', 'content_moderation'],
   ];

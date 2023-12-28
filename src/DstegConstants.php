@@ -26,6 +26,7 @@ final class DstegConstants {
   const IMAGE_EFFECTS = 'Image effects';
   const OVERVIEW = 'Overview';
   const SKIP_ENTITY_MESSAGE = 'Skipping: @entity entity sync is disabled.';
+  const SITE_STUDIO_SETTINGS = 'Site Studio Settings';
   /**
    * Variable FIELD_TYPES is used to hold meta data about field types.
    *
@@ -291,6 +292,14 @@ final class DstegConstants {
     'workflow' => [
       'label',
     ],
+    'cohesion_font_stack' => [
+      'label',
+      'json_values'
+    ],
+    'cohesion_color' => [
+      'label',
+      'json_values'
+    ],
   ];
 
   const ENTITY_TYPE_MODULE_DEPENDENCIES = [
@@ -303,6 +312,7 @@ final class DstegConstants {
     DstegConstants::MENUS => ['menu_ui'],
     DstegConstants::VOCABULARIES => ['taxonomy'],
     DstegConstants::WORKFLOWS => ['workflows', 'content_moderation'],
+    DstegConstants::SITE_STUDIO_SETTINGS => ['cohesion', 'cohesion_website_settings'],
   ];
 
   const FIELD_FORM_WIDGET = [

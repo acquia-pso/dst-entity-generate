@@ -263,19 +263,14 @@ class SiteStudioSettings extends BaseEntityGenerate {
     }
 
     // Ignore "#" if provided.
-    if ($color[0] == '#') {
-      $color = substr($color, 1);
-    }
+    $color = ($color[0] === '#') ? substr($color, 1) : $color;
 
     // Check if color has 6 or 3 characters, get values.
-    if (strlen($color) == 6) {
+    if (strlen($color) === 6) {
       $hex = [$color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]];
     }
-    elseif (strlen($color) == 3) {
+    elseif (strlen($color) === 3) {
       $hex = [$color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]];
-    }
-    else {
-      return $default_color;
     }
 
     // Convert hex values to rgb values.

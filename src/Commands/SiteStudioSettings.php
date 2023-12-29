@@ -2,13 +2,10 @@
 
 namespace Drupal\dst_entity_generate\Commands;
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\dst_entity_generate\BaseEntityGenerate;
 use Drupal\dst_entity_generate\DstegConstants;
-use Drupal\Component\Uuid\UuidInterface;
 
 /**
  * Providees functionality for creating Cohesion font stack from DST sheet.
@@ -77,22 +74,28 @@ class SiteStudioSettings extends BaseEntityGenerate {
   public function generateSiteStudioSettings($options = ['update' => FALSE, 'type' => NULL]) {
     $this->io()->success('Generating site studio settings.');
     $this->updateMode = $options['update'];
-    $mode = 'create';
-    if ($this->updateMode) {
-      $mode = 'update';
-    }
     $data = $this->getDataFromSheet(DstegConstants::SITE_STUDIO_SETTINGS);
+    // Filtering the data further when command argument is provided.
+    if (!empty($options['type'])) {
+      foreach ($data as $key => $value) {
+        if (str_replace(' ', '_', strtolower($value['type'])) !== $options['type']) {
+          unset($data[$key]);
+        }
+      }
+      sort($data);
+    }
+
     // Site studio settings generated from DST sheet.
     $settings = $this->getSiteStudioData($data, $options['type']);
     foreach ($settings as $key => $value) {
       $type = $value['type'];
       $setting = $value['entity']['id'];
-      $entity_type = ($type === 'Font') ? 'cohesion_font_stack' : 'cohesion_color';
+      $entity_type = 'cohesion_' . $type;
       $entity = $this->entityTypeManager->getStorage($entity_type)->load($setting);
       if (!empty($entity)) {
         if ($this->updateMode && $data[$key][$this->implementationFlagColumn] === $this->updateFlag) {
           $this->updateEntityType($entity, $value['entity']);
-          $this->io()->success($type . ' ' . $setting .  " updated.");
+          $this->io()->success($type . ' ' . $setting . " updated.");
           continue;
         }
         $this->io()->warning($type . ' ' . $setting . " Already exists. Skipping creation.");
@@ -100,7 +103,7 @@ class SiteStudioSettings extends BaseEntityGenerate {
       }
       $status = $this->entityTypeManager->getStorage($entity_type)->create($value['entity'])->save();
       if ($status === SAVED_NEW) {
-        $this->io()->success($type . ' ' . $setting .  " is successfully created.");
+        $this->io()->success($type . ' ' . $setting . " is successfully created.");
       }
     }
   }
@@ -108,8 +111,10 @@ class SiteStudioSettings extends BaseEntityGenerate {
   /**
    * Get data needed for site studio entity.
    *
-   * @param array $data
+   * @param $data
    *   Array of Data.
+   * @param $param
+   *   Command argument.
    *
    * @return array|null
    *   Font stack data.
@@ -118,21 +123,29 @@ class SiteStudioSettings extends BaseEntityGenerate {
     $site_studio_data = [];
     foreach ($data as $item) {
       // To allow existing entity update.
+      if (!$this->requiredFieldsCheck($item, 'Content type')) {
+        continue;
+      }
       if (!$this->validateMachineName($item['machine_name'])) {
         continue;
       }
       // Type value will distinguish between the cohesion entities.
       // Command with param -> type = param.
       // Command with no param -> type value from sheet data to be considered.
-      $type = $param ?: strtolower($item['type']);
+      $type = $param ?: str_replace(' ', '_', strtolower($item['type']));
       switch ($type) {
-        case 'font':
-          // Prepare json values only if item has font data.
-          $json_values = ($item['type'] === 'Font') ? $this->getFontJsonValues($item) : [];
+        // Prepare json values based on the item type; font stack, library & color.
+        case 'font_stack':
+          $json_values = ($item['type'] === 'Font Stack') ? $this->getFontStackJsonValues($item) : [];
 
           break;
+
+        case 'font_library':
+          $json_values = ($item['type'] === 'Font Library') ? $this->getFontLibraryJsonValues($item) : [];
+
+          break;
+
         case 'color':
-          // Prepare json values only if item has color data.
           $json_values = ($item['type'] === 'Color') ? $this->getColorJsonValues($item) : [];
 
           break;
@@ -141,20 +154,20 @@ class SiteStudioSettings extends BaseEntityGenerate {
       if (!empty($json_values)) {
         $entity = [
           'langcode' => 'en',
-          'status' => true,
+          'status' => TRUE,
           'label' => $item['label'],
           'id' => $item['machine_name'],
           'uuid' => $this->uuid->generate(),
           'json_values' => json_encode($json_values),
           'json_mapper' => '{}',
-          'modified' => true,
-          'selectable' => true,
-          'locked' => false,
+          'modified' => TRUE,
+          'selectable' => TRUE,
+          'locked' => FALSE,
           'weight' => 0,
         ];
         $site_studio_data[] = [
           'entity' => $entity,
-          'type' => $item['type'],
+          'type' => $type,
         ];
       }
     }
@@ -166,11 +179,12 @@ class SiteStudioSettings extends BaseEntityGenerate {
    * Prepares json value for cohesion font stack.
    *
    * @param $item
-   *  The data coming from DST sheet.
+   *   The data coming from DST sheet.
+   *
    * @return array
-   *  Returns json_values.
+   *   Returns json_values.
    */
-  protected function getFontJsonValues($item): array {
+  protected function getFontStackJsonValues($item): array {
     return [
       'name' => $item['label'],
       'fontStack' => $item['metadata'],
@@ -178,27 +192,45 @@ class SiteStudioSettings extends BaseEntityGenerate {
       'uid' => $item['machine_name'],
       'class' => '.coh-' . $item['machine_name'],
     ];
+  }
 
+  /**
+   * Prepares json value for cohesion font library.
+   *
+   * @param $item
+   *   The data coming from DST sheet.
+   *
+   * @return array
+   *   Returns json_values.
+   */
+  protected function getFontLibraryJsonValues($item): array {
+    return [
+      'name' => $item['label'],
+      'type' => 'import',
+      'url' => $item['metadata'],
+      'uid' => $item['machine_name'],
+    ];
   }
 
   /**
    * Prepares json value for cohesion color.
    *
    * @param $item
-   *  The data coming from DST sheet.
+   *   The data coming from DST sheet.
+   *
    * @return array
-   *  Returns json_values.
+   *   Returns json_values.
    */
   protected function getColorJsonValues($item): array {
-    $tags = [];
     $rgba_color = $this->hex2rgba($item['metadata'], 1);
     if (array_key_exists('tag', $item) && $item['tag']) {
       $tag = [$item['tag']];
-    } else {
+    }
+    else {
       $tag = [];
     }
     return [
-      'link' => true,
+      'link' => TRUE,
       'value' => [
         'value' => [
           'hex' => $item['metadata'],
@@ -208,18 +240,60 @@ class SiteStudioSettings extends BaseEntityGenerate {
       'uid' => $item['machine_name'],
       'name' => $item['label'],
       'class' => '.coh-color-' . $item['machine_name'],
+      'variable' => '$coh-color-' . $item['machine_name'],
+      'wysiwyg' => (array_key_exists('settings', $item) && $item['settings'] == 'ckeditor') ? TRUE : FALSE,
+      'tags' => $tag,
     ];
   }
 
   /**
    * Converts hex code to rgba.
    *
-   * @param $hex
-   *  Hex code coming from DST sheet.
-   * @param $alpha
+   * @param $color
+   *   Hex code coming from DST sheet.
+   * @param $opacity
+   *
    * @return string
    */
-  protected function hex2rgba($hex, $alpha): string {
-    return 'RGBA Value';
+  public function hex2rgba($color, $opacity = FALSE): string {
+    $default_color = 'rgb(0,0,0)';
+    // Return default color if no color provided.
+    if (empty($color)) {
+      return $default_color;
+    }
+
+    // Ignore "#" if provided.
+    if ($color[0] == '#') {
+      $color = substr($color, 1);
+    }
+
+    // Check if color has 6 or 3 characters, get values.
+    if (strlen($color) == 6) {
+      $hex = [$color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]];
+    }
+    elseif (strlen($color) == 3) {
+      $hex = [$color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]];
+    }
+    else {
+      return $default_color;
+    }
+
+    // Convert hex values to rgb values.
+    $rgb = array_map('hexdec', $hex);
+
+    // Check if opacity is set(rgba or rgb)
+    if ($opacity) {
+      if (abs($opacity) > 1) {
+        $opacity = 1.0;
+      }
+      $output = 'rgba(' . implode(",", $rgb) . ',' . $opacity . ')';
+    }
+    else {
+      $output = 'rgb(' . implode(",", $rgb) . ')';
+    }
+
+    // Return rgb(a) color string.
+    return $output;
   }
+
 }

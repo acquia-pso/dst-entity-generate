@@ -294,11 +294,15 @@ final class DstegConstants {
     ],
     'cohesion_font_stack' => [
       'label',
-      'json_values'
+      'json_values',
+    ],
+    'cohesion_font_library' => [
+      'label',
+      'json_values',
     ],
     'cohesion_color' => [
       'label',
-      'json_values'
+      'json_values',
     ],
   ];
 

@@ -13,8 +13,8 @@
   ],
   "require": {
     "cweagans/composer-patches": "^1.6",
-    "drush/drush": "^10.3 || ^11",
-    "google/apiclient": "^2.8"
+    "drush/drush": "^10.3 || ^11 || ^12",
+    "google/apiclient": "^2.15"
   },
   "require-dev": {
     "acquia/coding-standards": "^1.0.1",

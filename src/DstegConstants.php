@@ -328,6 +328,16 @@ final class DstegConstants {
     'File' => 'file_generic',
     'Site Studio layout canvas' => 'cohesion_layout_builder_widget',
     'Link' => 'link_default',
+    'Media library' => 'media_library_widget',
+  ];
+
+  /**
+   * Modules that must be enabled to use a form widget.
+   *
+   * Keyed by the form widget plugin ID from FIELD_FORM_WIDGET.
+   */
+  const FIELD_FORM_WIDGET_MODULE_DEPENDENCIES = [
+    'media_library_widget' => 'media_library',
   ];
 
 }

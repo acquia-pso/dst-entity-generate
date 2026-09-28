@@ -315,6 +315,20 @@ class GeneralApi {
     }
     elseif ($is_empty_form_widget === FALSE) {
       $field['drupal_field_form_widget'] = $field_types[$field['form_widget']];
+      $widget_dependencies = DstegConstants::FIELD_FORM_WIDGET_MODULE_DEPENDENCIES;
+      $widget_module = $widget_dependencies[$field['drupal_field_form_widget']] ?? NULL;
+      if (isset($widget_module) && !$this->isModuleEnabled($widget_module)) {
+        // Still create the field, with the default form widget.
+        $this->logger->warning($this->t(
+          "The @module module is not installed. Using the default form widget instead of '@fwidget' for @field field.",
+          [
+            '@module' => $widget_module,
+            '@fwidget' => $field['form_widget'],
+            '@field' => $field['machine_name'],
+          ]
+        ));
+        $field['drupal_field_form_widget'] = '';
+      }
     }
 
     if ($field && $field_meta['type'] !== 'field_group') {
